@@ -3,6 +3,7 @@
 
 uint8_t helperPage = 1u;
 uint16_t currentPage{};
+
 constexpr uint16_t PAGE_SIZE = 256u;
 bool visibility = false;
 
@@ -172,8 +173,6 @@ namespace EditorUI
 {
 	void DrawCpuState(const CPU& cpu)
 	{
-		//ImGui::ShowDemoWindow();
-
 		ImGui::Begin("CPU State");
 		ImGui::Text("Program Counter: 0x%04X", cpu.GetPC());
 		ImGui::Text("Stack Pointer: 0x%02X", cpu.GetSP());
@@ -215,7 +214,8 @@ namespace EditorUI
 
 		if (mode == EditorMode::EDIT)
 		{
-			ImGui::InputTextMultiline("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
+			ImGui::InputTextMultiline
+			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 			if (ImGui::Button("Assemble & Load"))
 			{
 				const std::string sourceCode(editorBuffer);
@@ -225,46 +225,49 @@ namespace EditorUI
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
 			}
 		}
-		else if (mode == EditorMode::DISSASEMBLY)
+		else
 		{
-			for (size_t index = 0; index < memoryUnit.GetMemory().size(); ++index)
+			if (!memoryUnit.IsMemoryEmpty())
 			{
-				uint8_t opcode = memoryUnit.Read(static_cast<uint16_t>(index));
-				const InstructionDef instruction = dissasembler.GetInstructionDef(opcode);
+				for (size_t index = 0; index < memoryUnit.GetMemory().size(); ++index)
+				{
+					uint8_t opcode = memoryUnit.Read(static_cast<uint16_t>(index));
+					const InstructionDef instruction = dissasembler.GetInstructionDef(opcode);
 
-				if (index == cpu.GetPC())
-					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-				else
-					ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+					if (index == cpu.GetPC())
+						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+					else
+						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
 
-				switch (instruction.size)
-				{
-				case 1:
-				{
-					ImGui::Text("0x%02x: %s", opcode, instruction.mnemonic.c_str());
-					break;
+					switch (instruction.size)
+					{
+					case 1:
+					{
+						ImGui::Text("0x%02x: %s", opcode, instruction.mnemonic.c_str());
+						break;
+					}
+					case 2:
+					{
+						uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
+						ImGui::Text("0x%02x: %s %d", opcode, instruction.mnemonic.c_str(), secondByte);
+						break;
+					}
+					case 3:
+					{
+						uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
+						uint8_t thirdByte = memoryUnit.Read(static_cast<uint16_t>(index + 2));
+						uint16_t address = (secondByte << 8) | thirdByte;
+						ImGui::Text("0x%02x: %s 0x%04X", opcode, instruction.mnemonic.c_str(), address);
+						break;
+					}
+					default:
+						ImGui::Text("0x%04zx: ???", index);
+						break;
+					}
+					index += instruction.size - 1;
+					ImGui::PopStyleColor();
+					if (opcode == 0xFF) break;
 				}
-				case 2:
-				{
-					uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
-					ImGui::Text("0x%02x: %s %d", opcode, instruction.mnemonic.c_str(), secondByte);
-					break;
-				}
-				case 3:
-				{
-					uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
-					uint8_t thirdByte = memoryUnit.Read(static_cast<uint16_t>(index + 2));
-					uint16_t address = (secondByte << 8) | thirdByte;
-					ImGui::Text("0x%02x: %s 0x%04X", opcode, instruction.mnemonic.c_str(), address);
-					break;
-				}
-				default:
-					ImGui::Text("0x%04zx: ???", index);
-					break;
-				}
-				index += instruction.size - 1;
-				ImGui::PopStyleColor();
-				if (opcode == 0xFF) break;
 			}
 		}
 		ImGui::End();
@@ -273,7 +276,9 @@ namespace EditorUI
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC)
 	{
 		if (followPC)
+		{
 			currentPage = cpu.GetPC() / PAGE_SIZE;
+		}
 
 		std::string memoryView = "Memory View (page " + std::to_string(currentPage) + "/" + std::to_string(PAGE_SIZE - 1) + ")";
 		ImGui::Begin(memoryView.c_str());
@@ -332,7 +337,7 @@ namespace EditorUI
 
 		if (ImGui::Button("\t\tReset\t\t"))
 		{
-			memoryUnit.Reset(initialMemory);
+			memoryUnit.Clear(initialMemory);
 			cpu.Reset();
 			executeAuto = false;
 			followPC = true;

@@ -1,6 +1,5 @@
-#include "SFML/Graphics.hpp"
+#include <SFML/Graphics.hpp>
 
-#include "framework.h"
 #include <fcntl.h>
 #include <sstream>
 
@@ -15,10 +14,7 @@ bool followPC = true;
 bool showISA = false;
 float speed = 1.0f;
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-	_In_opt_ HINSTANCE hPrevInstance,
-	_In_ LPWSTR    lpCmdLine,
-	_In_ int       nCmdShow)
+int main()
 {
 	sf::Clock instructionCycle;
 	MemoryUnit memory;
@@ -29,7 +25,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	Dissasembler dissasembler;
 
 	sf::Font font;
-	sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "CPU Simulator");
+	sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "CPU Emulator");
 	window.setFramerateLimit(60);
 
 	ImGui::SFML::Init(window);
@@ -49,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				}
 				else if (keyCode->code == sf::Keyboard::Key::R)
 				{
-					memory.Reset(initialMemory);
+					memory.Clear(initialMemory);
 					cpu.Reset();
 					followPC = true;
 					executeAuto = false;
@@ -83,5 +79,4 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		window.display();
 	}
 	ImGui::SFML::Shutdown();
-	return 0;
 }

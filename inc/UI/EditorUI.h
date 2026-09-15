@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CPU.h"
 #include "MemoryUnit.h"
 #include "Dissasembler.h"
@@ -9,7 +10,7 @@
 
 enum EditorMode
 {
-	EDIT,
+	EDIT = 0,
 	DISSASEMBLY
 };
 
