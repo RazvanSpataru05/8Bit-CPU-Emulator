@@ -3,11 +3,12 @@
 #include "Core/MemoryUnit.h"
 
 #include <string>
+#include <memory>
 
 class CPU
 {
 public:
-	CPU(MemoryUnit& m_memoryUnit);
+	CPU();
 
 	void Step();
 	void Reset();
@@ -59,6 +60,6 @@ private:
 	bool m_NegativeFlag;
 	bool m_OverflowFlag;
 	bool m_HaltFlag;
-	MemoryUnit& m_memoryUnit;
+	MemoryUnit m_memoryUnit;
 };
 

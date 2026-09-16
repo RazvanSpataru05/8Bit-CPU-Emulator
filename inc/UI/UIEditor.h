@@ -20,7 +20,7 @@ namespace UIEditor
 	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, 
 		const Dissasembler& dissasembler, const CPU& cpu);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
-	void DrawMenu(MemoryUnit& memoryUnit, const std::array<uint8_t, 65536>& initialMemory, 
+	void DrawMenu(MemoryUnit& memoryUnit, 
 		bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();

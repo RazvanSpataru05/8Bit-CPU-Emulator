@@ -19,9 +19,8 @@ int main()
 	sf::Clock instructionCycle;
 	MemoryUnit memory;
 	memory.ParseValues("program.txt");
-	const std::array<uint8_t, 65536> initialMemory = memory.GetMemory();
 
-	CPU cpu(memory);
+	CPU cpu{};
 	Dissasembler dissasembler;
 
 	sf::Font font;
@@ -45,7 +44,7 @@ int main()
 				}
 				else if (keyCode->code == sf::Keyboard::Key::R)
 				{
-					memory.Clear(initialMemory);
+					memory.Clear();
 					cpu.Reset();
 					followPC = true;
 					executeAuto = false;
@@ -71,7 +70,7 @@ int main()
 		UIEditor::DrawCpuState(cpu);
 		UIEditor::DrawAssemblyPanel(mode, memory, dissasembler, cpu);
 		UIEditor::DrawMemoryView(memory, cpu, followPC);
-		UIEditor::DrawMenu(memory, initialMemory, executeAuto, followPC, cpu);
+		UIEditor::DrawMenu(memory, executeAuto, followPC, cpu);
 		UIEditor::DrawSpeedSlider(speed);
 		UIEditor::DrawHelpMenu();
 

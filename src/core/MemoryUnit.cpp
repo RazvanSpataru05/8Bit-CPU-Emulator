@@ -30,9 +30,9 @@ void MemoryUnit::Write(uint16_t address, uint8_t value) noexcept
 	}
 }
 
-void MemoryUnit::Clear(const std::array<uint8_t, 65536>& initialMemory) noexcept
+void MemoryUnit::Clear() noexcept
 {
-	m_memory = initialMemory;
+	std::fill(m_memory.begin(), m_memory.end(), 0x00);
 	m_hasData = false;
 }
 

@@ -69,7 +69,7 @@ static void TextCentered(std::string_view text)
 	ImGui::TextUnformatted(text.data(), text.data() + text.size());
 }
 
-static void DisplayInstruction(const ISAEntry* table, int index)
+static void DisplayInstruction(const ISAEntry* table, size_t index)
 {
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
@@ -322,7 +322,7 @@ namespace UIEditor
 		}
 		ImGui::End();
 	}
-	void DrawMenu(MemoryUnit& memoryUnit, const std::array<uint8_t, 65536>& initialMemory,
+	void DrawMenu(MemoryUnit& memoryUnit,
 		bool& executeAuto, bool& followPC, CPU& cpu)
 	{
 		std::string execute = "Auto (";
@@ -339,7 +339,7 @@ namespace UIEditor
 
 		if (ImGui::Button("\t\tReset\t\t"))
 		{
-			memoryUnit.Clear(initialMemory);
+			memoryUnit.Clear();
 			cpu.Reset();
 			executeAuto = false;
 			followPC = true;
