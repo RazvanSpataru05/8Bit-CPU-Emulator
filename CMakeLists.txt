@@ -25,6 +25,7 @@ set(SOURCES
     src/Debugger/Dissasembler.cpp
 
     src/UI/UIEditor.cpp
+    src/UI/Application.cpp
 )
 
 set(HEADERS
@@ -39,6 +40,7 @@ set(HEADERS
     inc/Debugger/Dissasembler.h
 
     inc/UI/UIEditor.h
+    inc/UI/Application.h
 )
 
 # ============================================================
