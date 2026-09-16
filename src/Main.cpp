@@ -68,12 +68,12 @@ int main()
 
 		window.clear(sf::Color(65, 65, 65));
 
-		EditorUI::DrawCpuState(cpu);
-		EditorUI::DrawAssemblyPanel(mode, memory, dissasembler, cpu);
-		EditorUI::DrawMemoryView(memory, cpu, followPC);
-		EditorUI::DrawMenu(memory, initialMemory, executeAuto, followPC, cpu);
-		EditorUI::DrawSpeedSlider(speed);
-		EditorUI::DrawHelpMenu();
+		UIEditor::DrawCpuState(cpu);
+		UIEditor::DrawAssemblyPanel(mode, memory, dissasembler, cpu);
+		UIEditor::DrawMemoryView(memory, cpu, followPC);
+		UIEditor::DrawMenu(memory, initialMemory, executeAuto, followPC, cpu);
+		UIEditor::DrawSpeedSlider(speed);
+		UIEditor::DrawHelpMenu();
 
 		ImGui::SFML::Render(window);
 		window.display();

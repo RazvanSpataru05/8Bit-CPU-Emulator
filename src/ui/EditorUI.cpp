@@ -27,7 +27,8 @@ constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
 enum PageNumber
 {
-	GLOSSARY_PAGE = 1,
+	NONE = 0,
+	GLOSSARY_PAGE,
 	LOAD_STORE_PAGE,
 	ARITHMETIC_PAGE,
 	LOGICAL_PAGE,
@@ -96,10 +97,10 @@ static void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstru
 
 	int tableSize;
 	const ISAEntry* table = GetISATable(tableSize);
-	for (int i = 0; i < tableSize; i++)
+	for (size_t index = 0; index < tableSize; ++index)
 	{
-		if (table[i].opcode >= firstInstruction && table[i].opcode <= lastInstruction)
-			DisplayInstruction(table, i);
+		if (table[index].opcode >= firstInstruction && table[index].opcode <= lastInstruction)
+			DisplayInstruction(table, index);
 	}
 }
 
@@ -109,19 +110,20 @@ static void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
 
 	int tableSize;
 	const ISAEntry* table = GetISATable(tableSize);
-	for (uint16_t i = 0; i < tableSize; i++)
+	for (uint16_t index = 0; index < tableSize; ++index)
 	{
 		for (uint8_t opcode : opcodes)
 		{
-			if (table[i].opcode == opcode)
+			if (table[index].opcode == opcode)
 			{
-				DisplayInstruction(table, i);
+				DisplayInstruction(table, index);
 			}
 		}
 	}
 }
 
-static void DisplayTable(const char* pageTitle, const char* tableTitle, uint8_t firstInstruction, uint8_t lastInstruction)
+static void DisplayTable(const char* pageTitle, const char* tableTitle,
+	uint8_t firstInstruction, uint8_t lastInstruction)
 {
 	float windowWidth = ImGui::GetWindowSize().x;
 	float titleWidth = ImGui::CalcTextSize(pageTitle).x;
@@ -169,7 +171,7 @@ static void DisplayTable(const char* pageTitle, const char* tableTitle, std::ini
 	ImGui::PopStyleVar();
 }
 
-namespace EditorUI
+namespace UIEditor
 {
 	void DrawCpuState(const CPU& cpu)
 	{
@@ -264,7 +266,7 @@ namespace EditorUI
 						ImGui::Text("0x%04zx: ???", index);
 						break;
 					}
-					index += instruction.size - 1;
+					index += static_cast<size_t>(instruction.size - 1);
 					ImGui::PopStyleColor();
 					if (opcode == 0xFF) break;
 				}
@@ -292,7 +294,7 @@ namespace EditorUI
 		if (ImGui::Button("\t\t\tNext\t\t\t"))
 			currentPage = (currentPage + 1) % 256;
 
-		const size_t startAddress = currentPage * PAGE_SIZE;
+		const size_t startAddress = static_cast<size_t>(currentPage * PAGE_SIZE);
 		const size_t endAddress = startAddress + PAGE_SIZE;
 		if (ImGui::BeginTable("MemoryTable", 16, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
 		{

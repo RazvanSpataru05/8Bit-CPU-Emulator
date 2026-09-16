@@ -5,14 +5,9 @@ project(CPU-Simulator-8bit
     LANGUAGES CXX
 )
 
-# ============================================================
-# C++ standard
-# ============================================================
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
 
 # ============================================================
 # Source files
@@ -30,8 +25,27 @@ set(SOURCES
     src/Debugger/Dissasembler.cpp
 
     src/UI/EditorUI.cpp
+)
 
-    # ImGui
+set(HEADERS
+    inc/Assembler/InstructionDef.h
+    inc/Assembler/ISAEntry.h
+    inc/Assembler/Lexer.h
+    inc/Assembler/Token.h
+
+    inc/Core/CPU.h
+    inc/Core/MemoryUnit.h
+
+    inc/Debugger/Dissasembler.h
+
+    inc/UI/EditorUI.h
+)
+
+# ============================================================
+# Third-party (ImGui)
+# ============================================================
+
+set(IMGUI_SOURCES
     lib/ImGui/imgui.cpp
     lib/ImGui/imgui_demo.cpp
     lib/ImGui/imgui_draw.cpp
@@ -40,15 +54,15 @@ set(SOURCES
     lib/ImGui/imgui-SFML.cpp
 )
 
-
 # ============================================================
 # Executable
 # ============================================================
 
 add_executable(${PROJECT_NAME}
     ${SOURCES}
+    ${HEADERS}
+    ${IMGUI_SOURCES}
 )
-
 
 # ============================================================
 # Header / include directories
@@ -57,7 +71,6 @@ add_executable(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-
         ${CMAKE_CURRENT_SOURCE_DIR}/inc
         ${CMAKE_CURRENT_SOURCE_DIR}/inc/Assembler
         ${CMAKE_CURRENT_SOURCE_DIR}/inc/Core
@@ -66,9 +79,7 @@ target_include_directories(${PROJECT_NAME}
 
         ${CMAKE_CURRENT_SOURCE_DIR}/lib
         ${CMAKE_CURRENT_SOURCE_DIR}/lib/ImGui
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/SFML
 )
-
 
 # ============================================================
 # SFML
@@ -90,15 +101,20 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # ============================================================
+# Solution Explorer folder structure
+# ============================================================
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES} ${HEADERS})
+source_group("ImGui" FILES ${IMGUI_SOURCES})
+
+# ============================================================
 # MSVC configuration
 # ============================================================
 
 if(MSVC)
-
     target_compile_options(${PROJECT_NAME}
         PRIVATE
             /W3
             /permissive-
         )
-
 endif()

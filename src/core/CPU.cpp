@@ -591,7 +591,7 @@ void CPU::WriteRegister(uint8_t selector, uint8_t value)
 	case 0x01: m_B = value; break;
 	case 0x02: m_C = value; break;
 	case 0x03: m_D = value; break;
-	default: m_A = value; break;
+	default: break;
 	}
 }
 

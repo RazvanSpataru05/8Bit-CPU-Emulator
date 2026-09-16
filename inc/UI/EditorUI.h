@@ -14,12 +14,14 @@ enum EditorMode
 	DISSASEMBLY
 };
 
-namespace EditorUI
+namespace UIEditor
 {
 	void DrawCpuState(const CPU& cpu);
-	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu);
+	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, 
+		const Dissasembler& dissasembler, const CPU& cpu);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
-	void DrawMenu(MemoryUnit& memoryUnit, const std::array<uint8_t, 65536>& initialMemory, bool& executeAuto, bool& followPC, CPU& cpu);
+	void DrawMenu(MemoryUnit& memoryUnit, const std::array<uint8_t, 65536>& initialMemory, 
+		bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
 }

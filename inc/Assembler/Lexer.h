@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <vector>
 #include <cctype>
@@ -47,8 +48,8 @@ private:
 	std::vector<std::string> m_errors;
 
 	const std::vector<std::pair<std::function<bool(char)>, Handler>> m_handlers = {
-		{[](char c) { return isalpha(c); },[this] {ConsumeWord(); }},
-		{[](char c) {return isdigit(c); }, [this] {ConsumeNumber(); }},
+		{[](char c) { return std::isalpha(static_cast<unsigned char>(c)); },[this] {ConsumeWord(); }},
+		{[](char c) {return std::isdigit(static_cast<unsigned char>(c)); }, [this] {ConsumeNumber(); }},
 		{[](char c) {return c == '\n'; }, [this] {ConsumeNewLine(); }},
 		{[](char c) {return c == ';'; }, [this] {ConsumeComment(); }},
 		{[](char c) {return c == ' ' || c == '\t'; }, [this] {m_currentIndex++; }}
