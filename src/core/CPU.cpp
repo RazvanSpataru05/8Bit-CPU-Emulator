@@ -1,4 +1,4 @@
-#include "CPU.h"
+#include "Core/CPU.h"
 
 CPU::CPU(MemoryUnit& memoryUnit) :
 	m_memoryUnit{ memoryUnit }

@@ -1,11 +1,11 @@
+#include "Core/MemoryUnit.h"
+#include "Debugger/Dissasembler.h"
+#include "UI/UIEditor.h"
+
 #include <SFML/Graphics.hpp>
 
 #include <fcntl.h>
 #include <sstream>
-
-#include "MemoryUnit.h"
-#include "Dissasembler.h"
-#include "EditorUi.h"
 
 EditorMode mode = EditorMode::DISSASEMBLY;
 

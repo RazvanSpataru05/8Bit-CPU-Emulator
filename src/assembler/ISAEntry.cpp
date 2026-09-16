@@ -1,4 +1,4 @@
-#include "ISAEntry.h"
+#include "Assembler/ISAEntry.h"
 
 const ISAEntry* GetISATable(int& outSize)
 {
@@ -8,7 +8,7 @@ const ISAEntry* GetISATable(int& outSize)
 
 bool IsMnemonic(const std::string& word)
 {
-	for (size_t index = 0; index < isaTable->size; index++)
+	for (size_t index = 0; index < isaTable->size; ++index)
 	{
 		if (isaTable->mnemonic == word)
 		{

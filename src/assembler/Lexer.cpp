@@ -1,9 +1,9 @@
-#include "Lexer.h"
+#include "Assembler/Lexer.h"
 
 Lexer::Lexer(const std::string& sourceCode) :
 	m_sourceCode{ sourceCode },
 	m_lineNumber{ 0u },
-	m_currentIndex{ 0u }
+	m_currentIndex{ 0 }
 {
 }
 

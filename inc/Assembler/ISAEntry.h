@@ -1,13 +1,14 @@
 #pragma once
+
 #include <cstdint>
 #include <string>
 
 struct ISAEntry
 {
-    const char* mnemonic;
-    uint8_t opcode;
-    uint8_t size;
-    const char* description;
+    const char* mnemonic = nullptr;
+    uint8_t opcode{};
+    uint8_t size{};
+    const char* description = nullptr;
 };
 
 static const ISAEntry isaTable[] = {

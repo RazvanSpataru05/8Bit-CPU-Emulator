@@ -1,14 +1,14 @@
 #pragma once
 
-#include "CPU.h"
-#include "MemoryUnit.h"
-#include "Dissasembler.h"
-#include "ISAEntry.h"
+#include "Assembler/ISAEntry.h"
+#include "Core/CPU.h"
+#include "Core/MemoryUnit.h"
+#include "Debugger/Dissasembler.h"
 
-#include "imgui.h"
-#include "imgui-SFML.h"
+#include "ImGui/imgui.h"
+#include "ImGui/imgui-SFML.h"
 
-enum EditorMode
+enum class EditorMode
 {
 	EDIT = 0,
 	DISSASEMBLY

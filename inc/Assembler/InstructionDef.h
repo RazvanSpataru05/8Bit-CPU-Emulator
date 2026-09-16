@@ -6,7 +6,7 @@
 struct InstructionDef
 {
 	std::string mnemonic;
-	uint8_t size;
+	uint8_t size{};
 };
 
 const inline std::unordered_map<uint8_t, std::string> selectorToName{

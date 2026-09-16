@@ -1,5 +1,5 @@
-#include "EditorUI.h"
-#include "Lexer.h"
+#include "UI/UIEditor.h"
+#include "Assembler/Lexer.h"
 
 uint8_t helperPage = 1u;
 uint16_t currentPage{};

@@ -1,4 +1,4 @@
-#include "Dissasembler.h"
+#include "Debugger/Dissasembler.h"
 
 Dissasembler::Dissasembler()
 {
@@ -81,7 +81,7 @@ Dissasembler::Dissasembler()
 	m_instructions[0xFF] = { "HLT",     1u };
 }
 
-const InstructionDef& Dissasembler::GetInstructionDef(uint8_t index) const
+const InstructionDef& Dissasembler::GetInstructionDef(size_t index) const
 {
 	return m_instructions[index];
 }

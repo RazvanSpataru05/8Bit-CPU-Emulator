@@ -1,5 +1,7 @@
 #pragma once
-#include "MemoryUnit.h"
+
+#include "Core/MemoryUnit.h"
+
 #include <string>
 
 class CPU

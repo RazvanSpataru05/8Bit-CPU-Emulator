@@ -1,14 +1,15 @@
 #pragma once
+#pragma once
+
+#include "Assembler/InstructionDef.h"
+#include "Assembler/ISAEntry.h"
+#include "Assembler/Token.h"
 
 #include <string>
 #include <vector>
 #include <cctype>
 #include <functional>
 #include <optional>
-
-#include "InstructionDef.h"
-#include "ISAEntry.h"
-#include "Token.h"
 
 using Handler = std::function<void()>;
 
@@ -42,7 +43,7 @@ private:
 private:
 	std::string m_sourceCode;
 	uint32_t m_lineNumber;
-	unsigned m_currentIndex;
+	size_t m_currentIndex;
 
 	std::vector<Token> m_tokens;
 	std::vector<std::string> m_errors;
