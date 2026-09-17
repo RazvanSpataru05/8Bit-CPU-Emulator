@@ -16,7 +16,7 @@ public:
 
 	void Write(uint16_t address, uint8_t value) noexcept;
 	void Clear() noexcept;
-	void Load(uint16_t startAddress, const std::vector<uint8_t>& values);
+	void Load(const std::vector<uint8_t>& values, uint16_t startAddress);
 	void ParseValues(const std::string& filename);
 
 private:

@@ -49,7 +49,6 @@ void Application::Update()
 		m_CPU->Step();
 		m_instructionCycle.restart();
 	}
-
 	ImGui::SFML::Update(m_window, m_deltaClock.restart());
 }
 

@@ -36,7 +36,7 @@ void MemoryUnit::Clear() noexcept
 	m_hasData = false;
 }
 
-void MemoryUnit::Load(uint16_t startAddress, const std::vector<uint8_t>& values)
+void MemoryUnit::Load(const std::vector<uint8_t>& values, uint16_t startAddress)
 {
 	if (startAddress + values.size() > m_memory.size()) return;
 
@@ -67,5 +67,5 @@ void MemoryUnit::ParseValues(const std::string& filename)
 
 	file.close();
 	std::cout << values.size() << std::endl;
-	Load(0x00, values);
+	Load(values, 0x0000);
 }
