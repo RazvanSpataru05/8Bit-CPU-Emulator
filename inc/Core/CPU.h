@@ -35,6 +35,10 @@ public:
 	[[nodiscard]] bool IsReadingInstruction() const noexcept;
 	[[nodiscard]] bool IsWritingInstruction() const noexcept;
 
+	// Memory Unit getter (const & non-const)
+	[[nodiscard]] const MemoryUnit& GetMemoryUnit() const noexcept;
+	[[nodiscard]] MemoryUnit& GetMemoryUnit() noexcept;
+
 private:
 	[[nodiscard]] uint8_t ReadRegister(uint8_t selector) const noexcept;
 	void WriteRegister(uint8_t selector, uint8_t value);
@@ -51,7 +55,6 @@ private:
 	uint8_t m_D;
 
 	uint8_t m_SP; // Stack Pointer
-
 	uint16_t m_PC; // Program Counter registry
 	uint8_t m_IR; // Instruction registry
 

@@ -1,6 +1,7 @@
 #include "Core/MemoryUnit.h"
 #include "Debugger/Dissasembler.h"
 #include "UI/UIEditor.h"
+#include "UI/Application.h"
 
 #include <SFML/Graphics.hpp>
 
@@ -16,66 +17,68 @@ float speed = 1.0f;
 
 int main()
 {
-	sf::Clock instructionCycle;
-	MemoryUnit memory;
-	memory.ParseValues("program.txt");
+	Application app{};
+	app.Run();
+	//sf::Clock instructionCycle;
+	//MemoryUnit memory;
+	//memory.ParseValues("program.txt");
 
-	CPU cpu{};
-	Dissasembler dissasembler;
+	//CPU cpu{};
+	//Dissasembler dissasembler;
 
-	sf::Font font;
-	sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "CPU Emulator");
-	window.setFramerateLimit(60);
+	//sf::Font font;
+	//sf::RenderWindow window(sf::VideoMode({ 1920, 1080 }), "CPU Emulator");
+	//window.setFramerateLimit(60);
 
-	ImGui::SFML::Init(window);
-	sf::Clock deltaClock;
+	//ImGui::SFML::Init(window);
+	//sf::Clock deltaClock;
 
-	while (window.isOpen())
-	{
-		while (const std::optional event = window.pollEvent())
-		{
-			ImGui::SFML::ProcessEvent(window, event.value());
-			if (event->is<sf::Event::KeyPressed>())
-			{
-				const auto keyCode = event->getIf<sf::Event::KeyPressed>();
-				if (keyCode->code == sf::Keyboard::Key::Space)
-				{
-					cpu.Step();
-				}
-				else if (keyCode->code == sf::Keyboard::Key::R)
-				{
-					memory.Clear();
-					cpu.Reset();
-					followPC = true;
-					executeAuto = false;
-				}
-			}
+	//while (window.isOpen())
+	//{
+	//	while (const std::optional event = window.pollEvent())
+	//	{
+	//		ImGui::SFML::ProcessEvent(window, event.value());
+	//		if (event->is<sf::Event::KeyPressed>())
+	//		{
+	//			const auto keyCode = event->getIf<sf::Event::KeyPressed>();
+	//			if (keyCode->code == sf::Keyboard::Key::Space)
+	//			{
+	//				cpu.Step();
+	//			}
+	//			else if (keyCode->code == sf::Keyboard::Key::R)
+	//			{
+	//				memory.Clear();
+	//				cpu.Reset();
+	//				followPC = true;
+	//				executeAuto = false;
+	//			}
+	//		}
 
-			if (event->is<sf::Event::Closed>())
-			{
-				window.close();
-			}
-		}
+	//		if (event->is<sf::Event::Closed>())
+	//		{
+	//			window.close();
+	//		}
+	//	}
 
-		if (executeAuto && instructionCycle.getElapsedTime().asSeconds() >= speed)
-		{
-			cpu.Step();
-			instructionCycle.restart();
-		}
+	//	if (executeAuto && instructionCycle.getElapsedTime().asSeconds() >= speed)
+	//	{
+	//		cpu.Step();
+	//		instructionCycle.restart();
+	//	}
 
-		ImGui::SFML::Update(window, deltaClock.restart());
+	//	ImGui::SFML::Update(window, deltaClock.restart());
 
-		window.clear(sf::Color(65, 65, 65));
+	//	window.clear(sf::Color(65, 65, 65));
 
-		UIEditor::DrawCpuState(cpu);
-		UIEditor::DrawAssemblyPanel(mode, memory, dissasembler, cpu);
-		UIEditor::DrawMemoryView(memory, cpu, followPC);
-		UIEditor::DrawMenu(memory, executeAuto, followPC, cpu);
-		UIEditor::DrawSpeedSlider(speed);
-		UIEditor::DrawHelpMenu();
+	//	UIEditor::DrawCpuState(cpu);
+	//	UIEditor::DrawAssemblyPanel(mode, memory, dissasembler, cpu);
+	//	UIEditor::DrawMemoryView(memory, cpu, followPC);
+	//	UIEditor::DrawMenu(memory, executeAuto, followPC, cpu);
+	//	UIEditor::DrawSpeedSlider(speed);
+	//	UIEditor::DrawHelpMenu();
 
-		ImGui::SFML::Render(window);
-		window.display();
-	}
-	ImGui::SFML::Shutdown();
+	//	ImGui::SFML::Render(window);
+	//	window.display();
+	//}
+	//ImGui::SFML::Shutdown();
 }

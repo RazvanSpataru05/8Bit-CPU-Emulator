@@ -11,6 +11,9 @@ class Application
 public:
 	explicit Application();
 
+	[[nodiscard]] const CPU& GetCPU() const;
+
+	void Init();
 	void Run();
 
 private:
@@ -24,5 +27,14 @@ private:
 	std::unique_ptr<CPU> m_CPU;
 	std::unique_ptr<Dissasembler> m_dissasembler;
 
+	EditorMode m_editorMode;
+
+	bool m_executeAuto;
+	bool m_followPC;
+	bool m_showISA;
+	float m_autoSpeed;
+
+	sf::RenderWindow m_window;
+	sf::Clock m_deltaClock;
 };
 

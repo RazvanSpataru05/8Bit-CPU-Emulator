@@ -159,7 +159,7 @@ void CPU::Step()
 	{
 		uint16_t bc = (m_B << 8) | m_C;
 		bc++;
-		m_B = (bc >> 8) && 0xFF;
+		m_B = (bc >> 8) & 0xFF;
 		m_C = bc & 0xFF;
 		return;
 	}
@@ -679,6 +679,16 @@ bool CPU::IsReadingInstruction() const noexcept
 bool CPU::IsWritingInstruction() const noexcept
 {
 	return m_memoryUnit.Read(m_PC) == 0x04;
+}
+
+const MemoryUnit& CPU::GetMemoryUnit() const noexcept
+{
+	return m_memoryUnit;
+}
+
+MemoryUnit& CPU::GetMemoryUnit() noexcept
+{
+	return m_memoryUnit;
 }
 
 uint16_t CPU::ComputeAddress(uint16_t programCounter)
