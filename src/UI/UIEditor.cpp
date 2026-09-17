@@ -231,7 +231,7 @@ namespace UIEditor
 		{
 			if (!memoryUnit.IsMemoryEmpty())
 			{
-				for (size_t index = 0; index < memoryUnit.GetMemory().size(); ++index)
+				for (size_t index = 0; index < cpu.MEMORY_UNIT_SIZE; ++index)
 				{
 					uint8_t opcode = memoryUnit.Read(static_cast<uint16_t>(index));
 					const InstructionDef instruction = dissasembler.GetInstructionDef(opcode);

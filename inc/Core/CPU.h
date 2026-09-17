@@ -8,6 +8,9 @@
 class CPU
 {
 public:
+	const size_t MEMORY_UNIT_SIZE{ 65536 };
+
+public:
 	CPU();
 
 	void Fetch();

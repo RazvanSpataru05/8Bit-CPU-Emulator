@@ -1,14 +1,10 @@
 #include "Core/MemoryUnit.h"
 
-MemoryUnit::MemoryUnit()
+MemoryUnit::MemoryUnit() :
+	m_hasData{ false },
+	m_snapshotStartAddress{ 0x00 }
 {
 	std::fill(m_memory.begin(), m_memory.end(), 0x00);
-	m_hasData = false;
-}
-
-const std::array<uint8_t, 65536>& MemoryUnit::GetMemory() const noexcept
-{
-	return m_memory;
 }
 
 bool MemoryUnit::IsMemoryEmpty() const noexcept
@@ -36,12 +32,26 @@ void MemoryUnit::Clear() noexcept
 	m_hasData = false;
 }
 
+void MemoryUnit::RestoreSnapshot()
+{
+	Clear();
+	for (uint16_t index = 0; index < m_snapshotData.size(); ++index)
+	{
+		m_memory[m_snapshotStartAddress + index] = m_snapshotData[index];
+		if (m_snapshotStartAddress != 0x00)
+		{
+			m_hasData = true;
+		}
+	}
+}
+
 void MemoryUnit::LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t startAddress)
 {
 	if (startAddress + values.size() > m_memory.size()) return;
 
 	std::copy(values.begin(), values.end(), m_memory.begin() + startAddress);
-	std::copy(values.begin(), values.end(), m_cache.begin());
+	std::copy(values.begin(), values.end(), m_snapshotData.begin());
+	m_snapshotStartAddress = startAddress;
 }
 
 void MemoryUnit::LoadProgramFromFIle(const std::filesystem::path& filename)
