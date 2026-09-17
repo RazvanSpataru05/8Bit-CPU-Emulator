@@ -25,6 +25,8 @@ constexpr uint8_t LAST_JUMP_INSTRUCTION = 0x58;
 constexpr uint8_t FIRST_STACK_INSTRUCTION = 0x60;
 constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
+const size_t BUFFER_SIZE{ 8192 };
+
 enum PageNumber
 {
 	NONE = 0,
@@ -200,7 +202,7 @@ namespace UIEditor
 
 	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu)
 	{
-		static char editorBuffer[8192] = "";
+		static char editorBuffer[BUFFER_SIZE] = "";
 
 		ImGui::Begin("Assembly Panel");
 		if (ImGui::Button("Edit Mode"))
@@ -227,7 +229,7 @@ namespace UIEditor
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
 			}
 		}
-		else
+		else if (mode == EditorMode::DISSASEMBLY)
 		{
 			if (!memoryUnit.IsMemoryEmpty())
 			{

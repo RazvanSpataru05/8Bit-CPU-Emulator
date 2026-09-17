@@ -20,7 +20,7 @@ const CPU& Application::GetCPU() const
 void Application::Init()
 {
 	const sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-	m_window = sf::RenderWindow(sf::VideoMode(desktop), "8-Bit CPU Emulator", sf::Style::Default); 
+	m_window = sf::RenderWindow(sf::VideoMode(desktop), "8-Bit CPU Emulator", sf::Style::Default);
 	m_window.setFramerateLimit(60);
 	ImGui::SFML::Init(m_window);
 }
@@ -82,6 +82,10 @@ void Application::Run()
 void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 {
 	const auto keyCode = event->getIf<sf::Event::KeyPressed>();
+	if (ImGui::GetIO().WantCaptureKeyboard)
+	{
+		return;
+	}
 
 	switch (keyCode->code)
 	{
@@ -99,6 +103,18 @@ void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 		m_followPC = true;
 		m_executeAuto = false;
 		break;
+
+		// Speed Slider Controls
+	case sf::Keyboard::Key::D:
+	{
+		m_autoSpeed = std::min(2.00f, m_autoSpeed + 0.10f);
+		break;
+	}
+	case sf::Keyboard::Key::A:
+	{
+		m_autoSpeed = std::max(0.10f, m_autoSpeed - 0.10f);
+		break;
+	}
 
 	default:
 		break;

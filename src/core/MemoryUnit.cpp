@@ -35,7 +35,7 @@ void MemoryUnit::Clear() noexcept
 void MemoryUnit::RestoreSnapshot()
 {
 	Clear();
-	for (uint16_t index = 0; index < m_snapshotData.size(); ++index)
+	for (size_t index = 0; index < m_snapshotData.size(); ++index)
 	{
 		m_memory[m_snapshotStartAddress + index] = m_snapshotData[index];
 		if (m_snapshotStartAddress != 0x00)
