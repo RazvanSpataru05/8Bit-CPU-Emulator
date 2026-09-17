@@ -45,4 +45,3 @@ private:
 	sf::Clock m_instructionCycle;
 	sf::Font m_font;
 };
-

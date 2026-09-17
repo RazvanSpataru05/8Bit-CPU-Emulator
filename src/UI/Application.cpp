@@ -3,7 +3,7 @@
 Application::Application() :
 	m_CPU{ std::make_unique<CPU>() },
 	m_dissasembler{ std::make_unique<Dissasembler>() },
-	m_editorMode{ EditorMode::DISSASEMBLY },
+	m_editorMode{ EditorMode::EDIT },
 	m_executeAuto{ false },
 	m_followPC{ true },
 	m_showISA{ false },
@@ -81,11 +81,11 @@ void Application::Run()
 
 void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 {
-	const auto keyCode = event->getIf<sf::Event::KeyPressed>();
 	if (ImGui::GetIO().WantCaptureKeyboard)
 	{
 		return;
 	}
+	const auto keyCode = event->getIf<sf::Event::KeyPressed>();
 
 	switch (keyCode->code)
 	{

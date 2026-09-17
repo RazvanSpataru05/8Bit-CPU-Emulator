@@ -3,7 +3,7 @@
 enum class TokenType
 {
 	MNEMONIC,
-	REGISTER,
+	REGISTER, // A-D or a-d
 	NUMBER,
 	LABEL_DEF,
 	LABEL_REF,

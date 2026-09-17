@@ -26,7 +26,7 @@ public:
 	[[nodiscard]] uint8_t GetD() const noexcept;
 
 	[[nodiscard]] uint16_t GetPC() const noexcept;
-	[[nodiscard]] uint8_t GetSP() const noexcept;
+	[[nodiscard]] uint16_t GetSP() const noexcept;
 	[[nodiscard]] uint8_t GetIR() const noexcept;
 
 	//Flag getters
@@ -64,7 +64,7 @@ private:
 	uint8_t m_C;
 	uint8_t m_D;
 
-	uint8_t m_SP; // Stack Pointer Registry
+	uint16_t m_SP; // Stack Pointer Registry
 	uint16_t m_PC; // Program Counter Registry
 	uint8_t m_IR; // Instruction Registry
 

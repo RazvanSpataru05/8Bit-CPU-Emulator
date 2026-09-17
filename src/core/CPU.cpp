@@ -564,8 +564,8 @@ void CPU::Reset()
 	m_B = 0u;
 	m_C = 0u;
 	m_D = 0u;
-	m_PC = 0u;
-	m_SP = 0u;
+	m_PC = 0x0000;
+	m_SP = 0xFFFF;
 	m_IR = 0u;
 
 	m_ZeroFlag = false;
@@ -611,9 +611,13 @@ void CPU::UpdateFlags(uint8_t result, uint8_t a, uint8_t operand, bool isAdd)
 	m_NegativeFlag = (result & 0x80) != 0;
 
 	if (isAdd)
+	{
 		m_OverflowFlag = (~(a ^ operand) & (a ^ result) & 0x80) != 0;
+	}	
 	else
+	{
 		m_OverflowFlag = ((a ^ operand) & (a ^ result) & 0x80) != 0;
+	}
 }
 
 uint8_t CPU::GetA() const noexcept
@@ -641,7 +645,7 @@ uint16_t CPU::GetPC() const noexcept
 	return m_PC;
 }
 
-uint8_t CPU::GetSP() const noexcept
+uint16_t CPU::GetSP() const noexcept
 {
 	return m_SP;
 }

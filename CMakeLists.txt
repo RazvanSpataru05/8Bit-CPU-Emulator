@@ -35,6 +35,7 @@ set(HEADERS
     inc/Assembler/ISAEntry.h
     inc/Assembler/Lexer.h
     inc/Assembler/Token.h
+    inc/Assembler/Error.h
 
     inc/Core/CPU.h
     inc/Core/MemoryUnit.h

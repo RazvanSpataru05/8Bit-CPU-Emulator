@@ -227,6 +227,7 @@ namespace UIEditor
 				lexer.Tokenize();
 				const std::string result = lexer.GetTokenizedSourceCode();
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
+				lexer.PrintTokenizedSourceCode();
 			}
 		}
 		else if (mode == EditorMode::DISSASEMBLY)

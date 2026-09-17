@@ -1,10 +1,10 @@
 #pragma once
-#pragma once
 
 #include "Assembler/InstructionDef.h"
 #include "Assembler/ISAEntry.h"
 #include "Assembler/Token.h"
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <cctype>
@@ -20,6 +20,7 @@ public:
 
 	void Tokenize();
 	std::string GetTokenizedSourceCode() const;
+	void PrintTokenizedSourceCode() const noexcept;
 
 	const std::vector<std::string>& GetErrors() const;
 	const std::vector<Token>& GetTokens() const;
@@ -38,22 +39,17 @@ private:
 	std::optional<std::string> CheckLexicalNumericError(uint8_t base, const std::string& number) const;
 
 	Token BuildToken(const std::string& word);
-	Token BuildNumericToken(const std::string& number, uint8_t prefix) const;
 
 private:
-	std::string m_sourceCode;
+	std::string_view m_sourceCode;
 	uint32_t m_lineNumber;
 	size_t m_currentIndex;
 
 	std::vector<Token> m_tokens;
 	std::vector<std::string> m_errors;
 
-	const std::vector<std::pair<std::function<bool(char)>, Handler>> m_handlers = {
-		{[](char c) { return std::isalpha(static_cast<unsigned char>(c)); },[this] {ConsumeWord(); }},
-		{[](char c) {return std::isdigit(static_cast<unsigned char>(c)); }, [this] {ConsumeNumber(); }},
-		{[](char c) {return c == '\n'; }, [this] {ConsumeNewLine(); }},
-		{[](char c) {return c == ';'; }, [this] {ConsumeComment(); }},
-		{[](char c) {return c == ' ' || c == '\t'; }, [this] {m_currentIndex++; }}
+	std::vector<std::pair<std::function<bool(unsigned char)>, Handler>> m_handlers =
+	{
+		{[](unsigned char c) {return std::isalpha(c);}, [this] {ConsumeWord();}}
 	};
 };
-
