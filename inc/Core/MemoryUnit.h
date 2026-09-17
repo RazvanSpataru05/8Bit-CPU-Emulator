@@ -1,9 +1,12 @@
 #pragma once
 
+#include "IO/ProgramLoader.h"
+
 #include <array>
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <span>
 
 class MemoryUnit
 {
