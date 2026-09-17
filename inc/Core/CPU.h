@@ -10,6 +10,7 @@ class CPU
 public:
 	CPU();
 
+	void Fetch();
 	void Step();
 	void Reset();
 
@@ -47,16 +48,22 @@ private:
 	void UpdateFlags(uint8_t result, uint8_t a, uint8_t opearand, bool isAdd);
 
 private:
+	CPU(const CPU&) = delete;
+	CPU& operator=(const CPU&) = delete;
+	CPU(CPU&&) = delete;
+	CPU& operator=(CPU&&) = delete;
 
-	// General registry
+private:
+
+	// General Registry
 	uint8_t m_A;
 	uint8_t m_B;
 	uint8_t m_C;
 	uint8_t m_D;
 
-	uint8_t m_SP; // Stack Pointer
-	uint16_t m_PC; // Program Counter registry
-	uint8_t m_IR; // Instruction registry
+	uint8_t m_SP; // Stack Pointer Registry
+	uint16_t m_PC; // Program Counter Registry
+	uint8_t m_IR; // Instruction Registry
 
 	bool m_ZeroFlag;
 	bool m_CarryFlag;

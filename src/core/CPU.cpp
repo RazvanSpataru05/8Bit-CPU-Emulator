@@ -5,12 +5,17 @@ CPU::CPU()
 	Reset();
 }
 
-void CPU::Step()
+void CPU::Fetch()
 {
 	if (m_HaltFlag) return;
 
 	m_IR = m_memoryUnit.Read(m_PC);
 	m_PC++;
+}
+
+void CPU::Step()
+{
+	Fetch();
 
 	switch (m_IR)
 	{

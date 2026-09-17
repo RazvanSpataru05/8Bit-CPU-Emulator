@@ -5,6 +5,7 @@
 #include "UI/UIEditor.h"
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 
 class Application
 {
@@ -14,7 +15,12 @@ public:
 	[[nodiscard]] const CPU& GetCPU() const;
 
 	void Init();
+	void ProcessEvents();
+	void Update();
+	void RenderUI();
 	void Run();
+
+	void ProcessKeyStrokes(const std::optional<sf::Event>& event);
 
 private:
 	Application(const Application&) = delete;
@@ -36,5 +42,7 @@ private:
 
 	sf::RenderWindow m_window;
 	sf::Clock m_deltaClock;
+	sf::Clock m_instructionCycle;
+	sf::Font m_font;
 };
 
