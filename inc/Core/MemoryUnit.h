@@ -19,11 +19,12 @@ public:
 
 	void Write(uint16_t address, uint8_t value) noexcept;
 	void Clear() noexcept;
-	void Load(const std::vector<uint8_t>& values, uint16_t startAddress);
-	void ParseValues(const std::string& filename);
+	void LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t startAddress);
+	void LoadProgramFromFIle(const std::filesystem::path& filename);
 
 private:
 	std::array<uint8_t, 65536> m_memory;
 	bool m_hasData;
+	std::vector<uint8_t> m_cache;
 };
 

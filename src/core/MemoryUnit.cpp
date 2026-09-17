@@ -36,36 +36,16 @@ void MemoryUnit::Clear() noexcept
 	m_hasData = false;
 }
 
-void MemoryUnit::Load(const std::vector<uint8_t>& values, uint16_t startAddress)
+void MemoryUnit::LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t startAddress)
 {
 	if (startAddress + values.size() > m_memory.size()) return;
 
 	std::copy(values.begin(), values.end(), m_memory.begin() + startAddress);
+	std::copy(values.begin(), values.end(), m_cache.begin());
 }
 
-void MemoryUnit::ParseValues(const std::string& filename)
+void MemoryUnit::LoadProgramFromFIle(const std::filesystem::path& filename)
 {
-	const std::string path = "resources/" + filename;
-	std::ifstream file(path);
-	if (!file.is_open())
-	{
-		std::cout << "Error: Could not open file" << std::endl;
-		return;
-	}
-
-	std::vector<uint8_t> values;
-	unsigned hexValue{};
-	while (file >> std::hex >> hexValue)
-	{
-		uint8_t value = static_cast<uint8_t>(hexValue);
-		values.emplace_back(value);
-		if (value != 0x00)
-		{
-			m_hasData = true;
-		}
-	}
-
-	file.close();
-	std::cout << values.size() << std::endl;
-	Load(values, 0x0000);
+	const std::filesystem::path fullPath = std::filesystem::path("resources") / filename;
+	LoadValuesIntoMemory(ProgramLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
 }

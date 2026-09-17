@@ -4,13 +4,7 @@
 #include <vector>
 #include <fstream>
 
-class ProgramLoader
+namespace ProgramLoader
 {
-public:
-	ProgramLoader() = default;
-
-	std::vector<uint8_t> ParseHexValues(const std::filesystem::path& path);
-
-private:
-
+	std::vector<uint8_t> ParseHexValues(const std::filesystem::path& path, bool& hasData);
 };
