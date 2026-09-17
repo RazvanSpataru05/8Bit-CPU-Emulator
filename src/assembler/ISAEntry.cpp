@@ -8,6 +8,7 @@ const ISAEntry* GetISATable(int& outSize)
 
 bool IsMnemonic(const std::string& word)
 {
+	std::cout << "ISA Table size: " << isaTable->size << std::endl << std::endl;
 	for (size_t index = 0; index < isaTable->size; ++index)
 	{
 		if (isaTable->mnemonic == word)

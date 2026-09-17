@@ -7,7 +7,6 @@ enum class TokenType
 	NUMBER,
 	LABEL_DEF,
 	LABEL_REF,
-	NEWLINE,
 	END
 };
 

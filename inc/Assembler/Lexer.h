@@ -3,6 +3,7 @@
 #include "Assembler/InstructionDef.h"
 #include "Assembler/ISAEntry.h"
 #include "Assembler/Token.h"
+#include "Assembler/Error.h"
 
 #include <iostream>
 #include <string>
@@ -10,6 +11,7 @@
 #include <cctype>
 #include <functional>
 #include <optional>
+#include <algorithm>
 
 using Handler = std::function<void()>;
 
@@ -22,13 +24,13 @@ public:
 	std::string GetTokenizedSourceCode() const;
 	void PrintTokenizedSourceCode() const noexcept;
 
-	const std::vector<std::string>& GetErrors() const;
+	const std::vector<Error>& GetErrors() const;
 	const std::vector<Token>& GetTokens() const;
 
 private:
 	void ConsumeWord();
+	void ConsumeWhiteSpace();
 	void ConsumeNumber();
-	void ConsumeNewLine();
 	void ConsumeComment();
 
 	void ErrorRecovery();
@@ -41,15 +43,18 @@ private:
 	Token BuildToken(const std::string& word);
 
 private:
-	std::string_view m_sourceCode;
+	std::string m_sourceCode;
 	uint32_t m_lineNumber;
 	size_t m_currentIndex;
 
 	std::vector<Token> m_tokens;
-	std::vector<std::string> m_errors;
+	std::vector<Error> m_errors;
 
-	std::vector<std::pair<std::function<bool(unsigned char)>, Handler>> m_handlers =
+	std::vector<std::pair<std::function<bool(char)>, Handler>> m_handlers =
 	{
-		{[](unsigned char c) {return std::isalpha(c);}, [this] {ConsumeWord();}}
+		{[](char c) {return std::isalnum(c);}, [this] {ConsumeWord();}},
+		{[](char c) {return c == ';';}, [this] {ConsumeComment();} },
+		{[](char c) {return c == ' ' || c == '\t';}, [this] {ConsumeWhiteSpace();}},
+		{[](char c) {return c == '\n';}, [this] {++m_currentIndex; ++m_lineNumber;}}
 	};
 };

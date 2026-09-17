@@ -2,9 +2,10 @@
 
 Lexer::Lexer(const std::string& sourceCode) :
 	m_sourceCode{ sourceCode },
-	m_lineNumber{ 0u },
+	m_lineNumber{ 1u },
 	m_currentIndex{ 0 }
 {
+	std::cout << "String View Source Code Size: " << m_sourceCode.size() << std::endl;
 }
 
 void Lexer::Tokenize()
@@ -16,26 +17,29 @@ void Lexer::Tokenize()
 
 	while (m_currentIndex < m_sourceCode.size())
 	{
-		const unsigned char currentChar = m_sourceCode[m_currentIndex];
+		std::cout << "hello from while block" << std::endl;
+		const char currentChar = m_sourceCode[m_currentIndex];
+		std::cout << "char = [" << currentChar << "]\n";
+		std::cout << "isalnum = " << std::isalnum(currentChar) << '\n';
+		std::cout << "handlers = " << m_handlers.size() << '\n';
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& pair)
 			{
 				return pair.first(currentChar);
 			});
 		if (it != m_handlers.end())
 		{
-			it->second;
+			std::cout << "Handler found " << std::endl;
+			it->second();
 		}
 		else
 		{
-			m_errors.emplace_back("");
+			m_errors.emplace_back(m_lineNumber, std::string_view("Error: Unknown character " + currentChar));
+			std::cout << "hello from error recovery block" << std::endl;
+			ErrorRecovery();
 		}
 	}
 
-	m_tokens.emplace_back(Token
-		{
-		TokenType::END,
-		"HLT",
-		m_lineNumber });
+	m_tokens.emplace_back(TokenType::END, "HLT", m_lineNumber);
 }
 
 std::string Lexer::GetTokenizedSourceCode() const
@@ -55,7 +59,7 @@ void Lexer::PrintTokenizedSourceCode() const noexcept
 	std::cout << tokenizedSourceCode;
 }
 
-const std::vector<std::string>& Lexer::GetErrors() const
+const std::vector<Error>& Lexer::GetErrors() const
 {
 	return m_errors;
 }
@@ -75,6 +79,16 @@ void Lexer::ConsumeWord()
 		++m_currentIndex;
 	}
 	m_tokens.emplace_back(BuildToken(word));
+}
+
+void Lexer::ConsumeWhiteSpace()
+{
+	while (m_currentIndex < m_sourceCode.size() &&
+		m_sourceCode[m_currentIndex] != ' ' &&
+		m_sourceCode[m_currentIndex] != '\t')
+	{
+		++m_currentIndex;
+	}
 }
 
 void Lexer::CheckBase(const std::string& prefix, uint8_t& base)
@@ -121,13 +135,13 @@ void Lexer::ConsumeNumber()
 
 	if (const auto error = CheckLexicalNumericError(base, number); error.has_value())
 	{
-		m_errors.emplace_back(error.value());
+		m_errors.emplace_back(m_lineNumber, error.value());
 		return;
 	}
 
 	if (m_currentIndex < m_sourceCode.size() && isalnum(m_sourceCode[m_currentIndex]))
 	{
-		m_errors.emplace_back("Line " + std::to_string(m_lineNumber) +
+		m_errors.emplace_back(m_lineNumber, "Line " + std::to_string(m_lineNumber) +
 			": Invalid digit " + m_sourceCode[m_currentIndex] + " for base " + std::to_string(base) + ".");
 		ErrorRecovery();
 		return;
@@ -145,23 +159,11 @@ std::optional<std::string> Lexer::CheckLexicalNumericError(uint8_t base, const s
 	return std::nullopt;
 }
 
-void Lexer::ConsumeNewLine()
-{
-	m_tokens.emplace_back(Token
-	(
-		TokenType::NEWLINE,
-		"\n",
-		m_lineNumber
-	));
-	m_lineNumber++;
-	m_currentIndex++;
-}
-
 void Lexer::ConsumeComment()
 {
 	while (m_currentIndex < m_sourceCode.size() && m_sourceCode[m_currentIndex] != '\n')
 	{
-		m_currentIndex++;
+		++m_currentIndex;
 	}
 }
 
@@ -172,6 +174,10 @@ void Lexer::ErrorRecovery()
 		&& m_sourceCode[m_currentIndex] != '\t'
 		&& m_sourceCode[m_currentIndex] != '\n')
 	{
+		if (m_sourceCode[m_currentIndex] == '\n')
+		{
+			++m_lineNumber;
+		}
 		++m_currentIndex;
 	}
 }
@@ -185,7 +191,6 @@ std::string Lexer::GetTokenType(const Token& token) const
 	case TokenType::LABEL_DEF:	return "LABEL_DEF";
 	case TokenType::LABEL_REF:	return "LABEL_REF";
 	case TokenType::NUMBER:		return "NUMBER";
-	case TokenType::NEWLINE:	return "NEWLINE";
 	case TokenType::END:		return "END";
 	default:					return "ERROR";
 	}
@@ -196,6 +201,7 @@ Token Lexer::BuildToken(const std::string& word)
 	Token token;
 	token.line = m_lineNumber;
 	token.value = word;
+	//std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 
 	auto it = nameToSelector.find(word);
 	if (it != nameToSelector.end())

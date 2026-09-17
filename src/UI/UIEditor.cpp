@@ -202,7 +202,7 @@ namespace UIEditor
 
 	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu)
 	{
-		static char editorBuffer[BUFFER_SIZE] = "";
+		static char editorBuffer[BUFFER_SIZE];
 
 		ImGui::Begin("Assembly Panel");
 		if (ImGui::Button("Edit Mode"))
@@ -222,8 +222,7 @@ namespace UIEditor
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 			if (ImGui::Button("Assemble & Load"))
 			{
-				const std::string sourceCode(editorBuffer);
-				Lexer lexer{ sourceCode };
+				Lexer lexer{ editorBuffer };
 				lexer.Tokenize();
 				const std::string result = lexer.GetTokenizedSourceCode();
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
