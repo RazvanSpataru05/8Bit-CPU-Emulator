@@ -31,6 +31,7 @@ set(SOURCES
     src/UI/Application.cpp
 
     src/Utils/CharacterUtils.cpp
+    src/Utils/StringUtils.cpp
 )
 
 set(HEADERS
@@ -52,6 +53,7 @@ set(HEADERS
     inc/UI/Application.h
 
     inc/Utils/CharacterUtils.h
+    inc/Utils/StringUtils.h
 )
 
 # ============================================================
