@@ -18,7 +18,6 @@ void Lexer::Tokenize()
 	while (m_currentIndex < m_sourceCode.size())
 	{
 		const char currentChar = m_sourceCode[m_currentIndex];
-		std::cout << "hello";
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& handler)
 			{
 				return handler.first(currentChar);
@@ -97,17 +96,6 @@ bool Lexer::HasPrefix(std::string_view word) const
 	return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
 }
 
-std::optional<std::string> Lexer::CheckLexicalNumericError(uint8_t base, const std::string& number) const
-{
-	// Base is diff than 10 (number has prefix), but number is empty
-	if (base != 10 && number.empty())
-	{
-		return "Line " + std::to_string(m_lineNumber) +
-			": No number present after base " + std::to_string(base) + ".";
-	}
-	return std::nullopt;
-}
-
 void Lexer::ConsumeComment()
 {
 	while (m_currentIndex < m_sourceCode.size() && m_sourceCode[m_currentIndex] != '\n')
@@ -160,6 +148,7 @@ void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 
 void Lexer::ReportError(std::string_view error)
 {
+	std::cout << "Invalid number";
 	m_errors.emplace_back(m_lineNumber, error);
 }
 
@@ -210,22 +199,13 @@ bool Lexer::IsNumber(std::string_view word) const
 	if (HasPrefix(word))
 	{
 		startingPosition += 2;
-		prefix = word[0] + word[1];
+		prefix = word.substr(0, 2);
 		CheckBase(prefix, base);
 	}
 
-	auto isValidDigit = [](char c, uint8_t base) {
-		switch (base)
-		{
-		case 2:
-			return c == '0' || c == '1';
-
-		case 16:
-			return static_cast<bool>(isxdigit(c));
-		}
-		};
-
-	return true;
+	return std::all_of(word.begin() + startingPosition, word.end(), [base](char c) {
+		return Utils::IsValidDigit(c, base);
+		});
 }
 
 Token Lexer::BuildToken(std::string_view word)
@@ -242,12 +222,13 @@ Token Lexer::BuildToken(std::string_view word)
 	{
 		return { TokenType::MNEMONIC, word, m_lineNumber };
 	}
-	else if (IsNumber(word))
-	{
-		return { TokenType::NUMBER, word, m_lineNumber };
-	}
 	else
 	{
-		return { TokenType::IDENTIFIER, word, m_lineNumber };
+		if (IsNumber(word))
+		{
+			return { TokenType::NUMBER, word, m_lineNumber };
+		}
+		else ReportError("Invalid number");
 	}
+	return { TokenType::IDENTIFIER, word, m_lineNumber };
 }

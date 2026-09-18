@@ -5,12 +5,12 @@
 #include "Assembler/Token.h"
 #include "Assembler/Error.h"
 
+#include "Utils/CharacterUtils.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
-#include <cctype>
 #include <functional>
-#include <optional>
 #include <algorithm>
 
 using Handler = std::function<void()>;
@@ -50,7 +50,6 @@ private:
 
 	void CheckBase(std::string_view prefix, uint8_t& base) const;
 	bool HasPrefix(std::string_view word) const;
-	std::optional<std::string> CheckLexicalNumericError(uint8_t base, const std::string& number) const;
 
 	Token BuildToken(std::string_view word);
 
