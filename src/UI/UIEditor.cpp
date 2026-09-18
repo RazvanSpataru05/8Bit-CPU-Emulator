@@ -222,7 +222,8 @@ namespace UIEditor
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 			if (ImGui::Button("Assemble & Load"))
 			{
-				Lexer lexer{ editorBuffer };
+				const std::string temporary = editorBuffer;
+				Lexer lexer{ temporary };
 				lexer.Tokenize();
 				const std::string result = lexer.GetTokenizedSourceCode();
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);

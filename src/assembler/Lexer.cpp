@@ -17,11 +17,10 @@ void Lexer::Tokenize()
 
 	while (m_currentIndex < m_sourceCode.size())
 	{
-		std::cout << "hello from while block" << std::endl;
+		std::cout << "Hello from while block" << std::endl;
 		const char currentChar = m_sourceCode[m_currentIndex];
 		std::cout << "char = [" << currentChar << "]\n";
-		std::cout << "isalnum = " << std::isalnum(currentChar) << '\n';
-		std::cout << "handlers = " << m_handlers.size() << '\n';
+		std::cout << "current index: " << m_currentIndex << '\n';
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& pair)
 			{
 				return pair.first(currentChar);
@@ -84,8 +83,8 @@ void Lexer::ConsumeWord()
 void Lexer::ConsumeWhiteSpace()
 {
 	while (m_currentIndex < m_sourceCode.size() &&
-		m_sourceCode[m_currentIndex] != ' ' &&
-		m_sourceCode[m_currentIndex] != '\t')
+		(m_sourceCode[m_currentIndex] == ' ' ||
+		m_sourceCode[m_currentIndex] == '\t'))
 	{
 		++m_currentIndex;
 	}
