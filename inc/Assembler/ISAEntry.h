@@ -12,7 +12,7 @@ struct ISAEntry
     const char* description = nullptr;
 };
 
-static const ISAEntry isaTable[] = {
+static const ISAEntry ISATable[] = {
 
     /* Load / Store instructions (20 total) */
     {"LDA_IM", 0x01, 2, "Loads immediate value into register A"},

@@ -77,6 +77,7 @@ void Lexer::ConsumeWord()
 		word += m_sourceCode[m_currentIndex];
 		++m_currentIndex;
 	}
+	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 	m_tokens.emplace_back(BuildToken(word));
 }
 
@@ -200,7 +201,6 @@ Token Lexer::BuildToken(const std::string& word)
 	Token token;
 	token.line = m_lineNumber;
 	token.value = word;
-	//std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 
 	auto it = nameToSelector.find(word);
 	if (it != nameToSelector.end())
