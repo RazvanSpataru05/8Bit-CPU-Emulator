@@ -30,7 +30,6 @@ public:
 private:
 	void ConsumeWord();
 	void ConsumeWhiteSpace();
-	void ConsumeNumber();
 	void ConsumeComment();
 	void ConsumeNewLine();
 	void ConsumeColon();
@@ -43,15 +42,17 @@ private:
 	// Helper for other tokens
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
-	void ReportError(const std::string& error);
+	void ReportError(std::string_view error);
 	void ErrorRecovery();
 	std::string GetTokenType(const Token& token) const;
 
-	void CheckBase(const std::string& prefix, uint8_t& base);
-	bool IsPrefix() const;
+	bool IsNumber(std::string_view word) const;
+
+	void CheckBase(std::string_view prefix, uint8_t& base) const;
+	bool HasPrefix(std::string_view word) const;
 	std::optional<std::string> CheckLexicalNumericError(uint8_t base, const std::string& number) const;
 
-	Token BuildToken(const std::string& word);
+	Token BuildToken(std::string_view word);
 
 private:
 	std::string m_sourceCode;

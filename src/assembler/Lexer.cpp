@@ -72,7 +72,6 @@ void Lexer::ConsumeWord()
 		word += m_sourceCode[m_currentIndex];
 		++m_currentIndex;
 	}
-	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
 	m_tokens.push_back(BuildToken(word));
 }
 
@@ -86,61 +85,16 @@ void Lexer::ConsumeWhiteSpace()
 	}
 }
 
-void Lexer::CheckBase(const std::string& prefix, uint8_t& base)
+void Lexer::CheckBase(std::string_view prefix, uint8_t& base) const
 {
-	if (prefix == "0x") base = 16u;
-	else if (prefix == "0b") base = 2u;
+	if (prefix == "0b" || prefix == "0B") base = 2u;
+	else if (prefix == "0x" || prefix == "0X") base = 16u;
 }
 
-bool Lexer::IsPrefix() const
+bool Lexer::HasPrefix(std::string_view word) const
 {
-	if (m_currentIndex + 1 < m_sourceCode.size() &&
-		(m_sourceCode[m_currentIndex] == '0' &&
-			(m_sourceCode[m_currentIndex + 1] == 'b' || m_sourceCode[m_currentIndex + 1] == 'x')))
-	{
-		return true;
-	}
-	return false;
-}
-
-void Lexer::ConsumeNumber()
-{
-	std::string number;
-	std::string prefix;
-	uint8_t base = 10u;
-
-	if (IsPrefix())
-	{
-		prefix = m_sourceCode[m_currentIndex] + m_sourceCode[++m_currentIndex];
-		CheckBase(prefix, base);
-	}
-
-	auto isValidDigit = [](char c, uint8_t base) -> bool
-		{
-			if (base == 2) return c == '0' || c == '1';
-			if (base == 16) return isxdigit(c);
-			return isdigit(c);
-		};
-
-	while (m_currentIndex < m_sourceCode.size() && isValidDigit(m_sourceCode[m_currentIndex], base))
-	{
-		number += m_sourceCode[m_currentIndex];
-		++m_currentIndex;
-	}
-
-	if (const auto error = CheckLexicalNumericError(base, number); error.has_value())
-	{
-		m_errors.emplace_back(m_lineNumber, error.value());
-		return;
-	}
-
-	if (m_currentIndex < m_sourceCode.size() && isalnum(m_sourceCode[m_currentIndex]))
-	{
-		m_errors.emplace_back(m_lineNumber, "Line " + std::to_string(m_lineNumber) +
-			": Invalid digit " + m_sourceCode[m_currentIndex] + " for base " + std::to_string(base) + ".");
-		ErrorRecovery();
-		return;
-	}
+	if (word.size() < 2) return false;
+	return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
 }
 
 std::optional<std::string> Lexer::CheckLexicalNumericError(uint8_t base, const std::string& number) const
@@ -204,7 +158,7 @@ void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 	++m_currentIndex;
 }
 
-void Lexer::ReportError(const std::string& error)
+void Lexer::ReportError(std::string_view error)
 {
 	m_errors.emplace_back(m_lineNumber, error);
 }
@@ -247,21 +201,53 @@ std::string Lexer::GetTokenType(const Token& token) const
 	}
 }
 
-Token Lexer::BuildToken(const std::string& word)
+bool Lexer::IsNumber(std::string_view word) const
 {
-	auto it = nameToSelector.find(word);
+	std::string prefix;
+	uint8_t base = 10u;
+	size_t startingPosition{};
+
+	if (HasPrefix(word))
+	{
+		startingPosition += 2;
+		prefix = word[0] + word[1];
+		CheckBase(prefix, base);
+	}
+
+	auto isValidDigit = [](char c, uint8_t base) {
+		switch (base)
+		{
+		case 2:
+			return c == '0' || c == '1';
+
+		case 16:
+			return static_cast<bool>(isxdigit(c));
+		}
+		};
+
+	return true;
+}
+
+Token Lexer::BuildToken(std::string_view word)
+{
+	std::string upperWord{ word };
+	std::transform(upperWord.begin(), upperWord.end(), upperWord.begin(), ::toupper);
+
+	auto it = nameToSelector.find(upperWord);
 	if (it != nameToSelector.end())
 	{
 		return { TokenType::REGISTER, word, m_lineNumber };
 	}
-	else if (IsMnemonic(word))
+	else if (ISA::IsMnemonic(upperWord))
 	{
 		return { TokenType::MNEMONIC, word, m_lineNumber };
 	}
-	else if (m_currentIndex < m_sourceCode.size() && m_sourceCode[m_currentIndex] == ':')
+	else if (IsNumber(word))
 	{
-		++m_currentIndex;
+		return { TokenType::NUMBER, word, m_lineNumber };
+	}
+	else
+	{
 		return { TokenType::IDENTIFIER, word, m_lineNumber };
 	}
-	return { TokenType::NUMBER, word, m_lineNumber };
 }

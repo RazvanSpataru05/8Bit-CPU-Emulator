@@ -98,7 +98,7 @@ static void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstru
 	SetupInstructionsTableColumn();
 
 	int tableSize;
-	const ISAEntry* table = GetISATable(tableSize);
+	const ISAEntry* table = ISA::GetISATable(tableSize);
 	for (size_t index = 0; index < tableSize; ++index)
 	{
 		if (table[index].opcode >= firstInstruction && table[index].opcode <= lastInstruction)
@@ -111,7 +111,7 @@ static void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
 	SetupInstructionsTableColumn();
 
 	int tableSize;
-	const ISAEntry* table = GetISATable(tableSize);
+	const ISAEntry* table = ISA::GetISATable(tableSize);
 	for (uint16_t index = 0; index < tableSize; ++index)
 	{
 		for (uint8_t opcode : opcodes)

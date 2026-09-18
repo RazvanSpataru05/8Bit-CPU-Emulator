@@ -90,6 +90,10 @@ static const ISAEntry ISATable[] = {
     /* ISA Table size : 59 total */
 };
 
-const ISAEntry* GetISATable(int& outSize);
+namespace ISA
+{
+    const ISAEntry* GetISATable(int& outSize);
 
-bool IsMnemonic(const std::string& word);
+    bool IsMnemonic(const std::string& word);
+}
+
