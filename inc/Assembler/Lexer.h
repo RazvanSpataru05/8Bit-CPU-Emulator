@@ -35,6 +35,10 @@ private:
 	void ConsumeNewLine();
 	void ConsumeColon();
 	void ConsumeComma();
+	void ConsumeLeftParanthesis();
+	void ConsumeRightParanthesis();
+	void ConsumeLeftBracket();
+	void ConsumeRightBracket();
 
 	// Helper for other tokens
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
@@ -64,6 +68,10 @@ private:
 		{[](char c) {return c == ' ' || c == '\t';}, [this] {ConsumeWhiteSpace();}},
 		{[](char c) {return c == '\n';}, [this] {ConsumeNewLine();}},
 		{[](char c) {return c == ':';}, [this] {ConsumeColon();}},
-		{[](char c) {return c == ',';}, [this] {ConsumeComma();}}
+		{[](char c) {return c == ',';}, [this] {ConsumeComma();}},
+		{ [](char c) {return c == '(';}, [this] {ConsumeLeftParanthesis();} },
+		{ [](char c) {return c == ')';}, [this] {ConsumeRightParanthesis();} },
+		{ [](char c) {return c == '[';}, [this] {ConsumeLeftBracket();} },
+		{ [](char c) {return c == ']';}, [this] {ConsumeRightBracket();} }
 	};
 };

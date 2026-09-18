@@ -178,6 +178,26 @@ void Lexer::ConsumeComma()
 	ConsumeSymbol(TokenType::COMMA, ",");
 }
 
+void Lexer::ConsumeLeftParanthesis()
+{
+	ConsumeSymbol(TokenType::LEFT_PARAN, "(");
+}
+
+void Lexer::ConsumeRightParanthesis()
+{
+	ConsumeSymbol(TokenType::RIGHT_PARAN, ")");
+}
+
+void Lexer::ConsumeLeftBracket()
+{
+	ConsumeSymbol(TokenType::LEFT_BRACKET, "[");
+}
+
+void Lexer::ConsumeRightBracket()
+{
+	ConsumeSymbol(TokenType::LEFT_BRACKET, "]");
+}
+
 void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 {
 	m_tokens.emplace_back(tokenType, symbol, m_lineNumber);
@@ -208,17 +228,22 @@ std::string Lexer::GetTokenType(const Token& token) const
 {
 	switch (token.type)
 	{
-	case TokenType::REGISTER:	return "REGISTER";
-	case TokenType::MNEMONIC:	return "MNEMONIC";
-	case TokenType::IDENTIFIER:	return "IDENTIFIER";
-	case TokenType::NUMBER:		return "NUMBER";
+	case TokenType::REGISTER:		return "REGISTER";
+	case TokenType::MNEMONIC:		return "MNEMONIC";
+	case TokenType::IDENTIFIER:		return "IDENTIFIER";
+	case TokenType::NUMBER:			return "NUMBER";
 
-	case TokenType::COLON:		return "COLON";
-	case TokenType::COMMA:		return "COMMA";
+	case TokenType::LEFT_PARAN:		return "LEFT_PARAN";
+	case TokenType::RIGHT_PARAN:	return "RIGHT_PARAN";
+	case TokenType::LEFT_BRACKET:	return "LEFT_BRACKET";
+	case TokenType::RIGHT_BRACKET:	return "RIGHT_BRACKET";
 
-	case TokenType::END:		return "END";
+	case TokenType::COLON:			return "COLON";
+	case TokenType::COMMA:			return "COMMA";
 
-	default:					return "ERROR";
+	case TokenType::END:			return "END";
+
+	default:						return "ERROR";
 	}
 }
 
