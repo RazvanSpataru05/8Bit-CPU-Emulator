@@ -203,7 +203,7 @@ bool Lexer::IsNumber(std::string_view word) const
 		CheckBase(prefix, base);
 	}
 
-	return std::all_of(word.begin() + startingPosition, word.end(), [base](char c) {
+	return std::all_of(word.begin() + startingPosition, word.end(), [base](unsigned char c) {
 		return Utils::IsValidDigit(c, base);
 		});
 }

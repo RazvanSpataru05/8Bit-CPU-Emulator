@@ -1,6 +1,6 @@
 #include "Utils/CharacterUtils.h"
 
-bool Utils::IsValidDigit(char c, uint8_t base)
+bool Utils::IsValidDigit(unsigned char c, uint8_t base)
 {
     switch (base)
     {
