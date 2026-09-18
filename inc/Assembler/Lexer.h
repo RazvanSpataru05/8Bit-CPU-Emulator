@@ -32,7 +32,14 @@ private:
 	void ConsumeWhiteSpace();
 	void ConsumeNumber();
 	void ConsumeComment();
+	void ConsumeNewLine();
+	void ConsumeColon();
+	void ConsumeComma();
 
+	// Helper for other tokens
+	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
+
+	void ReportError(const std::string& error);
 	void ErrorRecovery();
 	std::string GetTokenType(const Token& token) const;
 
@@ -52,9 +59,11 @@ private:
 
 	std::vector<std::pair<std::function<bool(char)>, Handler>> m_handlers =
 	{
-		{[](char c) {return std::isalnum(c);}, [this] {ConsumeWord();}},
+		{[](char c) {return isalnum(c);}, [this] {ConsumeWord();}},
 		{[](char c) {return c == ';';}, [this] {ConsumeComment();} },
 		{[](char c) {return c == ' ' || c == '\t';}, [this] {ConsumeWhiteSpace();}},
-		{[](char c) {return c == '\n';}, [this] {++m_currentIndex; ++m_lineNumber;}}
+		{[](char c) {return c == '\n';}, [this] {ConsumeNewLine();}},
+		{[](char c) {return c == ':';}, [this] {ConsumeColon();}},
+		{[](char c) {return c == ',';}, [this] {ConsumeComma();}}
 	};
 };

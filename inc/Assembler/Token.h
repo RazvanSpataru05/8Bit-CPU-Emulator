@@ -2,11 +2,16 @@
 
 enum class TokenType
 {
+	NONE=0,
+
 	MNEMONIC,
 	REGISTER, // A-D or a-d
 	NUMBER,
-	LABEL_DEF,
-	LABEL_REF,
+	IDENTIFIER,
+
+	COLON,
+	COMMA,
+
 	END
 };
 
@@ -16,7 +21,6 @@ struct Token
 	std::string value{};
 	uint32_t line{};
 
-	Token() = default;
 	Token(TokenType t, std::string_view v, uint32_t l) :
 		type{ t }, value{ v }, line{ l } {
 	}

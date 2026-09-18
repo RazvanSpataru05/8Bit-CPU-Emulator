@@ -10,34 +10,30 @@ Lexer::Lexer(const std::string& sourceCode) :
 
 void Lexer::Tokenize()
 {
-	if (m_sourceCode.empty()) return;
-
 	m_tokens.clear();
 	m_errors.clear();
+	m_currentIndex = 0;
+	m_lineNumber = 1u;
 
 	while (m_currentIndex < m_sourceCode.size())
 	{
-		std::cout << "Hello from while block" << std::endl;
 		const char currentChar = m_sourceCode[m_currentIndex];
-		std::cout << "char = [" << currentChar << "]\n";
-		std::cout << "current index: " << m_currentIndex << '\n';
-		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& pair)
+		std::cout << "hello";
+		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& handler)
 			{
-				return pair.first(currentChar);
+				return handler.first(currentChar);
 			});
+
 		if (it != m_handlers.end())
 		{
-			std::cout << "Handler found " << std::endl;
 			it->second();
 		}
 		else
 		{
-			m_errors.emplace_back(m_lineNumber, std::string_view("Error: Unknown character " + currentChar));
-			std::cout << "hello from error recovery block" << std::endl;
+			ReportError("Unknown character " + currentChar);
 			ErrorRecovery();
 		}
 	}
-
 	m_tokens.emplace_back(TokenType::END, "HLT", m_lineNumber);
 }
 
@@ -54,8 +50,7 @@ std::string Lexer::GetTokenizedSourceCode() const
 void Lexer::PrintTokenizedSourceCode() const noexcept
 {
 	std::cout << m_tokens.size() << std::endl << std::endl;
-	const std::string tokenizedSourceCode = GetTokenizedSourceCode();
-	std::cout << tokenizedSourceCode;
+	std::cout << GetTokenizedSourceCode();
 }
 
 const std::vector<Error>& Lexer::GetErrors() const
@@ -78,14 +73,14 @@ void Lexer::ConsumeWord()
 		++m_currentIndex;
 	}
 	std::transform(word.begin(), word.end(), word.begin(), ::toupper);
-	m_tokens.emplace_back(BuildToken(word));
+	m_tokens.push_back(BuildToken(word));
 }
 
 void Lexer::ConsumeWhiteSpace()
 {
 	while (m_currentIndex < m_sourceCode.size() &&
 		(m_sourceCode[m_currentIndex] == ' ' ||
-		m_sourceCode[m_currentIndex] == '\t'))
+			m_sourceCode[m_currentIndex] == '\t'))
 	{
 		++m_currentIndex;
 	}
@@ -167,12 +162,39 @@ void Lexer::ConsumeComment()
 	}
 }
 
+void Lexer::ConsumeNewLine()
+{
+	++m_currentIndex;
+	++m_lineNumber;
+}
+
+void Lexer::ConsumeColon()
+{
+	ConsumeSymbol(TokenType::COLON, ":");
+}
+
+void Lexer::ConsumeComma()
+{
+	ConsumeSymbol(TokenType::COMMA, ",");
+}
+
+void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
+{
+	m_tokens.emplace_back(tokenType, symbol, m_lineNumber);
+	++m_currentIndex;
+}
+
+void Lexer::ReportError(const std::string& error)
+{
+	m_errors.emplace_back(m_lineNumber, error);
+}
+
 void Lexer::ErrorRecovery()
 {
-	while (m_currentIndex < m_sourceCode.size()
-		&& m_sourceCode[m_currentIndex] != ' '
-		&& m_sourceCode[m_currentIndex] != '\t'
-		&& m_sourceCode[m_currentIndex] != '\n')
+	while (m_currentIndex < m_sourceCode.size() &&
+		(m_sourceCode[m_currentIndex] == ' ' ||
+			m_sourceCode[m_currentIndex] == '\t' ||
+			m_sourceCode[m_currentIndex] == '\n'))
 	{
 		if (m_sourceCode[m_currentIndex] == '\n')
 		{
@@ -188,38 +210,33 @@ std::string Lexer::GetTokenType(const Token& token) const
 	{
 	case TokenType::REGISTER:	return "REGISTER";
 	case TokenType::MNEMONIC:	return "MNEMONIC";
-	case TokenType::LABEL_DEF:	return "LABEL_DEF";
-	case TokenType::LABEL_REF:	return "LABEL_REF";
+	case TokenType::IDENTIFIER:	return "IDENTIFIER";
 	case TokenType::NUMBER:		return "NUMBER";
+
+	case TokenType::COLON:		return "COLON";
+	case TokenType::COMMA:		return "COMMA";
+
 	case TokenType::END:		return "END";
+
 	default:					return "ERROR";
 	}
 }
 
 Token Lexer::BuildToken(const std::string& word)
 {
-	Token token;
-	token.line = m_lineNumber;
-	token.value = word;
-
 	auto it = nameToSelector.find(word);
 	if (it != nameToSelector.end())
 	{
-		token.type = TokenType::REGISTER;
-		return token;
+		return { TokenType::REGISTER, word, m_lineNumber };
 	}
-
-	if (IsMnemonic(word))
+	else if (IsMnemonic(word))
 	{
-		token.type = TokenType::MNEMONIC;
-		return token;
+		return { TokenType::MNEMONIC, word, m_lineNumber };
 	}
-
-	if (m_sourceCode[m_currentIndex] == ':')
+	else if (m_currentIndex < m_sourceCode.size() && m_sourceCode[m_currentIndex] == ':')
 	{
-		token.type = TokenType::LABEL_DEF;
 		++m_currentIndex;
-		return token;
+		return { TokenType::IDENTIFIER, word, m_lineNumber };
 	}
-	return token;
+	return { TokenType::NUMBER, word, m_lineNumber };
 }
