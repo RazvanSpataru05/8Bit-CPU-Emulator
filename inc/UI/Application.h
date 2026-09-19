@@ -33,7 +33,7 @@ private:
 	std::unique_ptr<CPU> m_CPU;
 	std::unique_ptr<Dissasembler> m_dissasembler;
 
-	EditorMode m_editorMode;
+	UIEditor::Mode m_editorMode;
 
 	bool m_executeAuto;
 	bool m_followPC;

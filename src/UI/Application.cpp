@@ -3,7 +3,7 @@
 Application::Application() :
 	m_CPU{ std::make_unique<CPU>() },
 	m_dissasembler{ std::make_unique<Dissasembler>() },
-	m_editorMode{ EditorMode::EDIT },
+	m_editorMode{ UIEditor::Mode::EDIT },
 	m_executeAuto{ false },
 	m_followPC{ true },
 	m_showISA{ false },

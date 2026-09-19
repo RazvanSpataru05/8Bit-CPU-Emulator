@@ -1,7 +1,6 @@
 #include "UI/UIEditor.h"
 #include "Assembler/Lexer.h"
 
-uint8_t helperPage = 1u;
 uint16_t currentPage{};
 
 constexpr uint16_t PAGE_SIZE = 256u;
@@ -27,20 +26,6 @@ constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
 const size_t BUFFER_SIZE{ 8192 };
 
-enum PageNumber
-{
-	NONE = 0,
-	GLOSSARY_PAGE,
-	LOAD_STORE_PAGE,
-	ARITHMETIC_PAGE,
-	LOGICAL_PAGE,
-	COMPARE_PAGE,
-	JUMP_PAGE,
-	STACK_PAGE,
-	MISC_PAGE
-};
-
-
 static const char* FlagToStr(bool value)
 {
 	return value ? "True" : "False";
@@ -50,6 +35,7 @@ static void SetupInstructionsTableColumn()
 {
 	ImGui::TableSetupColumn("Mnemonic", ImGuiTableColumnFlags_WidthFixed, 92.0f);
 	ImGui::TableSetupColumn("Opcode", ImGuiTableColumnFlags_WidthFixed, 56.0f);
+	ImGui::TableSetupColumn("Operator Kind", ImGuiTableColumnFlags_WidthFixed, 70.0f);
 	ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 36.0f);
 	ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
 
@@ -71,38 +57,42 @@ static void TextCentered(std::string_view text)
 	ImGui::TextUnformatted(text.data(), text.data() + text.size());
 }
 
-static void DisplayInstruction(const ISAEntry* table, size_t index)
+static void DisplayInstruction(size_t index)
 {
 	ImGui::TableNextRow();
 	ImGui::TableSetColumnIndex(0);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.80f, 1.00f, 1.0f));
-	TextCentered(table[index].mnemonic);
+	TextCentered(ISA::Table[index].mnemonic);
 	ImGui::PopStyleColor();
 
 	ImGui::TableSetColumnIndex(1);
 	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
-	TextCentered(std::format("0x{:02X}", table[index].opcode));
+	TextCentered(std::format("0x{:02X}", ISA::Table[index].opcode));
 	ImGui::PopStyleColor();
 
 	ImGui::TableSetColumnIndex(2);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
-	TextCentered(std::format("{}", table[index].size));
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
+	TextCentered(Utils::OperatorKindToString(ISA::Table[index].operatorKind));
 	ImGui::PopStyleColor();
 
 	ImGui::TableSetColumnIndex(3);
-	ImGui::TextWrapped("%s", table[index].description);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
+	TextCentered(std::format("{}", ISA::Table[index].size));
+	ImGui::PopStyleColor();
+
+	ImGui::TableSetColumnIndex(4);
+	ImGui::TextWrapped("%s", ISA::Table[index].description);
 }
 
 static void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstruction)
 {
 	SetupInstructionsTableColumn();
 
-	int tableSize;
-	const ISAEntry* table = ISA::GetISATable(tableSize);
+	const size_t tableSize = ISA::GetISATableSize();
 	for (size_t index = 0; index < tableSize; ++index)
 	{
-		if (table[index].opcode >= firstInstruction && table[index].opcode <= lastInstruction)
-			DisplayInstruction(table, index);
+		if (ISA::Table[index].opcode >= firstInstruction && ISA::Table[index].opcode <= lastInstruction)
+			DisplayInstruction(index);
 	}
 }
 
@@ -110,15 +100,14 @@ static void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
 {
 	SetupInstructionsTableColumn();
 
-	int tableSize;
-	const ISAEntry* table = ISA::GetISATable(tableSize);
-	for (uint16_t index = 0; index < tableSize; ++index)
+	const size_t tableSize = ISA::GetISATableSize();
+	for (size_t index = 0; index < tableSize; ++index)
 	{
 		for (uint8_t opcode : opcodes)
 		{
-			if (table[index].opcode == opcode)
+			if (ISA::Table[index].opcode == opcode)
 			{
-				DisplayInstruction(table, index);
+				DisplayInstruction(index);
 			}
 		}
 	}
@@ -200,23 +189,23 @@ namespace UIEditor
 		ImGui::End();
 	}
 
-	void DrawAssemblyPanel(EditorMode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu)
+	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu)
 	{
 		static char editorBuffer[BUFFER_SIZE];
 
 		ImGui::Begin("Assembly Panel");
 		if (ImGui::Button("Edit Mode"))
 		{
-			mode = EditorMode::EDIT;
+			mode = Mode::EDIT;
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Dissasembly"))
 		{
-			mode = EditorMode::DISSASEMBLY;
+			mode = Mode::DISSASEMBLY;
 		}
 		ImGui::Separator();
 
-		if (mode == EditorMode::EDIT)
+		if (mode == Mode::EDIT)
 		{
 			ImGui::InputTextMultiline
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
@@ -230,7 +219,7 @@ namespace UIEditor
 				lexer.PrintTokenizedSourceCode();
 			}
 		}
-		else if (mode == EditorMode::DISSASEMBLY)
+		else if (mode == Mode::DISSASEMBLY)
 		{
 			if (!memoryUnit.IsMemoryEmpty())
 			{
@@ -282,10 +271,10 @@ namespace UIEditor
 	{
 		if (followPC)
 		{
-			currentPage = cpu.GetPC() / PAGE_SIZE;
+			currentPage = static_cast<uint8_t>(cpu.GetPC() / PAGE_SIZE);
 		}
 
-		std::string memoryView = "Memory View (page " + std::to_string(currentPage) + "/" + std::to_string(PAGE_SIZE - 1) + ")";
+		const std::string memoryView = "Memory View (page " + std::to_string(currentPage) + "/" + std::to_string(PAGE_SIZE - 1) + ")";
 		ImGui::Begin(memoryView.c_str());
 		if (ImGui::Button("\t\t\tPrev\t\t\t"))
 			currentPage = currentPage - 1 < 0 ? 255 : currentPage - 1;
@@ -378,7 +367,8 @@ namespace UIEditor
 		if (visibility)
 		{
 			ImGui::Begin("Help Menu");
-			std::string pageText = "Page " + std::to_string(helperPage) + "/8";
+			const std::string pageText = "Page " + std::to_string(static_cast<uint8_t>(currentHelperPage)) + "/8";
+
 			float windowWidth = ImGui::GetWindowSize().x;
 			float textWidth = ImGui::CalcTextSize(pageText.c_str()).x;
 			float navButtonWidth = ImGui::CalcTextSize(">").x + ImGui::GetStyle().FramePadding.x * 2;
@@ -396,18 +386,22 @@ namespace UIEditor
 			}
 
 			ImGui::SetCursorPosY(windowWidth * 0.055f - ImGui::GetStyle().WindowPadding.y * 1.2f);
-			if (ImGui::Button("<") && helperPage > 1u)
-				helperPage--;
+			if (ImGui::Button("<"))
+			{
+				PreviousPage();
+			}
 
 			ImGui::SameLine();
 			ImGui::SetCursorPosX(windowWidth - navButtonWidth - ImGui::GetStyle().WindowPadding.x * 2.0f);
 			ImGui::SetCursorPosY(windowWidth * 0.055f - ImGui::GetStyle().WindowPadding.y * 1.2f);
-			if (ImGui::Button(">") && helperPage < 8)
-				helperPage++;
-
-			switch (helperPage)
+			if (ImGui::Button(">"))
 			{
-			case PageNumber::GLOSSARY_PAGE:
+				NextPage();
+			}
+
+			switch (currentHelperPage)
+			{
+			case PageType::GLOSSARY_PAGE:
 			{
 				const char* title = "Glossary";
 				float titleWidth = ImGui::CalcTextSize(title).x;
@@ -447,37 +441,37 @@ namespace UIEditor
 				}
 				break;
 			}
-			case PageNumber::LOAD_STORE_PAGE:
+			case PageType::LOAD_STORE_PAGE:
 			{
 				DisplayTable("Load & Store Instructions Table", "load_store_table", FIRST_LOAD_INSTRUCTION, LAST_LOAD_INSTRUCTION);
 				break;
 			}
-			case PageNumber::ARITHMETIC_PAGE:
+			case PageType::ARITHMETIC_PAGE:
 			{
 				DisplayTable("Arithmetic Instructions Table", "arithmetic_table", FIRST_ARITHMETIC_INSTRUCTION, LAST_ARITHMETIC_INSTRUCTION);
 				break;
 			}
-			case PageNumber::LOGICAL_PAGE:
+			case PageType::LOGICAL_PAGE:
 			{
 				DisplayTable("Logical Instructions Table", "logical_tabe", FIRST_LOGIC_INSTRUCTION, LAST_LOGIC_INSTRUCTION);
 				break;
 			}
-			case PageNumber::COMPARE_PAGE:
+			case PageType::COMPARE_PAGE:
 			{
 				DisplayTable("Compare Instructions Table", "compare_table", FIRST_COMPARE_INSTRUCTION, LAST_COMPARE_INSTRUCTION);
 				break;
 			}
-			case PageNumber::JUMP_PAGE:
+			case PageType::JUMP_PAGE:
 			{
 				DisplayTable("Jump Instructions Table", "jump_table", FIRST_JUMP_INSTRUCTION, LAST_JUMP_INSTRUCTION);
 				break;
 			}
-			case PageNumber::STACK_PAGE:
+			case PageType::STACK_PAGE:
 			{
 				DisplayTable("Stack Instructions Table", "stack_table", FIRST_STACK_INSTRUCTION, LAST_STACK_INSTRUCTION);
 				break;
 			}
-			case PageNumber::MISC_PAGE:
+			case PageType::MISC_PAGE:
 			{
 				DisplayTable("Misc Instructions Table", "misc_table", { 0x00, 0x70, 0xFF });
 				break;

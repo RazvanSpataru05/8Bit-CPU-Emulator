@@ -2,9 +2,9 @@
 
 std::string Utils::ToUpper(std::string_view word)
 {
-    std::string upper{ word };
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-    return upper;
+	std::string upper{ word };
+	std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+	return upper;
 }
 
 void Utils::CheckBase(std::string_view prefix, uint8_t& base)
@@ -15,14 +15,14 @@ void Utils::CheckBase(std::string_view prefix, uint8_t& base)
 
 bool Utils::HasPrefix(std::string_view word)
 {
-    if (word.size() < 2) return false;
-    return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
+	if (word.size() < 2) return false;
+	return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
 }
 
 bool Utils::StartsLikeNumber(std::string_view word)
 {
-    if (word.empty()) return false;
-    return Utils::HasPrefix(word) || isdigit(word[0]);
+	if (word.empty()) return false;
+	return Utils::HasPrefix(word) || isdigit(word[0]);
 }
 
 bool Utils::IsNumber(std::string_view word)
@@ -41,4 +41,17 @@ bool Utils::IsNumber(std::string_view word)
 	return std::all_of(word.begin() + startingPosition, word.end(), [base](unsigned char c) {
 		return Utils::IsValidDigit(c, base);
 		});
+}
+
+std::string_view Utils::OperatorKindToString(ISA::OperatorKind operatorKind)
+{
+	switch (operatorKind)
+	{
+	case ISA::OperatorKind::NONE:					return "None";
+	case ISA::OperatorKind::IMM_8:					return "Immediate 8-bit value";
+	case ISA::OperatorKind::ADDR_16:				return "16-bit Address";
+	case ISA::OperatorKind::REG:					return "Registry or Selector Code";
+	case ISA::OperatorKind::REG_REG:				return "Two registries";
+	}
+	return "Error";
 }

@@ -7,10 +7,10 @@ namespace ISA
 		auto it = s_opcodeTable.find(mnemonic);
 		return it != s_opcodeTable.end() ? it->second : nullptr;
 	}
-	const ISAEntry* GetISATable(int& outSize)
+
+	size_t GetISATableSize()
 	{
-		outSize = sizeof(ISATable) / sizeof(ISAEntry);
-		return ISATable;
+		return static_cast<size_t>(sizeof(Table) / sizeof(ISAEntry));
 	}
 
 	bool IsMnemonic(const std::string& word)

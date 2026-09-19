@@ -19,32 +19,32 @@ public:
 	uint16_t ComputeAddress(uint16_t programCounter);
 
 	//Registry getters
-	[[nodiscard]] uint8_t GetA() const noexcept;
-	[[nodiscard]] uint8_t GetB() const noexcept;
-	[[nodiscard]] uint8_t GetC() const noexcept;
-	[[nodiscard]] uint8_t GetD() const noexcept;
+	[[nodiscard]] uint8_t		GetA() const noexcept;
+	[[nodiscard]] uint8_t		GetB() const noexcept;
+	[[nodiscard]] uint8_t		GetC() const noexcept;
+	[[nodiscard]] uint8_t		GetD() const noexcept;
 
-	[[nodiscard]] uint16_t GetPC() const noexcept;
-	[[nodiscard]] uint16_t GetSP() const noexcept;
-	[[nodiscard]] uint8_t GetIR() const noexcept;
+	[[nodiscard]] uint16_t		GetPC() const noexcept;
+	[[nodiscard]] uint16_t		GetSP() const noexcept;
+	[[nodiscard]] uint8_t		GetIR() const noexcept;
 
 	//Flag getters
-	[[nodiscard]] bool GetZeroFlag() const noexcept;
-	[[nodiscard]] bool GetHaltFlag() const noexcept;
-	[[nodiscard]] bool GetCarryFlag() const noexcept;
-	[[nodiscard]] bool GetNegativeFlag() const noexcept;
-	[[nodiscard]] bool GetOverflowFlag() const noexcept;
+	[[nodiscard]] bool			GetZeroFlag() const noexcept;
+	[[nodiscard]] bool			GetHaltFlag() const noexcept;
+	[[nodiscard]] bool			GetCarryFlag() const noexcept;
+	[[nodiscard]] bool			GetNegativeFlag() const noexcept;
+	[[nodiscard]] bool			GetOverflowFlag() const noexcept;
 
 	[[nodiscard]] bool IsReadingInstruction() const noexcept;
 	[[nodiscard]] bool IsWritingInstruction() const noexcept;
 
 	// Memory Unit getter (const & non-const)
-	[[nodiscard]] const MemoryUnit& GetMemoryUnit() const noexcept;
-	[[nodiscard]] MemoryUnit& GetMemoryUnit() noexcept;
+	[[nodiscard]] const MemoryUnit&		GetMemoryUnit() const noexcept;
+	[[nodiscard]] MemoryUnit&			GetMemoryUnit() noexcept;
 
 private:
-	[[nodiscard]] uint8_t ReadRegister(uint8_t selector) const noexcept;
-	void WriteRegister(uint8_t selector, uint8_t value);
+	[[nodiscard]] uint8_t	ReadRegister(uint8_t selector) const noexcept;
+	void					WriteRegister(uint8_t selector, uint8_t value);
 
 	void UpdateFlags(uint8_t result);
 	void UpdateFlags(uint8_t result, uint8_t a, uint8_t opearand, bool isAdd);

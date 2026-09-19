@@ -2,6 +2,10 @@
 
 #include "Utils/CharacterUtils.h"
 
+#include "UI/UIEditor.h"
+
+#include "Assembler/ISAEntry.h"
+
 #include <string>
 #include <algorithm>
 
@@ -14,4 +18,6 @@ namespace Utils
 	bool HasPrefix(std::string_view word);
 	bool StartsLikeNumber(std::string_view word);
 	bool IsNumber(std::string_view word);
-}
+
+	std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
+};
