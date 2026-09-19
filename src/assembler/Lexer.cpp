@@ -1,6 +1,6 @@
 #include "Assembler/Lexer.h"
 
-Lexer::Lexer(const std::string& sourceCode) :
+Lexer::Lexer(std::string_view sourceCode) :
 	m_sourceCode{ sourceCode },
 	m_lineNumber{ 1u },
 	m_currentIndex{ 0 }
@@ -106,7 +106,7 @@ void Lexer::ConsumeComment()
 
 void Lexer::ConsumeNewLine()
 {
-	++m_currentIndex;
+	ConsumeSymbol(TokenType::NEW_LINE, "\n");
 	++m_lineNumber;
 }
 
@@ -175,6 +175,7 @@ std::string Lexer::GetTokenType(const Token& token) const
 	case TokenType::MNEMONIC:		return "MNEMONIC";
 	case TokenType::IDENTIFIER:		return "IDENTIFIER";
 	case TokenType::NUMBER:			return "NUMBER";
+	case TokenType::NEW_LINE:		return "NEW_LINE";
 
 	case TokenType::LEFT_PARAN:		return "LEFT_PARAN";
 	case TokenType::RIGHT_PARAN:	return "RIGHT_PARAN";
@@ -210,8 +211,7 @@ bool Lexer::IsNumber(std::string_view word) const
 
 Token Lexer::BuildToken(std::string_view word)
 {
-	std::string upperWord{ word };
-	std::transform(upperWord.begin(), upperWord.end(), upperWord.begin(), ::toupper);
+	const std::string upperWord = Utils::ToUpper(word);
 
 	auto it = nameToSelector.find(upperWord);
 	if (it != nameToSelector.end())

@@ -7,6 +7,7 @@ enum class TokenType
 	MNEMONIC,
 	REGISTER, // A-D or a-d
 	NUMBER,
+	NEW_LINE,
 	IDENTIFIER,
 
 	LEFT_PARAN,
