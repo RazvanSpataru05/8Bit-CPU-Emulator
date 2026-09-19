@@ -2,6 +2,11 @@
 
 namespace ISA
 {
+	const ISAEntry* Find(const std::string& mnemonic)
+	{
+		auto it = s_opcodeTable.find(mnemonic);
+		return it != s_opcodeTable.end() ? it->second : nullptr;
+	}
 	const ISAEntry* GetISATable(int& outSize)
 	{
 		outSize = sizeof(ISATable) / sizeof(ISAEntry);
@@ -10,14 +15,6 @@ namespace ISA
 
 	bool IsMnemonic(const std::string& word)
 	{
-		const size_t tableSize = static_cast<size_t>(sizeof(ISATable) / sizeof(ISAEntry));
-		for (size_t index = 0; index < tableSize; ++index)
-		{
-			if (ISATable[index].mnemonic == word)
-			{
-				return true;
-			}
-		}
-		return false;
+		return Find(word) != nullptr;
 	}
 }

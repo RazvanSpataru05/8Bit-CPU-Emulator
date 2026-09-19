@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <iostream>
 
 enum class OperatorKind
@@ -102,6 +103,22 @@ static const ISAEntry ISATable[] = {
 
 namespace ISA
 {
+    namespace
+    {
+        std::unordered_map<std::string, const ISAEntry*> BuildOpcodeTable()
+        {
+            std::unordered_map<std::string, const ISAEntry*> opcodeTable;
+            for (const auto& entry : ISATable)
+            {
+                opcodeTable[entry.mnemonic] = &entry;
+            }
+            return opcodeTable;
+        }
+
+        const auto s_opcodeTable = BuildOpcodeTable();
+    }
+
+    const ISAEntry* Find(const std::string& mnemonic);
     const ISAEntry* GetISATable(int& outSize);
 
     bool IsMnemonic(const std::string& word);
