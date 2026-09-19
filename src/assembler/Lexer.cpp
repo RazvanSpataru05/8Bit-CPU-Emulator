@@ -30,7 +30,6 @@ void Lexer::Tokenize()
 		else
 		{
 			ReportError("Unknown character " + currentChar);
-			ErrorRecovery();
 		}
 	}
 	m_tokens.emplace_back(TokenType::END, "HLT", m_lineNumber);
@@ -152,21 +151,6 @@ void Lexer::ReportError(std::string_view error)
 	m_errors.emplace_back(m_lineNumber, error);
 }
 
-void Lexer::ErrorRecovery()
-{
-	while (m_currentIndex < m_sourceCode.size() &&
-		(m_sourceCode[m_currentIndex] == ' ' ||
-			m_sourceCode[m_currentIndex] == '\t' ||
-			m_sourceCode[m_currentIndex] == '\n'))
-	{
-		if (m_sourceCode[m_currentIndex] == '\n')
-		{
-			++m_lineNumber;
-		}
-		++m_currentIndex;
-	}
-}
-
 std::string Lexer::GetTokenType(const Token& token) const
 {
 	switch (token.type)
@@ -191,6 +175,12 @@ std::string Lexer::GetTokenType(const Token& token) const
 	}
 }
 
+bool Lexer::StartsLikeNumber(std::string_view word) const
+{
+	if (word.empty()) return false;
+	return HasPrefix(word) || isdigit(word[0]);
+}
+
 bool Lexer::IsNumber(std::string_view word) const
 {
 	std::string prefix;
@@ -213,22 +203,13 @@ Token Lexer::BuildToken(std::string_view word)
 {
 	const std::string upperWord = Utils::ToUpper(word);
 
-	auto it = nameToSelector.find(upperWord);
-	if (it != nameToSelector.end())
+	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber };
+	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber };
+
+	if (StartsLikeNumber(word))
 	{
-		return { TokenType::REGISTER, word, m_lineNumber };
-	}
-	else if (ISA::IsMnemonic(upperWord))
-	{
-		return { TokenType::MNEMONIC, word, m_lineNumber };
-	}
-	else
-	{
-		if (IsNumber(word))
-		{
-			return { TokenType::NUMBER, word, m_lineNumber };
-		}
-		else ReportError("Invalid number");
+		if (!IsNumber(word)) ReportError("Invalid number");
+		return { TokenType::NUMBER, word, m_lineNumber };
 	}
 	return { TokenType::IDENTIFIER, word, m_lineNumber };
 }

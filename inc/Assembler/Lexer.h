@@ -45,9 +45,9 @@ private:
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
 	void ReportError(std::string_view error);
-	void ErrorRecovery();
 	std::string GetTokenType(const Token& token) const;
 
+	bool StartsLikeNumber(std::string_view word) const;
 	bool IsNumber(std::string_view word) const;
 
 	void CheckBase(std::string_view prefix, uint8_t& base) const;
