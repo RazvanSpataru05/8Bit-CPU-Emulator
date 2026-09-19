@@ -6,4 +6,5 @@
 namespace Utils
 {
 	bool IsValidDigit(unsigned char c, uint8_t base);
+
 }

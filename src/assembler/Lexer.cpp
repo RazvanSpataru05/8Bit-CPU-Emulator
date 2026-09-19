@@ -17,7 +17,7 @@ void Lexer::Tokenize()
 
 	while (m_currentIndex < m_sourceCode.size())
 	{
-		const char currentChar = m_sourceCode[m_currentIndex];
+		const unsigned char currentChar = m_sourceCode[m_currentIndex];
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentChar](const auto& handler)
 			{
 				return handler.first(currentChar);
@@ -81,18 +81,6 @@ void Lexer::ConsumeWhiteSpace()
 	{
 		++m_currentIndex;
 	}
-}
-
-void Lexer::CheckBase(std::string_view prefix, uint8_t& base) const
-{
-	if (prefix == "0b" || prefix == "0B") base = 2u;
-	else if (prefix == "0x" || prefix == "0X") base = 16u;
-}
-
-bool Lexer::HasPrefix(std::string_view word) const
-{
-	if (word.size() < 2) return false;
-	return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
 }
 
 void Lexer::ConsumeComment()
@@ -175,30 +163,6 @@ std::string Lexer::GetTokenType(const Token& token) const
 	}
 }
 
-bool Lexer::StartsLikeNumber(std::string_view word) const
-{
-	if (word.empty()) return false;
-	return HasPrefix(word) || isdigit(word[0]);
-}
-
-bool Lexer::IsNumber(std::string_view word) const
-{
-	std::string prefix;
-	uint8_t base = 10u;
-	size_t startingPosition{};
-
-	if (HasPrefix(word))
-	{
-		startingPosition += 2;
-		prefix = word.substr(0, 2);
-		CheckBase(prefix, base);
-	}
-
-	return std::all_of(word.begin() + startingPosition, word.end(), [base](unsigned char c) {
-		return Utils::IsValidDigit(c, base);
-		});
-}
-
 Token Lexer::BuildToken(std::string_view word)
 {
 	const std::string upperWord = Utils::ToUpper(word);
@@ -206,9 +170,9 @@ Token Lexer::BuildToken(std::string_view word)
 	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber };
 	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber };
 
-	if (StartsLikeNumber(word))
+	if (Utils::StartsLikeNumber(word))
 	{
-		if (!IsNumber(word)) ReportError("Invalid number");
+		if (!Utils::IsNumber(word)) ReportError("Invalid number");
 		return { TokenType::NUMBER, word, m_lineNumber };
 	}
 	return { TokenType::IDENTIFIER, word, m_lineNumber };

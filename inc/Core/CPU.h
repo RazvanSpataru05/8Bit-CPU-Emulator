@@ -3,7 +3,6 @@
 #include "Core/MemoryUnit.h"
 
 #include <string>
-#include <memory>
 
 class CPU
 {

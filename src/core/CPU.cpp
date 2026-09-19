@@ -66,7 +66,7 @@ void CPU::Step()
 		return;
 	}
 
-	case 0x07: // LDB_REG 3by
+	case 0x07: // LDB_REG 2by
 	{
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_B = ReadRegister(selector);
@@ -139,14 +139,14 @@ void CPU::Step()
 		return;
 	}
 
-	case 0x11: // LDA_IND 2by
+	case 0x11: // LDA_IND 1by
 	{
 		uint16_t bc = (m_B << 8) | m_C;
 		m_A = m_memoryUnit.Read(bc);
 		return;
 	}
 
-	case 0x12: // STA_IND 2by
+	case 0x12: // STA_IND 1by
 	{
 		uint16_t bc = (m_B << 8) | m_C;
 		m_memoryUnit.Write(bc, m_A);
@@ -162,10 +162,10 @@ void CPU::Step()
 
 	case 0x14: // INCW 1by
 	{
-		uint16_t bc = (m_B << 8) | m_C;
-		bc++;
-		m_B = (bc >> 8) & 0xFF;
-		m_C = bc & 0xFF;
+		uint16_t BC = (m_B << 8) | m_C;
+		++BC;
+		m_B = (BC >> 8) & 0xFF;
+		m_C = BC & 0xFF;
 		return;
 	}
 
@@ -529,8 +529,8 @@ void CPU::Step()
 
 	case 0x63: // RET 1by
 	{
-		uint8_t low = m_memoryUnit.Read(m_SP++);
-		uint8_t high = m_memoryUnit.Read(m_SP++);
+		uint8_t low = m_memoryUnit.Read(++m_SP);
+		uint8_t high = m_memoryUnit.Read(++m_SP);
 		m_PC = (high << 8) | low;
 		return;
 	}

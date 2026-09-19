@@ -47,12 +47,6 @@ private:
 	void ReportError(std::string_view error);
 	std::string GetTokenType(const Token& token) const;
 
-	bool StartsLikeNumber(std::string_view word) const;
-	bool IsNumber(std::string_view word) const;
-
-	void CheckBase(std::string_view prefix, uint8_t& base) const;
-	bool HasPrefix(std::string_view word) const;
-
 	Token BuildToken(std::string_view word);
 
 private:

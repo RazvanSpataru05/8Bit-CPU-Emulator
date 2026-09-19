@@ -6,3 +6,39 @@ std::string Utils::ToUpper(std::string_view word)
     std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
     return upper;
 }
+
+void Utils::CheckBase(std::string_view prefix, uint8_t& base)
+{
+	if (prefix == "0b" || prefix == "0B") base = 2u;
+	else if (prefix == "0x" || prefix == "0X") base = 16u;
+}
+
+bool Utils::HasPrefix(std::string_view word)
+{
+    if (word.size() < 2) return false;
+    return word[0] == '0' && (word[1] == 'b' || word[1] == 'B' || word[1] == 'x' || word[1] == 'X');
+}
+
+bool Utils::StartsLikeNumber(std::string_view word)
+{
+    if (word.empty()) return false;
+    return Utils::HasPrefix(word) || isdigit(word[0]);
+}
+
+bool Utils::IsNumber(std::string_view word)
+{
+	std::string prefix;
+	uint8_t base = 10u;
+	size_t startingPosition{};
+
+	if (HasPrefix(word))
+	{
+		startingPosition += 2;
+		prefix = word.substr(0, 2);
+		CheckBase(prefix, base);
+	}
+
+	return std::all_of(word.begin() + startingPosition, word.end(), [base](unsigned char c) {
+		return Utils::IsValidDigit(c, base);
+		});
+}
