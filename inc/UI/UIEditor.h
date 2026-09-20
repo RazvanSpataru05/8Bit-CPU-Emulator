@@ -14,7 +14,7 @@ namespace UIEditor
 {
 	enum class Mode : uint8_t
 	{
-		EDIT = 0,
+		EDIT = 0u,
 		DISSASEMBLY
 	};
 

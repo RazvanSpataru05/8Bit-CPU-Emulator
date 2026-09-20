@@ -51,7 +51,12 @@ std::string_view Utils::OperatorKindToString(ISA::OperatorKind operatorKind)
 	case ISA::OperatorKind::IMM_8:					return "Immediate 8-bit value";
 	case ISA::OperatorKind::ADDR_16:				return "16-bit Address";
 	case ISA::OperatorKind::REG:					return "Registry or Selector Code";
-	case ISA::OperatorKind::REG_REG:				return "Two registries";
+	case ISA::OperatorKind::REG_REG:				return "Two Registries";
 	}
 	return "Error";
+}
+
+const char* Utils::FlagToString(bool value)
+{
+	return value ? "True" : "False";
 }

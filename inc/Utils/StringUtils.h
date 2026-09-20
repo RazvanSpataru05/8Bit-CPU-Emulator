@@ -20,4 +20,5 @@ namespace Utils
 	bool IsNumber(std::string_view word);
 
 	std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
+	const char* FlagToString(bool value);
 };
