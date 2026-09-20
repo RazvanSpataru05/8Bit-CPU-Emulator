@@ -40,6 +40,7 @@ set(HEADERS
     inc/Assembler/Lexer.h
     inc/Assembler/Parser.h
     inc/Assembler/Token.h
+    inc/Assembler/Statement.h
     inc/Assembler/Error.h
 
     inc/Core/CPU.h

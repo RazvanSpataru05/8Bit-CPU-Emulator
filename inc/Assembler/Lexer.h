@@ -12,7 +12,7 @@
 #include <vector>
 #include <functional>
 
-using Handler = std::function<void()>;
+using TokenHandler = std::function<void()>;
 
 class Lexer
 {
@@ -61,7 +61,7 @@ private:
 	std::vector<Token> m_tokens;
 	std::vector<Error> m_errors;
 
-	std::vector<std::pair<std::function<bool(unsigned char)>, Handler>> m_handlers =
+	std::vector<std::pair<std::function<bool(unsigned char)>, TokenHandler>> m_handlers =
 	{
 		{[](unsigned char c) {return isalnum(c);}, [this] {ConsumeWord();}},
 		{[](unsigned char c) {return c == ';';}, [this] {ConsumeComment();} },
