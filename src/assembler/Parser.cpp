@@ -67,7 +67,7 @@ void Parser::PrintStatements() const
 
 void Parser::HandleMnemonicToken(const Token& token)
 {
-	const ISA::ISAEntry* entry = ISA::Find(token.value);
+	const ISA::ISAEntry* entry = ISA::Find(Utils::ToUpper(token.value));
 	if (!entry) return;
 
 	m_currentStatement.opcode = entry->opcode;
@@ -79,6 +79,7 @@ void Parser::HandleMnemonicToken(const Token& token)
 	case OperatorKind::NONE: break;
 	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8(); break; }
 	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16(); break; }
+	case OperatorKind::REG: {}
 	}
 
 	ExpectEndOfStatement();
@@ -99,24 +100,39 @@ void Parser::HandleNewLineToken(const Token& token)
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
-	const Token& token = Next();
+	const std::string& value = ConsumeNumber();
 
-	assert(token.type == TokenType::NUMBER);
-
-	operand[0] = static_cast<uint8_t>(Utils::ParseNumber(token.value));
+	operand[0] = static_cast<uint8_t>(Utils::ParseNumber(value));
 	return operand;
 }
 
 std::array<uint8_t, 2> Parser::ConsumeAddr16()
 {
 	std::array<uint8_t, 2> operands{};
-	const Token& token = Next();
+	const std::string& value = ConsumeNumber();
 
-	assert(token.type == TokenType::NUMBER);
-
-	const uint16_t address = Utils::ParseNumber(token.value);
+	const uint16_t address = Utils::ParseNumber(value);
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
 	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
+	return operands;
+}
+
+std::array<uint8_t, 2> Parser::ConsumeReg()
+{
+	std::array<uint8_t, 2> operands{};
+	auto value = ConsumeRegisterOrSelector();
+	if (value.second == TokenType::REGISTER) 
+	{
+		assert(nameToSelector.contains(value.first));
+		operands[0] = nameToSelector.at(value.first);
+	}
+	else if (value.second == TokenType::NUMBER) // number is registry identifier
+	{
+		uint8_t selector = Utils::ParseNumber(value.first);
+		assert(selectorToName.contains(selector));
+		operands[0] = selector;
+	}
+
 	return operands;
 }
 
@@ -130,4 +146,18 @@ void Parser::ExpectEndOfStatement()
 const Token& Parser::Next()
 {
 	return m_tokens[m_pos++];
+}
+
+const std::string& Parser::ConsumeNumber()
+{
+	const Token& token = Next();
+	assert(token.type == TokenType::NUMBER);
+	return token.value;
+}
+
+std::pair<const std::string&, TokenType> Parser::ConsumeRegisterOrSelector()
+{
+	const Token& token = Next();
+	assert(token.type == TokenType::REGISTER || token.type == TokenType::NUMBER);
+	return { token.value, token.type };
 }

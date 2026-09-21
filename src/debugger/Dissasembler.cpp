@@ -5,7 +5,7 @@ Dissasembler::Dissasembler()
 	std::fill(m_instructions.begin(), m_instructions.end(), InstructionDef("???", 1u));
 
 	// No operation instruction
-	m_instructions[0x00] = { "NOP", 1u };
+	m_instructions[0x00] = { "NOP",		1u };
 
 	// Load/Store instructions
 	m_instructions[0x01] = { "LDA_IM",  2u };
@@ -26,8 +26,8 @@ Dissasembler::Dissasembler()
 	m_instructions[0x10] = { "STD_DIR", 3u };
 	m_instructions[0x11] = { "LDA_IND", 2u };
 	m_instructions[0x12] = { "STA_IND", 2u };
-	m_instructions[0x13] = { "LDW_IM", 2u };
-	m_instructions[0x14] = { "INCW", 1u };
+	m_instructions[0x13] = { "LDW_IM",	2u };
+	m_instructions[0x14] = { "INCW",	1u };
 
 
 	// Arithmetic instructions

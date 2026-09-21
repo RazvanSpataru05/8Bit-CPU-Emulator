@@ -5,7 +5,7 @@
 
 struct InstructionDef
 {
-	std::string mnemonic;
+	std::string mnemonic = "";
 	uint8_t size{};
 };
 

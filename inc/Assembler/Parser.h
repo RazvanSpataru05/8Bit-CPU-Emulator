@@ -33,13 +33,18 @@ private:
 
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
+	std::array<uint8_t, 2> ConsumeReg();
 
 	void ExpectEndOfStatement();
 
+
+	/* Helpers */
 	const Token& Next();
+	const std::string& ConsumeNumber();
+	std::pair<const std::string&, TokenType> ConsumeRegisterOrSelector();
 
 private:
-	std::vector<Token> m_tokens;
+	const std::vector<Token> m_tokens;
 
 	uint32_t m_lineNumber;
 	size_t m_pos;

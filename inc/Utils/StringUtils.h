@@ -18,7 +18,7 @@ namespace Utils
 	bool HasPrefix(std::string_view word);
 	bool StartsLikeNumber(std::string_view word);
 	bool IsNumber(std::string_view word);
-	uint16_t ParseNumber(const std::string& word);
+	uint32_t ParseNumber(const std::string& word);
 
 	std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
 	const char* FlagToString(bool value);
