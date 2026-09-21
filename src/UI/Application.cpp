@@ -104,7 +104,7 @@ void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 		m_executeAuto = false;
 		break;
 
-		// Speed Slider Controls
+	// Speed Slider Controls
 	case sf::Keyboard::Key::D:
 	{
 		m_autoSpeed = std::min(2.00f, m_autoSpeed + 0.10f);

@@ -25,7 +25,7 @@ set(SOURCES
 
     src/Debugger/Dissasembler.cpp
 
-    src/IO/ProgramLoader.cpp
+    src/IO/DataLoader.cpp
 
     src/UI/UIEditor.cpp
     src/UI/Application.cpp
@@ -48,7 +48,7 @@ set(HEADERS
 
     inc/Debugger/Dissasembler.h
 
-    inc/IO/ProgramLoader.h
+    inc/IO/DataLoader.h
 
     inc/UI/UIEditor.h
     inc/UI/Application.h
