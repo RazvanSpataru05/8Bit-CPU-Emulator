@@ -32,8 +32,11 @@ private:
 	void HandleNewLineToken(const Token& token);
 
 	std::array<uint8_t, 2> ConsumeImm8();
+	std::array<uint8_t, 2> ConsumeAddr16();
 
 	void ExpectEndOfStatement();
+
+	const Token& Next();
 
 private:
 	std::vector<Token> m_tokens;

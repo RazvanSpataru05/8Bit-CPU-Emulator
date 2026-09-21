@@ -19,7 +19,7 @@ void Parser::ParseInstructions()
 
 	while (m_pos < m_tokens.size())
 	{
-		const Token currentToken = m_tokens[m_pos++];
+		const Token& currentToken = Next();
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
 			});
@@ -78,6 +78,7 @@ void Parser::HandleMnemonicToken(const Token& token)
 	{
 	case OperatorKind::NONE: break;
 	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8(); break; }
+	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16(); break; }
 	}
 
 	ExpectEndOfStatement();
@@ -98,7 +99,7 @@ void Parser::HandleNewLineToken(const Token& token)
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
-	const Token token = m_tokens[m_pos++];
+	const Token& token = Next();
 
 	assert(token.type == TokenType::NUMBER);
 
@@ -106,9 +107,27 @@ std::array<uint8_t, 2> Parser::ConsumeImm8()
 	return operand;
 }
 
+std::array<uint8_t, 2> Parser::ConsumeAddr16()
+{
+	std::array<uint8_t, 2> operands{};
+	const Token& token = Next();
+
+	assert(token.type == TokenType::NUMBER);
+
+	const uint16_t address = Utils::ParseNumber(token.value);
+	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
+	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
+	return operands;
+}
+
 void Parser::ExpectEndOfStatement()
 {
 	if (m_pos >= m_tokens.size()) return;
 	assert(m_tokens[m_pos].type == TokenType::NEW_LINE);
 	++m_pos;
+}
+
+const Token& Parser::Next()
+{
+	return m_tokens[m_pos++];
 }
