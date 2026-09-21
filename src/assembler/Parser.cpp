@@ -77,9 +77,10 @@ void Parser::HandleMnemonicToken(const Token& token)
 	switch (entry->operatorKind)
 	{
 	case OperatorKind::NONE: break;
-	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8(); break; }
+	case OperatorKind::IMM_8:	{ m_currentStatement.operands = ConsumeImm8(); break; }
 	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16(); break; }
-	case OperatorKind::REG: {}
+	case OperatorKind::REG:		{ m_currentStatement.operands = ConsumeReg(); break; }
+	case OperatorKind::REG_REG: {}
 	}
 
 	ExpectEndOfStatement();
@@ -100,18 +101,16 @@ void Parser::HandleNewLineToken(const Token& token)
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
-	const std::string& value = ConsumeNumber();
 
-	operand[0] = static_cast<uint8_t>(Utils::ParseNumber(value));
+	operand[0] = static_cast<uint8_t>(ConsumeNumber());
 	return operand;
 }
 
 std::array<uint8_t, 2> Parser::ConsumeAddr16()
 {
 	std::array<uint8_t, 2> operands{};
-	const std::string& value = ConsumeNumber();
 
-	const uint16_t address = Utils::ParseNumber(value);
+	const uint16_t address = static_cast<uint16_t>(ConsumeNumber());
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
 	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
 	return operands;
@@ -120,18 +119,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 std::array<uint8_t, 2> Parser::ConsumeReg()
 {
 	std::array<uint8_t, 2> operands{};
-	auto value = ConsumeRegisterOrSelector();
-	if (value.second == TokenType::REGISTER) 
-	{
-		assert(nameToSelector.contains(value.first));
-		operands[0] = nameToSelector.at(value.first);
-	}
-	else if (value.second == TokenType::NUMBER) // number is registry identifier
-	{
-		uint8_t selector = Utils::ParseNumber(value.first);
-		assert(selectorToName.contains(selector));
-		operands[0] = selector;
-	}
+	operands[0] = ConsumeSelector();
 
 	return operands;
 }
@@ -148,16 +136,27 @@ const Token& Parser::Next()
 	return m_tokens[m_pos++];
 }
 
-const std::string& Parser::ConsumeNumber()
+uint32_t Parser::ConsumeNumber()
 {
 	const Token& token = Next();
 	assert(token.type == TokenType::NUMBER);
-	return token.value;
+	return Utils::ParseNumber(token.value);
 }
 
-std::pair<const std::string&, TokenType> Parser::ConsumeRegisterOrSelector()
+uint8_t Parser::ConsumeSelector()
 {
 	const Token& token = Next();
 	assert(token.type == TokenType::REGISTER || token.type == TokenType::NUMBER);
-	return { token.value, token.type };
+	if (token.type == TokenType::REGISTER)
+	{
+		const std::string upper = Utils::ToUpper(token.value);
+		assert(nameToSelector.contains(upper));
+		return nameToSelector.at(upper);
+	}
+	else // token type is number
+	{
+		const uint32_t selector = (Utils::ParseNumber(token.value));
+		assert(selectorToName.contains(static_cast<uint8_t>(selector)));
+		return static_cast<uint8_t>(selector);
+	}
 }

@@ -40,8 +40,8 @@ private:
 
 	/* Helpers */
 	const Token& Next();
-	const std::string& ConsumeNumber();
-	std::pair<const std::string&, TokenType> ConsumeRegisterOrSelector();
+	uint32_t ConsumeNumber();
+	std::pair<const std::string&, TokenType> ConsumeSelector();
 
 private:
 	const std::vector<Token> m_tokens;
