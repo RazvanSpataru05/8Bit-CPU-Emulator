@@ -7,12 +7,10 @@
 
 struct Statement
 {
-	uint8_t opcode;
-	std::array<uint8_t, 2> operands;
-	ISA::ISAEntry* ISAEntry; // temporary, for print debugging
+	uint8_t opcode = 0x00;
+	size_t operatorCount = 0u;
+	std::array<uint8_t, 2> operands{};
+	const ISA::ISAEntry* ISAEntry = nullptr; // temporary, for print debugging
 
 	Statement() = default;
-	Statement(uint8_t oc, const std::array<uint8_t, 2>& op, ISA::ISAEntry* entry) :
-		opcode{ oc }, operands{ op }, ISAEntry{ entry } {
-	}
 };

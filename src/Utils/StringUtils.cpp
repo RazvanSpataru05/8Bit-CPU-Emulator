@@ -43,6 +43,17 @@ bool Utils::IsNumber(std::string_view word)
 		});
 }
 
+uint16_t Utils::ParseNumber(const std::string& word)
+{
+	uint8_t base = 10u;
+	if (HasPrefix(word))
+	{
+		const std::string prefix = word.substr(0, 2);
+		CheckBase(prefix, base);
+	}
+	return static_cast<uint16_t>(std::stoi(word, nullptr, base));
+}
+
 std::string_view Utils::OperatorKindToString(ISA::OperatorKind operatorKind)
 {
 	switch (operatorKind)

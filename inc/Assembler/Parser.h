@@ -15,9 +15,8 @@ public:
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;
 
-	void Parse();
+	void ParseInstructions();
 
-	void BuildStatement();
 	void AddStatement();
 
 	void ResetCurrentStatement();
@@ -32,11 +31,15 @@ private:
 	void HandleIdentifierToken(const Token& token);
 	void HandleNewLineToken(const Token& token);
 
+	std::array<uint8_t, 2> ConsumeImm8();
+
+	void ExpectEndOfStatement();
+
 private:
 	std::vector<Token> m_tokens;
 
 	uint32_t m_lineNumber;
-	size_t m_currentTokenIndex;
+	size_t m_pos;
 
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
