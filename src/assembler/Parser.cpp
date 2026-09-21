@@ -10,6 +10,11 @@ Parser::Parser(const std::vector<Token>& tokens) :
 	ResetCurrentStatement();
 }
 
+std::span<const Statement> Parser::GetStatements() const noexcept
+{
+	return m_statements;
+}
+
 void Parser::ParseInstructions()
 {
 	m_statements.clear();

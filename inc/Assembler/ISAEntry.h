@@ -7,7 +7,7 @@
 
 namespace ISA
 {
-    enum class OperatorKind
+    enum class OperatorKind : uint8_t
     {
         NONE,
         IMM_8,

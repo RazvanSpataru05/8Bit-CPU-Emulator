@@ -15,9 +15,9 @@ public:
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;
 
-	void ParseInstructions();
+	std::span<const Statement> GetStatements() const noexcept;
 
-	void AddStatement();
+	void ParseInstructions();
 
 	void ResetCurrentStatement();
 	void PrintStatements() const;
@@ -36,6 +36,7 @@ private:
 	std::array<uint8_t, 2> ConsumeReg();
 	std::array<uint8_t, 2> ConsumeRegReg();
 
+	void AddStatement();
 	void ExpectEndOfStatement();
 	void ExpectComma();
 

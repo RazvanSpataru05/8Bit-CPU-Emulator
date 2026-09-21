@@ -98,7 +98,7 @@ void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 		break;
 
 	case sf::Keyboard::Key::R:
-		m_CPU->GetMemoryUnit().Clear();
+		m_CPU->GetMemoryUnit().RestoreSnapshot();
 		m_CPU->Reset();
 		m_followPC = true;
 		m_executeAuto = false;

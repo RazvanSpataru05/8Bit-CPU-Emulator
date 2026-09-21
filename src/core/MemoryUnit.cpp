@@ -47,15 +47,16 @@ void MemoryUnit::RestoreSnapshot()
 
 void MemoryUnit::LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t startAddress)
 {
-	if (startAddress + values.size() > m_memory.size()) return;
+	if (startAddress + values.size() > m_memory.size() || values.empty()) return;
 
 	std::copy(values.begin(), values.end(), m_memory.begin() + startAddress);
-	std::copy(values.begin(), values.end(), m_snapshotData.begin());
+	m_snapshotData.assign(values.begin(), values.end());
 	m_snapshotStartAddress = startAddress;
+	m_hasData = true;
 }
 
 void MemoryUnit::LoadProgramFromFIle(const std::filesystem::path& filename)
 {
 	const std::filesystem::path fullPath = std::filesystem::path("resources") / filename;
-	LoadValuesIntoMemory(ProgramLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
+	LoadValuesIntoMemory(DataLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
 }

@@ -53,7 +53,7 @@ namespace UIEditor
 
 	void DrawCpuState(const CPU& cpu);
 	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, 
-						   const Dissasembler& dissasembler, const CPU& cpu);
+						   const Dissasembler& dissasembler, CPU& cpu);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
 				  bool& executeAuto, bool& followPC, CPU& cpu);

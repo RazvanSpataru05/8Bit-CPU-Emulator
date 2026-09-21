@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IO/ProgramLoader.h"
+#include "IO/DataLoader.h"
 
 #include <array>
 #include <vector>
@@ -21,7 +21,7 @@ public:
 	void Clear() noexcept;
 	void RestoreSnapshot();
 
-	void LoadValuesIntoMemory(std::span<const uint8_t> program, uint16_t startAddress);
+	void LoadValuesIntoMemory(std::span<const uint8_t> program, uint16_t startAddress = 0x0000);
 	void LoadProgramFromFIle(const std::filesystem::path& filename);
 
 private:

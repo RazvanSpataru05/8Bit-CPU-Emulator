@@ -186,7 +186,7 @@ namespace UIEditor
 		ImGui::End();
 	}
 
-	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, const CPU& cpu)
+	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, CPU& cpu)
 	{
 		static char editorBuffer[BUFFER_SIZE];
 
@@ -215,14 +215,20 @@ namespace UIEditor
 				Parser parser{ lexer.GetTokens() };
 				parser.ParseInstructions();
 				parser.PrintStatements();
+				const auto statements = parser.GetStatements();
+				const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
+				
+				MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
+				memoryUnit.LoadValuesIntoMemory(values);
 
-				const std::string result = lexer.GetTokenizedSourceCode();
-				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
+
+				//const std::string result = lexer.GetTokenizedSourceCode();
+				//strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
 			}
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
-			if (!memoryUnit.IsMemoryEmpty())
+			if (!cpu.GetMemoryUnit().IsMemoryEmpty())
 			{
 				for (size_t index = 0; index < cpu.MEMORY_UNIT_SIZE; ++index)
 				{
