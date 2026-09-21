@@ -34,14 +34,15 @@ private:
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
 	std::array<uint8_t, 2> ConsumeReg();
+	std::array<uint8_t, 2> ConsumeRegReg();
 
 	void ExpectEndOfStatement();
-
+	void ExpectComma();
 
 	/* Helpers */
 	const Token& Next();
 	uint32_t ConsumeNumber();
-	std::pair<const std::string&, TokenType> ConsumeSelector();
+	uint8_t ConsumeSelector();
 
 private:
 	const std::vector<Token> m_tokens;
@@ -52,7 +53,7 @@ private:
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
 
-	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
+	std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
 	{
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
 			[this](const Token& token) {HandleMnemonicToken(token);}},

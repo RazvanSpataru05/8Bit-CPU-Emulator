@@ -1,5 +1,5 @@
 #include "UI/UIEditor.h"
-#include "Assembler/Lexer.h"
+#include "Assembler/Parser.h"
 
 uint8_t currentPage{};
 
@@ -211,10 +211,13 @@ namespace UIEditor
 				const std::string temporary = editorBuffer;
 				Lexer lexer{ temporary };
 				lexer.Tokenize();
+				
+				Parser parser{ lexer.GetTokens() };
+				parser.ParseInstructions();
+				parser.PrintStatements();
 
 				const std::string result = lexer.GetTokenizedSourceCode();
 				strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
-				lexer.PrintTokenizedSourceCode();
 			}
 		}
 		else if (mode == Mode::DISSASEMBLY)

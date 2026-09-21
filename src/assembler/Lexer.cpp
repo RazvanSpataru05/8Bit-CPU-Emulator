@@ -32,7 +32,7 @@ void Lexer::Tokenize()
 			ReportError("Unknown character " + currentChar);
 		}
 	}
-	m_tokens.emplace_back(TokenType::END, "HLT", m_lineNumber);
+	m_tokens.emplace_back(TokenType::END_OF_FILE, "HLT", m_lineNumber);
 }
 
 std::string Lexer::GetTokenizedSourceCode() const
@@ -157,7 +157,7 @@ std::string Lexer::GetTokenType(const Token& token) const
 	case TokenType::COLON:			return "COLON";
 	case TokenType::COMMA:			return "COMMA";
 
-	case TokenType::END:			return "END";
+	case TokenType::END_OF_FILE:			return "HALT";
 
 	default:						return "ERROR";
 	}

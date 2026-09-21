@@ -55,11 +55,11 @@ void Parser::PrintStatements() const
 		{
 			std::cout << "MNEMONIC: " << statement.ISAEntry->mnemonic << std::endl;
 		}
-		std::cout << "OPCODE: " << statement.opcode << std::endl;
+		std::cout << "OPCODE: 0x" << std::hex << static_cast<int>(statement.opcode) << std::endl;
 		std::cout << "VALUES: ";
-		for (uint8_t value : statement.operands)
+		for (size_t index = 0; index < statement.operatorCount; ++index)
 		{
-			std::cout << value << " ";
+			std::cout << "0x" << std::hex << static_cast<int>(statement.operands[index]) << " ";
 		}
 		std::cout << std::endl << std::endl;
 	}
@@ -77,10 +77,11 @@ void Parser::HandleMnemonicToken(const Token& token)
 	switch (entry->operatorKind)
 	{
 	case OperatorKind::NONE: break;
-	case OperatorKind::IMM_8:	{ m_currentStatement.operands = ConsumeImm8(); break; }
-	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16(); break; }
-	case OperatorKind::REG:		{ m_currentStatement.operands = ConsumeReg(); break; }
-	case OperatorKind::REG_REG: {}
+	case OperatorKind::IMM_8:	{ m_currentStatement.operands = ConsumeImm8();		break; }
+	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16();	break; }
+	case OperatorKind::REG:		{ m_currentStatement.operands = ConsumeReg();		break; }
+	case OperatorKind::REG_REG: { m_currentStatement.operands = ConsumeRegReg();	break; }
+	default: break;
 	}
 
 	ExpectEndOfStatement();
@@ -124,11 +125,27 @@ std::array<uint8_t, 2> Parser::ConsumeReg()
 	return operands;
 }
 
+std::array<uint8_t, 2> Parser::ConsumeRegReg()
+{
+	std::array<uint8_t, 2> operands{};
+	operands[0] = ConsumeSelector();
+	ExpectComma();
+	operands[1] = ConsumeSelector();
+
+	return operands;
+}
+
 void Parser::ExpectEndOfStatement()
 {
 	if (m_pos >= m_tokens.size()) return;
-	assert(m_tokens[m_pos].type == TokenType::NEW_LINE);
-	++m_pos;
+	const Token& token = Next();
+	assert(token.type == TokenType::NEW_LINE || token.type == TokenType::END_OF_FILE);
+}
+
+void Parser::ExpectComma()
+{
+	const Token& token = Next();
+	assert(token.type == TokenType::COMMA);
 }
 
 const Token& Parser::Next()

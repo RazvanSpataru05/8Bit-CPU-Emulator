@@ -1,6 +1,6 @@
 #pragma once
 
-enum class TokenType
+enum class TokenType : uint8_t
 {
 	NONE=0,
 
@@ -18,7 +18,7 @@ enum class TokenType
 	COLON,
 	COMMA,
 
-	END
+	END_OF_FILE
 };
 
 struct Token
