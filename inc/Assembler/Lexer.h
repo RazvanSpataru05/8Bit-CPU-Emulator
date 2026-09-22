@@ -24,8 +24,13 @@ public:
 	Lexer& operator=(Lexer&&) = default;
 
 	void Tokenize();
+
+	bool LexerErrors() const noexcept;
+
 	std::string GetTokenizedSourceCode() const;
 	void PrintTokenizedSourceCode() const noexcept;
+
+	void SetSourceCode(std::string_view sourceCode);
 
 	const std::vector<Error>& GetErrors() const;
 	const std::vector<Token>& GetTokens() const;
@@ -57,7 +62,7 @@ private:
 private:
 	std::string m_sourceCode;
 	uint32_t m_lineNumber;
-	size_t m_currentIndex;
+	size_t m_currentIndex{};
 
 	std::vector<Token> m_tokens;
 	std::vector<Error> m_errors;

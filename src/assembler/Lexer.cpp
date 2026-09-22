@@ -35,6 +35,11 @@ void Lexer::Tokenize()
 	m_tokens.emplace_back(TokenType::END_OF_FILE, "HLT", m_lineNumber);
 }
 
+bool Lexer::LexerErrors() const noexcept
+{
+	return m_errors.empty();
+}
+
 std::string Lexer::GetTokenizedSourceCode() const
 {
 	std::string tokenizedSourceCode;
@@ -49,6 +54,11 @@ void Lexer::PrintTokenizedSourceCode() const noexcept
 {
 	std::cout << m_tokens.size() << std::endl << std::endl;
 	std::cout << GetTokenizedSourceCode();
+}
+
+void Lexer::SetSourceCode(std::string_view sourceCode)
+{
+	m_sourceCode = sourceCode;
 }
 
 const std::vector<Error>& Lexer::GetErrors() const

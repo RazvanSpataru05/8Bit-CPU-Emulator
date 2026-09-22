@@ -3,8 +3,6 @@
 #include "Assembler/Lexer.h"
 #include "Assembler/Statement.h"
 
-#include <vector>
-
 using StatementHandler = std::function<void(const Token&)>;
 
 class Parser
@@ -16,9 +14,13 @@ public:
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;
 
+	void ParseInstructions();
+
+	bool ParserErrors() const noexcept;
+
 	std::span<const Statement> GetStatements() const noexcept;
 
-	void ParseInstructions();
+	void SetTokens(std::span<const Token> tokens);
 
 	void ResetCurrentStatement();
 	void PrintStatements() const;
@@ -47,15 +49,17 @@ private:
 	uint8_t ConsumeSelector();
 
 private:
-	const std::vector<Token> m_tokens;
+	std::vector<Token> m_tokens;
 
-	uint32_t m_lineNumber;
-	size_t m_pos;
+	std::vector<Error> m_errors;
+
+	uint32_t m_lineNumber{};
+	size_t m_pos{};
 
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
 
-	std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
+	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
 	{
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
 			[this](const Token& token) {HandleMnemonicToken(token);}},

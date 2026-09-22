@@ -7,6 +7,8 @@ class Assembler
 public:
 	Assembler();
 
+	bool Assemble(std::string_view sourceCode);
+
 private:
 	Assembler(const Assembler&) = delete;
 	Assembler& operator=(const Assembler&) = delete;

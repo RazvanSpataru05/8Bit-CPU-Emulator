@@ -2,17 +2,27 @@
 
 using namespace ISA;
 
-Parser::Parser(const std::vector<Token>& tokens) :
-	m_tokens{ tokens },
+Parser::Parser(std::span <const Token> tokens) :
 	m_lineNumber{ 1u },
 	m_pos{ 0 }
 {
+	m_tokens.assign(tokens.begin(), tokens.end());
 	ResetCurrentStatement();
+}
+
+bool Parser::ParserErrors() const noexcept
+{
+	return m_errors.empty();
 }
 
 std::span<const Statement> Parser::GetStatements() const noexcept
 {
 	return m_statements;
+}
+
+void Parser::SetTokens(std::span<const Token> tokens)
+{
+	m_tokens.assign(tokens.begin(), tokens.end());
 }
 
 void Parser::ParseInstructions()
