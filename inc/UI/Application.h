@@ -1,7 +1,11 @@
 #pragma once
 
+#include "Assembler/Assembler.h"
+
 #include "Core/CPU.h"
+
 #include "Debugger/Dissasembler.h"
+
 #include "UI/UIEditor.h"
 
 #include <SFML/Graphics.hpp>

@@ -17,6 +17,7 @@ using TokenHandler = std::function<void()>;
 class Lexer
 {
 public:
+	Lexer() = default;
 	Lexer(std::string_view sourceCode);
 
 	Lexer(Lexer&&) = default;

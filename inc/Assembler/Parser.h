@@ -10,6 +10,7 @@ using StatementHandler = std::function<void(const Token&)>;
 class Parser
 {
 public:
+	Parser() = default;
 	Parser(const std::vector<Token>& tokens);
 
 	Parser(Parser&&) = default;
