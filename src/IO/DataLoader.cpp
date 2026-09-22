@@ -33,5 +33,5 @@ std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> stat
 			values.emplace_back(statement.operands[index]);
 		}
 	}
-	return values;
+	return values.size() > std::numeric_limits<uint16_t>::max() ? values : std::vector<uint8_t>();
 }        

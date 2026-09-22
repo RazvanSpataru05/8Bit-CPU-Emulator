@@ -19,6 +19,7 @@ set(SOURCES
     src/Assembler/ISAEntry.cpp
     src/Assembler/Lexer.cpp
     src/Assembler/Parser.cpp
+    src/Assembler/Assembler.cpp
 
     src/Core/CPU.cpp
     src/Core/MemoryUnit.cpp
@@ -42,6 +43,7 @@ set(HEADERS
     inc/Assembler/Token.h
     inc/Assembler/Statement.h
     inc/Assembler/Error.h
+    inc/Assembler/Assembler.h
 
     inc/Core/CPU.h
     inc/Core/MemoryUnit.h
