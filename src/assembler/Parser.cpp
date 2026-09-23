@@ -12,7 +12,7 @@ Parser::Parser(const std::vector<Token>& tokens) :
 
 bool Parser::ParserErrors() const noexcept
 {
-	return m_errors.empty();
+	return !m_errors.empty();
 }
 
 std::span<const Statement> Parser::GetStatements() const noexcept
@@ -23,6 +23,7 @@ std::span<const Statement> Parser::GetStatements() const noexcept
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
+	std::cout << "Tokens: " << m_tokens.size();
 }
 
 void Parser::ParseInstructions()

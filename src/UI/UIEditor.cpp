@@ -1,5 +1,5 @@
 #include "UI/UIEditor.h"
-#include "Assembler/Parser.h"
+#include "Assembler/Assembler.h"
 
 namespace UIEditor
 {
@@ -221,7 +221,8 @@ namespace UIEditor
 		ImGui::End();
 	}
 
-	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler, CPU& cpu)
+	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler,
+		CPU& cpu, Assembler& assembler)
 	{
 		static char editorBuffer[BUFFER_SIZE];
 
@@ -243,19 +244,23 @@ namespace UIEditor
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 			if (ImGui::Button("Assemble & Load"))
 			{
-				const std::string temporary = editorBuffer;
-				Lexer lexer{ temporary };
-				lexer.Tokenize();
+				if (assembler.Assemble(editorBuffer))
+				{
 
-				Parser parser{ lexer.GetTokens() };
-				parser.ParseInstructions();
-				parser.PrintStatements();
-				const auto statements = parser.GetStatements();
-				const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
+				}
 
-				MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
-				memoryUnit.LoadValuesIntoMemory(values);
-				memoryUnit.PrintMemoryUntit();
+				//Lexer lexer{ editorBuffer };
+				//lexer.Tokenize();
+
+				//Parser parser{ lexer.GetTokens() };
+				//parser.ParseInstructions();
+				//parser.PrintStatements();
+				//const auto statements = parser.GetStatements();
+				//const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
+
+				//MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
+				//memoryUnit.LoadValuesIntoMemory(values);
+				//memoryUnit.PrintMemoryUntit();
 
 
 				//const std::string result = lexer.GetTokenizedSourceCode();

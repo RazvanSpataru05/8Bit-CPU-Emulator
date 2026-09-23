@@ -2,10 +2,6 @@
 
 #include "Assembler/Assembler.h"
 
-#include "Core/CPU.h"
-
-#include "Debugger/Dissasembler.h"
-
 #include "UI/UIEditor.h"
 
 #include <SFML/Graphics.hpp>
@@ -17,7 +13,8 @@ public:
 	explicit Application();
 
 	[[nodiscard]] const CPU& GetCPU() const;
-	[[nodiscard]] const Assembler& GetAssembler() const;
+
+	Assembler& GetAssembler();
 
 	void Init();
 	void ProcessEvents();

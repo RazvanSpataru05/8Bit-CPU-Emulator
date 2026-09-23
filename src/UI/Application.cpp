@@ -18,7 +18,7 @@ const CPU& Application::GetCPU() const
 	return *m_CPU;
 }
 
-const Assembler& Application::GetAssembler() const
+Assembler& Application::GetAssembler()
 {
 	return *m_assembler;
 }
@@ -63,7 +63,7 @@ void Application::RenderUI()
 	m_window.clear(sf::Color(65, 65, 65));
 
 	UIEditor::DrawCPUState(*m_CPU);
-	UIEditor::DrawAssemblyPanel(m_editorMode, m_CPU->GetMemoryUnit(), *m_dissasembler, *m_CPU);
+	UIEditor::DrawAssemblyPanel(m_editorMode, m_CPU->GetMemoryUnit(), *m_dissasembler, *m_CPU, *m_assembler);
 	UIEditor::DrawMemoryView(m_CPU->GetMemoryUnit(), *m_CPU, m_followPC);
 	UIEditor::DrawMenu(m_CPU->GetMemoryUnit(), m_executeAuto, m_followPC, *m_CPU);
 	UIEditor::DrawSpeedSlider(m_autoSpeed);

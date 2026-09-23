@@ -33,7 +33,7 @@ public:
 	void SetSourceCode(std::string_view sourceCode);
 
 	const std::vector<Error>& GetErrors() const;
-	const std::vector<Token>& GetTokens() const;
+	std::span<const Token> GetTokens() const;
 
 private:
 	void ConsumeWord();

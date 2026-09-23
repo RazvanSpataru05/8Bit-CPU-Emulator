@@ -37,7 +37,7 @@ void Lexer::Tokenize()
 
 bool Lexer::LexerErrors() const noexcept
 {
-	return m_errors.empty();
+	return !m_errors.empty();
 }
 
 std::string Lexer::GetTokenizedSourceCode() const
@@ -66,7 +66,7 @@ const std::vector<Error>& Lexer::GetErrors() const
 	return m_errors;
 }
 
-const std::vector<Token>& Lexer::GetTokens() const
+std::span<const Token> Lexer::GetTokens() const
 {
 	return m_tokens;
 }

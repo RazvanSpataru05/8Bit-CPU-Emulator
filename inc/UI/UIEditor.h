@@ -7,8 +7,12 @@
 
 #include "Debugger/Dissasembler.h"
 
+#include "Utils/StringUtils.h"
+
 #include "ImGui/imgui.h"
 #include "ImGui/imgui-SFML.h"
+
+class Assembler;
 
 namespace UIEditor
 {
@@ -32,7 +36,7 @@ namespace UIEditor
 
 	void DrawCPUState(const CPU& cpu);
 	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, 
-						   const Dissasembler& dissasembler, CPU& cpu);
+						   const Dissasembler& dissasembler, CPU& cpu, Assembler& assembler);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
 				  bool& executeAuto, bool& followPC, CPU& cpu);

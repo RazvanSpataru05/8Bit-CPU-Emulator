@@ -39,8 +39,8 @@ public:
 	bool IsWritingInstruction() const noexcept;
 
 	// Memory Unit getter (const & non-const)
-	[[nodiscard]] const MemoryUnit&		GetMemoryUnit() const noexcept;
-	[[nodiscard]] MemoryUnit&			GetMemoryUnit() noexcept;
+	[[nodiscard]] const MemoryUnit&			GetMemoryUnit() const noexcept;
+	[[nodiscard]]		MemoryUnit&			GetMemoryUnit() noexcept;
 
 private:
 	[[nodiscard]] uint8_t	ReadRegister(uint8_t selector) const noexcept;
