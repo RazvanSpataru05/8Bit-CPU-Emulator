@@ -30,28 +30,7 @@ namespace UIEditor
 		MISC_PAGE
 	};
 
-	namespace
-	{
-		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
-
-		void NextPage()
-		{
-			if (currentHelperPage != PageType::MISC_PAGE)
-			{
-				currentHelperPage = static_cast<PageType>(static_cast<uint8_t>(currentHelperPage) + 1);
-			}
-		}
-
-		void PreviousPage()
-		{
-			if (currentHelperPage != PageType::GLOSSARY_PAGE)
-			{
-				currentHelperPage = static_cast<PageType>(static_cast<uint8_t>(currentHelperPage) - 1);
-			}
-		}
-	}
-
-	void DrawCpuState(const CPU& cpu);
+	void DrawCPUState(const CPU& cpu);
 	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, 
 						   const Dissasembler& dissasembler, CPU& cpu);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);

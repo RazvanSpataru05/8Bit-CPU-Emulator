@@ -6,8 +6,6 @@ uint8_t currentPage{};
 constexpr uint16_t PAGE_SIZE = 256u;
 bool visibility = false;
 
-constexpr uint8_t HELP_TABLE_COLUMN_SIZE= 5u;
-
 constexpr uint8_t FIRST_LOAD_INSTRUCTION = 0x01;
 constexpr uint8_t LAST_LOAD_INSTRUCTION = 0x14;
 
@@ -28,145 +26,181 @@ constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
 const size_t BUFFER_SIZE{ 8192 };
 
-static void SetupInstructionsTableColumn()
-{
-	ImGui::TableSetupColumn("Mnemonic", ImGuiTableColumnFlags_WidthFixed, 92.0f);
-	ImGui::TableSetupColumn("Opcode", ImGuiTableColumnFlags_WidthFixed, 56.0f);
-	ImGui::TableSetupColumn("Operator Kind", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-	ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 36.0f);
-	ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
-
-	ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.18f, 0.28f, 0.45f, 1.0f));
-	ImGui::TableHeadersRow();
-	ImGui::PopStyleColor();
-}
-
-static void TextCentered(std::string_view text)
-{
-	float cellWidth = ImGui::GetColumnWidth();
-	float textWidth = ImGui::CalcTextSize(text.data()).x;
-	float offset = (cellWidth - textWidth) * 0.5f;
-
-	if (offset > 0.0f)
-	{
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-	}
-	ImGui::TextUnformatted(text.data(), text.data() + text.size());
-}
-
-static void DisplayInstruction(size_t index)
-{
-	ImGui::TableNextRow();
-	ImGui::TableSetColumnIndex(0);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.80f, 1.00f, 1.0f));
-	TextCentered(ISA::Table[index].mnemonic);
-	ImGui::PopStyleColor();
-
-	ImGui::TableSetColumnIndex(1);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
-	TextCentered(std::format("0x{:02X}", ISA::Table[index].opcode));
-	ImGui::PopStyleColor();
-
-	ImGui::TableSetColumnIndex(2);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.70f, 0.40f, 0.90f, 1.0f));
-	TextCentered(Utils::OperatorKindToString(ISA::Table[index].operatorKind));
-	ImGui::PopStyleColor();
-
-	ImGui::TableSetColumnIndex(3);
-	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
-	TextCentered(std::format("{}", ISA::Table[index].size));
-	ImGui::PopStyleColor();
-
-	ImGui::TableSetColumnIndex(4);
-	ImGui::TextWrapped("%s", ISA::Table[index].description);
-}
-
-static void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstruction)
-{
-	SetupInstructionsTableColumn();
-
-	const size_t tableSize = ISA::GetISATableSize();
-	for (size_t index = 0; index < tableSize; ++index)
-	{
-		if (ISA::Table[index].opcode >= firstInstruction && ISA::Table[index].opcode <= lastInstruction)
-			DisplayInstruction(index);
-	}
-}
-
-static void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
-{
-	SetupInstructionsTableColumn();
-
-	const size_t tableSize = ISA::GetISATableSize();
-	for (size_t index = 0; index < tableSize; ++index)
-	{
-		for (uint8_t opcode : opcodes)
-		{
-			if (ISA::Table[index].opcode == opcode)
-			{
-				DisplayInstruction(index);
-			}
-		}
-	}
-}
-
-static void DisplayTable(const char* pageTitle, const char* tableTitle,
-	uint8_t firstInstruction, uint8_t lastInstruction)
-{
-	float windowWidth = ImGui::GetWindowSize().x;
-	float titleWidth = ImGui::CalcTextSize(pageTitle).x;
-
-	ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
-	ImGui::SetCursorPosY(windowWidth * 0.05f);
-	ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
-	ImGui::Spacing();
-	ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
-	ImGui::Separator();
-	ImGui::PopStyleColor();
-	ImGui::Spacing();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
-	if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg |
-		ImGuiTableFlags_PadOuterX))
-	{
-		DisplayPageInstructions(firstInstruction, lastInstruction);
-		ImGui::EndTable();
-	}
-	ImGui::PopStyleVar();
-}
-
-static void DisplayTable(const char* pageTitle, const char* tableTitle, std::initializer_list<uint8_t> opcodes)
-{
-	float titleWidth = ImGui::CalcTextSize(pageTitle).x;
-	float windowWidth = ImGui::GetWindowSize().x;
-
-	ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
-	ImGui::SetCursorPosY(windowWidth * 0.05f);
-	ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
-	ImGui::Spacing();
-	ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
-	ImGui::Separator();
-	ImGui::PopStyleColor();
-	ImGui::Spacing();
-
-	ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
-	if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg |
-		ImGuiTableFlags_PadOuterX))
-	{
-		DisplayPageInstructions(opcodes);
-		ImGui::EndTable();
-	}
-	ImGui::PopStyleVar();
-}
-
 namespace UIEditor
 {
-	void DrawCpuState(const CPU& cpu)
+	namespace
+	{
+		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
+		constexpr uint8_t HELP_TABLE_COLUMN_SIZE{ 5u };
+
+		void NextPage()
+		{
+			if (currentHelperPage != PageType::MISC_PAGE)
+			{
+				currentHelperPage = static_cast<PageType>(static_cast<uint8_t>(currentHelperPage) + 1);
+			}
+		}
+
+		void PreviousPage()
+		{
+			if (currentHelperPage != PageType::GLOSSARY_PAGE)
+			{
+				currentHelperPage = static_cast<PageType>(static_cast<uint8_t>(currentHelperPage) - 1);
+			}
+		}
+
+		void SetupInstructionsTableColumn()
+		{
+			ImGui::TableSetupColumn("Mnemonic", ImGuiTableColumnFlags_WidthFixed, 92.0f);
+			ImGui::TableSetupColumn("Opcode", ImGuiTableColumnFlags_WidthFixed, 56.0f);
+			ImGui::TableSetupColumn("Operator Kind", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 36.0f);
+			ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
+
+			ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.18f, 0.28f, 0.45f, 1.0f));
+			ImGui::TableHeadersRow();
+			ImGui::PopStyleColor();
+		}
+
+		void TextCentered(std::string_view text)
+		{
+			float cellWidth = ImGui::GetColumnWidth();
+			float textWidth = ImGui::CalcTextSize(text.data()).x;
+			float offset = (cellWidth - textWidth) * 0.5f;
+
+			if (offset > 0.0f)
+			{
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+			}
+			ImGui::TextUnformatted(text.data(), text.data() + text.size());
+		}
+
+		void DisplayInstruction(size_t index)
+		{
+			int column = 0;
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.80f, 1.00f, 1.0f));
+			TextCentered(ISA::Table[index].mnemonic);
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
+			TextCentered(std::format("0x{:02X}", ISA::Table[index].opcode));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.70f, 0.40f, 0.90f, 1.0f));
+			TextCentered(Utils::OperatorKindToString(ISA::Table[index].operatorKind));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
+			TextCentered(std::format("{}", ISA::Table[index].size));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::TextWrapped("%s", ISA::Table[index].description);
+		}
+
+		void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstruction)
+		{
+			SetupInstructionsTableColumn();
+
+			const size_t tableSize = ISA::GetISATableSize();
+			for (size_t index = 0; index < tableSize; ++index)
+			{
+				if (ISA::Table[index].opcode >= firstInstruction
+					&& ISA::Table[index].opcode <= lastInstruction)
+				{
+					DisplayInstruction(index);
+				}
+
+				if (ISA::Table[index].opcode > lastInstruction)
+				{
+					return;
+				}
+			}
+		}
+
+		void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
+		{
+			SetupInstructionsTableColumn();
+
+			const size_t tableSize = ISA::GetISATableSize();
+			for (size_t index = 0; index < tableSize; ++index)
+			{
+				for (uint8_t opcode : opcodes)
+				{
+					if (ISA::Table[index].opcode == opcode)
+					{
+						DisplayInstruction(index);
+					}
+				}
+			}
+		}
+
+		void DisplayTable(const char* pageTitle, const char* tableTitle,
+			uint8_t firstInstruction, uint8_t lastInstruction)
+		{
+			float windowWidth = ImGui::GetWindowSize().x;
+			float titleWidth = ImGui::CalcTextSize(pageTitle).x;
+
+			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
+			ImGui::SetCursorPosY(windowWidth * 0.05f);
+			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
+			ImGui::Spacing();
+			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
+			ImGui::Separator();
+			ImGui::PopStyleColor();
+			ImGui::Spacing();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
+			if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE,
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_PadOuterX))
+			{
+				DisplayPageInstructions(firstInstruction, lastInstruction);
+				ImGui::EndTable();
+			}
+			ImGui::PopStyleVar();
+		}
+
+		void DisplayTable(const char* pageTitle, const char* tableTitle,
+			std::initializer_list<uint8_t> opcodes)
+		{
+			float titleWidth = ImGui::CalcTextSize(pageTitle).x;
+			float windowWidth = ImGui::GetWindowSize().x;
+
+			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
+			ImGui::SetCursorPosY(windowWidth * 0.05f);
+			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
+			ImGui::Spacing();
+			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
+			ImGui::Separator();
+			ImGui::PopStyleColor();
+			ImGui::Spacing();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
+			if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE,
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_PadOuterX))
+			{
+				DisplayPageInstructions(opcodes);
+				ImGui::EndTable();
+			}
+			ImGui::PopStyleVar();
+		}
+	}
+
+	void DrawCPUState(const CPU& cpu)
 	{
 		ImGui::Begin("CPU State");
-		ImGui::Text("Program Counter: 0x%04X",			cpu.GetPC());
-		ImGui::Text("Stack Pointer: 0x%02X",			cpu.GetSP());
-		ImGui::Text("Instruction Register: 0x%02X",		cpu.GetIR());
+		ImGui::Text("Program Counter: 0x%04X", cpu.GetPC());
+		ImGui::Text("Stack Pointer: 0x%02X", cpu.GetSP());
+		ImGui::Text("Instruction Register: 0x%02X", cpu.GetIR());
 		ImGui::Separator();
 
 		ImGui::Text("\nRegistry");
@@ -177,11 +211,11 @@ namespace UIEditor
 		ImGui::Separator();
 
 		ImGui::Text("\nFlags");
-		ImGui::Text("Zero Flag: %s",		Utils::FlagToString(cpu.GetZeroFlag()));
-		ImGui::Text("Carry Flag: %s",		Utils::FlagToString(cpu.GetCarryFlag()));
-		ImGui::Text("Negative Flag: %s",	Utils::FlagToString(cpu.GetNegativeFlag()));
-		ImGui::Text("Overflow Flag: %s",	Utils::FlagToString(cpu.GetOverflowFlag()));
-		ImGui::Text("Halt Flag: %s",		Utils::FlagToString(cpu.GetHaltFlag()));
+		ImGui::Text("Zero Flag: %s", Utils::FlagToString(cpu.GetZeroFlag()));
+		ImGui::Text("Carry Flag: %s", Utils::FlagToString(cpu.GetCarryFlag()));
+		ImGui::Text("Negative Flag: %s", Utils::FlagToString(cpu.GetNegativeFlag()));
+		ImGui::Text("Overflow Flag: %s", Utils::FlagToString(cpu.GetOverflowFlag()));
+		ImGui::Text("Halt Flag: %s", Utils::FlagToString(cpu.GetHaltFlag()));
 		ImGui::Separator();
 		ImGui::End();
 	}
@@ -211,13 +245,13 @@ namespace UIEditor
 				const std::string temporary = editorBuffer;
 				Lexer lexer{ temporary };
 				lexer.Tokenize();
-				
+
 				Parser parser{ lexer.GetTokens() };
 				parser.ParseInstructions();
 				parser.PrintStatements();
 				const auto statements = parser.GetStatements();
 				const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
-				
+
 				MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 				memoryUnit.LoadValuesIntoMemory(values);
 				memoryUnit.PrintMemoryUntit();
@@ -288,7 +322,7 @@ namespace UIEditor
 		{
 			currentPage = currentPage - 1 < 0 ? 255 : currentPage - 1;
 		}
-			
+
 
 		ImGui::SameLine();
 		const std::string spaces = std::string(" ", 79);
@@ -297,7 +331,7 @@ namespace UIEditor
 		if (ImGui::Button("\t\t\tNext\t\t\t"))
 		{
 			currentPage = (currentPage + 1) % 256;
-		}	
+		}
 
 		const size_t startAddress = static_cast<size_t>(currentPage * PAGE_SIZE);
 		const size_t endAddress = startAddress + PAGE_SIZE;
@@ -330,10 +364,8 @@ namespace UIEditor
 	void DrawMenu(MemoryUnit& memoryUnit,
 		bool& executeAuto, bool& followPC, CPU& cpu)
 	{
-		std::string execute = "Auto (";
-		execute += executeAuto ? "ON)" : "OFF)";
-		std::string follow = "Follow PC (";
-		follow += followPC ? "ON)" : "OFF)";
+		const char* executeAutoString = "Auto (" + executeAuto ? "ON)" : "OFF)";
+		const char* followPCString = "Follow PC (" + followPC ? "ON)" : "OFF)";
 
 		ImGui::Begin("Menu");
 		if (ImGui::Button("\t\tNext Step\t\t"))
@@ -350,13 +382,13 @@ namespace UIEditor
 			followPC = true;
 		}
 
-		if (ImGui::Button(execute.c_str()))
+		if (ImGui::Button(executeAutoString))
 		{
 			executeAuto = !executeAuto;
 		}
 		ImGui::SameLine();
 
-		if (ImGui::Button(follow.c_str()))
+		if (ImGui::Button(followPCString))
 		{
 			followPC = !followPC;
 		}

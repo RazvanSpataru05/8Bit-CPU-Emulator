@@ -35,8 +35,8 @@ public:
 	[[nodiscard]] bool			GetNegativeFlag() const noexcept;
 	[[nodiscard]] bool			GetOverflowFlag() const noexcept;
 
-	[[nodiscard]] bool IsReadingInstruction() const noexcept;
-	[[nodiscard]] bool IsWritingInstruction() const noexcept;
+	bool IsReadingInstruction() const noexcept;
+	bool IsWritingInstruction() const noexcept;
 
 	// Memory Unit getter (const & non-const)
 	[[nodiscard]] const MemoryUnit&		GetMemoryUnit() const noexcept;

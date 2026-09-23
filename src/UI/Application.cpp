@@ -62,7 +62,7 @@ void Application::RenderUI()
 {
 	m_window.clear(sf::Color(65, 65, 65));
 
-	UIEditor::DrawCpuState(*m_CPU);
+	UIEditor::DrawCPUState(*m_CPU);
 	UIEditor::DrawAssemblyPanel(m_editorMode, m_CPU->GetMemoryUnit(), *m_dissasembler, *m_CPU);
 	UIEditor::DrawMemoryView(m_CPU->GetMemoryUnit(), *m_CPU, m_followPC);
 	UIEditor::DrawMenu(m_CPU->GetMemoryUnit(), m_executeAuto, m_followPC, *m_CPU);
