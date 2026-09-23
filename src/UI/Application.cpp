@@ -3,6 +3,7 @@
 Application::Application() :
 	m_CPU{ std::make_unique<CPU>() },
 	m_dissasembler{ std::make_unique<Dissasembler>() },
+	m_assembler{std::make_unique<Assembler>()},
 	m_editorMode{ UIEditor::Mode::EDIT },
 	m_executeAuto{ false },
 	m_followPC{ true },
@@ -15,6 +16,11 @@ Application::Application() :
 const CPU& Application::GetCPU() const
 {
 	return *m_CPU;
+}
+
+const Assembler& Application::GetAssembler() const
+{
+	return *m_assembler;
 }
 
 void Application::Init()

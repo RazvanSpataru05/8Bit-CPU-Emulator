@@ -17,6 +17,7 @@ public:
 	explicit Application();
 
 	[[nodiscard]] const CPU& GetCPU() const;
+	[[nodiscard]] const Assembler& GetAssembler() const;
 
 	void Init();
 	void ProcessEvents();
@@ -36,6 +37,7 @@ private:
 private:
 	std::unique_ptr<CPU> m_CPU;
 	std::unique_ptr<Dissasembler> m_dissasembler;
+	std::unique_ptr<Assembler> m_assembler;
 
 	UIEditor::Mode m_editorMode;
 
