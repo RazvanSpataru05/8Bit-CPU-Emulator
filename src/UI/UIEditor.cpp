@@ -1,37 +1,38 @@
 #include "UI/UIEditor.h"
 #include "Assembler/Parser.h"
 
-uint8_t currentPage{};
-
-constexpr uint16_t PAGE_SIZE = 256u;
-bool visibility = false;
-
-constexpr uint8_t FIRST_LOAD_INSTRUCTION = 0x01;
-constexpr uint8_t LAST_LOAD_INSTRUCTION = 0x14;
-
-constexpr uint8_t FIRST_ARITHMETIC_INSTRUCTION = 0x20;
-constexpr uint8_t LAST_ARITHMETIC_INSTRUCTION = 0x2B;
-
-constexpr uint8_t FIRST_LOGIC_INSTRUCTION = 0x30;
-constexpr uint8_t LAST_LOGIC_INSTRUCTION = 0x38;
-
-constexpr uint8_t FIRST_COMPARE_INSTRUCTION = 0x40;
-constexpr uint8_t LAST_COMPARE_INSTRUCTION = 0x41;
-
-constexpr uint8_t FIRST_JUMP_INSTRUCTION = 0x50;
-constexpr uint8_t LAST_JUMP_INSTRUCTION = 0x58;
-
-constexpr uint8_t FIRST_STACK_INSTRUCTION = 0x60;
-constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
-
-const size_t BUFFER_SIZE{ 8192 };
-
 namespace UIEditor
 {
 	namespace
 	{
 		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
-		constexpr uint8_t HELP_TABLE_COLUMN_SIZE{ 5u };
+		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
+
+		constexpr uint16_t PAGE_SIZE = 256u;
+
+		constexpr uint8_t FIRST_LOAD_INSTRUCTION = 0x01;
+		constexpr uint8_t LAST_LOAD_INSTRUCTION = 0x14;
+
+		constexpr uint8_t FIRST_ARITHMETIC_INSTRUCTION = 0x20;
+		constexpr uint8_t LAST_ARITHMETIC_INSTRUCTION = 0x2B;
+
+		constexpr uint8_t FIRST_LOGIC_INSTRUCTION = 0x30;
+		constexpr uint8_t LAST_LOGIC_INSTRUCTION = 0x38;
+
+		constexpr uint8_t FIRST_COMPARE_INSTRUCTION = 0x40;
+		constexpr uint8_t LAST_COMPARE_INSTRUCTION = 0x41;
+
+		constexpr uint8_t FIRST_JUMP_INSTRUCTION = 0x50;
+		constexpr uint8_t LAST_JUMP_INSTRUCTION = 0x58;
+
+		constexpr uint8_t FIRST_STACK_INSTRUCTION = 0x60;
+		constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
+
+		const size_t BUFFER_SIZE{ 8192 };
+
+		uint8_t currentPage{};
+
+		bool helpMenuVisibility = false;
 
 		void NextPage()
 		{
@@ -397,7 +398,7 @@ namespace UIEditor
 		ImGui::Begin("Help");
 		if (ImGui::Button("Help"))
 		{
-			visibility = true;
+			helpMenuVisibility = true;
 		}
 		ImGui::End();
 	}
@@ -409,7 +410,7 @@ namespace UIEditor
 	}
 	void DrawHelpMenu()
 	{
-		if (visibility)
+		if (helpMenuVisibility)
 		{
 			ImGui::Begin("Help Menu");
 			const std::string pageText = "Page " + std::to_string(static_cast<uint8_t>(currentHelperPage)) + "/8";
@@ -427,7 +428,7 @@ namespace UIEditor
 			ImGui::SetCursorPosX(windowWidth - buttonWidth - ImGui::GetStyle().WindowPadding.x * 2.0f);
 			if (ImGui::Button("X"))
 			{
-				visibility = false;
+				helpMenuVisibility = false;
 			}
 
 			ImGui::SetCursorPosY(windowWidth * 0.055f - ImGui::GetStyle().WindowPadding.y * 1.2f);
