@@ -10,7 +10,7 @@ MemoryUnit::MemoryUnit() :
 bool MemoryUnit::IsMemoryEmpty() const noexcept
 {
 	return !m_hasData;
-}
+} 
 
 uint8_t MemoryUnit::Read(uint16_t address) const noexcept
 {
@@ -42,6 +42,14 @@ void MemoryUnit::RestoreSnapshot()
 		{
 			m_hasData = true;
 		}
+	}
+}
+
+void MemoryUnit::PrintMemoryUntit() const
+{
+	for (uint8_t opcode : m_memory)
+	{
+		std::cout << std::hex << static_cast<int>(opcode) << " ";
 	}
 }
 

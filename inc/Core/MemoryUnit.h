@@ -21,6 +21,8 @@ public:
 	void Clear() noexcept;
 	void RestoreSnapshot();
 
+	void PrintMemoryUntit() const;
+
 	void LoadValuesIntoMemory(std::span<const uint8_t> program, uint16_t startAddress = 0x0000);
 	void LoadProgramFromFIle(const std::filesystem::path& filename);
 

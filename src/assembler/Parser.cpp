@@ -2,7 +2,7 @@
 
 using namespace ISA;
 
-Parser::Parser(std::span <const Token> tokens) :
+Parser::Parser(const std::vector<Token>& tokens) :
 	m_lineNumber{ 1u },
 	m_pos{ 0 }
 {

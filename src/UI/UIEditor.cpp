@@ -220,6 +220,7 @@ namespace UIEditor
 				
 				MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 				memoryUnit.LoadValuesIntoMemory(values);
+				memoryUnit.PrintMemoryUntit();
 
 
 				//const std::string result = lexer.GetTokenizedSourceCode();

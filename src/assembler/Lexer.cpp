@@ -167,7 +167,7 @@ std::string Lexer::GetTokenType(const Token& token) const
 	case TokenType::COLON:			return "COLON";
 	case TokenType::COMMA:			return "COMMA";
 
-	case TokenType::END_OF_FILE:			return "HALT";
+	case TokenType::END_OF_FILE:			return "END_OF_FILE";
 
 	default:						return "ERROR";
 	}

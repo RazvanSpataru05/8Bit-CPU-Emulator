@@ -75,9 +75,9 @@ private:
 		{[](unsigned char c) {return c == '\n';}, [this] {ConsumeNewLine();}},
 		{[](unsigned char c) {return c == ':';}, [this] {ConsumeColon();}},
 		{[](unsigned char c) {return c == ',';}, [this] {ConsumeComma();}},
-		{ [](unsigned char c) {return c == '(';}, [this] {ConsumeLeftParanthesis();} },
-		{ [](unsigned char c) {return c == ')';}, [this] {ConsumeRightParanthesis();} },
-		{ [](unsigned char c) {return c == '[';}, [this] {ConsumeLeftBracket();} },
-		{ [](unsigned char c) {return c == ']';}, [this] {ConsumeRightBracket();} }
+		{[](unsigned char c) {return c == '(';}, [this] {ConsumeLeftParanthesis();} },
+		{[](unsigned char c) {return c == ')';}, [this] {ConsumeRightParanthesis();} },
+		{[](unsigned char c) {return c == '[';}, [this] {ConsumeLeftBracket();} },
+		{[](unsigned char c) {return c == ']';}, [this] {ConsumeRightBracket();} }
 	};
 };
