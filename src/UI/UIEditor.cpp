@@ -246,25 +246,16 @@ namespace UIEditor
 			{
 				if (assembler.Assemble(editorBuffer))
 				{
+					const auto statements = assembler.GetStatements();
+					const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
 
+					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
+					memoryUnit.LoadValuesIntoMemory(values);
 				}
-
-				//Lexer lexer{ editorBuffer };
-				//lexer.Tokenize();
-
-				//Parser parser{ lexer.GetTokens() };
-				//parser.ParseInstructions();
-				//parser.PrintStatements();
-				//const auto statements = parser.GetStatements();
-				//const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
-
-				//MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
-				//memoryUnit.LoadValuesIntoMemory(values);
-				//memoryUnit.PrintMemoryUntit();
-
-
-				//const std::string result = lexer.GetTokenizedSourceCode();
-				//strncpy_s(editorBuffer, sizeof(editorBuffer), result.c_str(), _TRUNCATE);
+				else
+				{
+					// display Assembler errors
+				}
 			}
 		}
 		else if (mode == Mode::DISSASEMBLY)

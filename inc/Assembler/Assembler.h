@@ -9,6 +9,8 @@ public:
 
 	bool Assemble(std::string_view sourceCode);
 
+	[[nodiscard]] std::span<const Statement> GetStatements() const noexcept;
+
 private:
 	Assembler(const Assembler&) = delete;
 	Assembler& operator=(const Assembler&) = delete;

@@ -21,3 +21,8 @@ bool Assembler::Assemble(std::string_view sourceCode)
 
 	return true;
 }
+
+std::span<const Statement> Assembler::GetStatements() const noexcept
+{
+	return m_parser.GetStatements();
+}
