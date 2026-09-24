@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assembler/Lexer.h"
+#include "Assembler/LabelInfo.h"
 #include "Assembler/Statement.h"
 
 using StatementHandler = std::function<void(const Token&)>;
@@ -14,6 +15,7 @@ public:
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;
 
+	void BuildSymbolTable();
 	void ParseInstructions();
 
 	bool ParserErrors() const noexcept;
@@ -23,7 +25,8 @@ public:
 	void SetTokens(std::span<const Token> tokens);
 
 	void ResetCurrentStatement();
-	void PrintStatements() const;
+	void PrintStatements() const noexcept;
+	void PrintLabels() const noexcept;
 
 private:
 	Parser(const Parser&) = delete;
@@ -34,6 +37,8 @@ private:
 	void HandleIdentifierToken(const Token& token);
 	void HandleNewLineToken(const Token& token);
 
+	void SkipOperandTokens(uint8_t size);
+
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
 	std::array<uint8_t, 2> ConsumeReg();
@@ -42,17 +47,23 @@ private:
 	void AddStatement();
 	void ExpectEndOfStatement();
 	void ExpectComma();
+	void ExpectColon();
+
+	bool IsLabelDefinition();
 
 	/* Helpers */
+	const Token& Peek() const;
 	const Token& Next();
 	uint32_t ConsumeNumber();
 	uint8_t ConsumeSelector();
 
 private:
 	std::vector<Token> m_tokens;
+	std::unordered_map<std::string, LabelInfo> m_labels;
 
 	std::vector<Error> m_errors;
 
+	uint16_t m_currentAddress{ 0x0000 };
 	uint32_t m_lineNumber{};
 	size_t m_pos{};
 

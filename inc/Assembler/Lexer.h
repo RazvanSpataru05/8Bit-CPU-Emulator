@@ -61,7 +61,7 @@ private:
 
 private:
 	std::string m_sourceCode;
-	uint32_t m_lineNumber;
+	uint32_t m_lineNumber{};
 	size_t m_currentIndex{};
 
 	std::vector<Token> m_tokens;

@@ -26,16 +26,54 @@ void Parser::SetTokens(std::span<const Token> tokens)
 	std::cout << "Tokens: " << m_tokens.size();
 }
 
+void Parser::BuildSymbolTable()
+{
+	m_labels.clear();
+	m_pos = 0;
+	m_lineNumber = 1u;
+	m_currentAddress = 0x0000;
+
+	std::cout << "In" << std::endl;
+	while (Peek().type != TokenType::END_OF_FILE)
+	{
+		std::cout << Peek().value << m_pos << std::endl;
+		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
+
+		if (Peek().type == TokenType::IDENTIFIER && IsLabelDefinition())
+		{
+			const std::string label = Utils::ToLower(Peek().value);
+			Next();
+			Next();
+			m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
+			continue;
+		}
+
+		const ISAEntry* entry = ISA::Find(Utils::ToUpper(Peek().value));
+		if (!entry) continue;
+		
+		m_currentAddress += entry->size;
+		SkipOperandTokens(entry->size);
+		ExpectEndOfStatement();
+	}
+	std::cout << "Out";
+}
+
 void Parser::ParseInstructions()
 {
+	BuildSymbolTable();
+	PrintLabels();
+
 	m_statements.clear();
+	m_errors.clear();
 	m_lineNumber = 1u;
 	m_pos = 0;
+	m_currentAddress = 0x0000;
 	ResetCurrentStatement();
 
-	while (m_pos < m_tokens.size())
+	while (Peek().type != TokenType::END_OF_FILE)
 	{
-		const Token& currentToken = Next();
+		const Token& currentToken = Peek();
+
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
 			});
@@ -63,7 +101,7 @@ void Parser::ResetCurrentStatement()
 	m_currentStatement.ISAEntry = nullptr;
 }
 
-void Parser::PrintStatements() const
+void Parser::PrintStatements() const noexcept
 {
 	for (const auto& statement : m_statements)
 	{
@@ -78,6 +116,17 @@ void Parser::PrintStatements() const
 			std::cout << "0x" << std::hex << static_cast<int>(statement.operands[index]) << " ";
 		}
 		std::cout << std::endl << std::endl;
+	}
+}
+
+void Parser::PrintLabels() const noexcept
+{
+	std::cout << "Labels: " << m_labels.size() << std::endl;
+	for (const auto& [label, info] : m_labels)
+	{
+		std::cout << "Label: "				<<			label << std::endl;
+		std::cout << "Address: "			<<			info.address << std::endl;
+		std::cout << "Line declaration: "	<<			info.lineDeclaration << std::endl;
 	}
 }
 
@@ -113,6 +162,11 @@ void Parser::HandleNewLineToken(const Token& token)
 {
 	ResetCurrentStatement();
 	++m_lineNumber;
+}
+
+void Parser::SkipOperandTokens(uint8_t size)
+{
+	m_pos += size;
 }
 
 std::array<uint8_t, 2> Parser::ConsumeImm8()
@@ -153,20 +207,34 @@ std::array<uint8_t, 2> Parser::ConsumeRegReg()
 
 void Parser::ExpectEndOfStatement()
 {
-	if (m_pos >= m_tokens.size()) return;
-	const Token& token = Next();
-	assert(token.type == TokenType::NEW_LINE || token.type == TokenType::END_OF_FILE);
+	if (m_pos >= m_tokens.size()) return
+	assert(Peek().type == TokenType::NEW_LINE || Peek().type == TokenType::END_OF_FILE);
+	++m_lineNumber;
 }
 
 void Parser::ExpectComma()
 {
-	const Token& token = Next();
-	assert(token.type == TokenType::COMMA);
+	assert(Next().type == TokenType::COMMA);
+}
+
+void Parser::ExpectColon()
+{
+	assert(Next().type == TokenType::COLON);
+}
+
+bool Parser::IsLabelDefinition()
+{
+	return m_pos + 1 < m_tokens.size() && m_tokens[m_pos + 1].type == TokenType::COLON;
+}
+
+const Token& Parser::Peek() const
+{
+	return m_tokens[m_pos];
 }
 
 const Token& Parser::Next()
 {
-	return m_tokens[m_pos++];
+	return m_tokens[++m_pos];
 }
 
 uint32_t Parser::ConsumeNumber()

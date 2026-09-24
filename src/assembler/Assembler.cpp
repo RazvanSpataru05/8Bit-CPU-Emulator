@@ -17,6 +17,7 @@ bool Assembler::Assemble(std::string_view sourceCode)
 	m_parser.SetTokens(m_lexer.GetTokens());
 	m_parser.ParseInstructions();
 	m_parser.PrintStatements();
+	m_parser.PrintLabels();
 	if (m_parser.ParserErrors()) return false;
 
 	return true;
