@@ -10,7 +10,7 @@ class Parser
 {
 public:
 	Parser() = default;
-	Parser(const std::vector<Token>& tokens);
+	Parser(std::span<const Token> tokens);
 
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;

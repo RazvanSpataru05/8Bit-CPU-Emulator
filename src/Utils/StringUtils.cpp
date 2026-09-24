@@ -9,7 +9,7 @@ std::string Utils::ToUpper(std::string_view word)
 
 std::string Utils::ToLower(std::string_view word)
 {
-	std::string lower;
+	std::string lower{ word };
 	std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 	return lower;
 }
