@@ -7,6 +7,13 @@ std::string Utils::ToUpper(std::string_view word)
 	return upper;
 }
 
+std::string Utils::ToLower(std::string_view word)
+{
+	std::string lower;
+	std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+	return lower;
+}
+
 void Utils::CheckBase(std::string_view prefix, uint8_t& base)
 {
 	if (prefix == "0b" || prefix == "0B") base = 2u;
