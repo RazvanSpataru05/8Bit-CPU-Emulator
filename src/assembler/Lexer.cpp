@@ -32,7 +32,7 @@ void Lexer::Tokenize()
 			ReportError("Unknown character " + currentChar);
 		}
 	}
-	m_tokens.emplace_back(TokenType::END_OF_FILE, "HLT", m_lineNumber);
+	m_tokens.emplace_back(TokenType::END_OF_FILE, "END_OF_FILE", ++m_lineNumber);
 }
 
 bool Lexer::LexerErrors() const noexcept

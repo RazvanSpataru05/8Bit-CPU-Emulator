@@ -28,23 +28,22 @@ void Parser::SetTokens(std::span<const Token> tokens)
 
 void Parser::BuildSymbolTable()
 {
+	std::cout << "FIRST PASS\n\n";
 	m_labels.clear();
 	m_pos = 0;
 	m_lineNumber = 1u;
 	m_currentAddress = 0x0000;
 
 	std::cout << "In" << std::endl;
-	while (Peek().type != TokenType::END_OF_FILE)
+	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
 		if (Peek().type == TokenType::IDENTIFIER && IsLabelDefinition())
 		{
 			const std::string label = Utils::ToLower(Peek().value);
-			std::cout << "Inserting label: " << label << std::endl;
-			Next();
-			Next();
 			m_labels[label] = LabelInfo(m_currentAddress, m_lineNumber);
+			ConsumeLabel();
 			continue;
 		}
 
@@ -55,13 +54,15 @@ void Parser::BuildSymbolTable()
 		SkipOperandTokens(entry->size);
 		ExpectEndOfStatement();
 	}
-	std::cout << "Out";
+	std::cout << "Out" << std::endl;
 }
 
 void Parser::ParseInstructions()
 {
 	BuildSymbolTable();
 	PrintLabels();
+
+	std::cout << "SECOND PASS\n\n";
 
 	m_statements.clear();
 	m_errors.clear();
@@ -70,9 +71,12 @@ void Parser::ParseInstructions()
 	m_currentAddress = 0x0000;
 	ResetCurrentStatement();
 
-	while (Peek().type != TokenType::END_OF_FILE)
+	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
+		std::cout << currentToken.value << std::endl;
+
+		if (currentToken.type == TokenType::NEW_LINE) { Next(); continue; }
 
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -141,10 +145,10 @@ void Parser::HandleMnemonicToken(const Token& token)
 
 	switch (entry->operatorKind)
 	{
-	case OperatorKind::NONE: break;
-	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8();		break; }
+	case OperatorKind::NONE: { break; }
+	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8(); Next();		break; }
 	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16();	break; }
-	case OperatorKind::REG: { m_currentStatement.operands = ConsumeReg();		break; }
+	case OperatorKind::REG: { m_currentStatement.operands = ConsumeReg();			break; }
 	case OperatorKind::REG_REG: { m_currentStatement.operands = ConsumeRegReg();	break; }
 	default: break;
 	}
@@ -155,7 +159,10 @@ void Parser::HandleMnemonicToken(const Token& token)
 
 void Parser::HandleIdentifierToken(const Token& token)
 {
-
+	if (IsLabelDefinition())
+	{
+		ConsumeLabel();
+	}
 }
 
 void Parser::HandleNewLineToken(const Token& token)
@@ -207,8 +214,13 @@ std::array<uint8_t, 2> Parser::ConsumeRegReg()
 
 void Parser::ExpectEndOfStatement()
 {
-	if (m_pos >= m_tokens.size()) return
-		assert(Peek().type == TokenType::NEW_LINE || Peek().type == TokenType::END_OF_FILE);
+	if (m_pos >= m_tokens.size()) return;
+
+	assert(Peek().type == TokenType::NEW_LINE || Peek().type == TokenType::END_OF_FILE);
+	if (m_pos + 1 < m_tokens.size())
+	{
+		Next();
+	}
 	++m_lineNumber;
 }
 
@@ -222,7 +234,12 @@ void Parser::ExpectColon()
 	assert(Next().type == TokenType::COLON);
 }
 
-bool Parser::IsLabelDefinition()
+void Parser::ConsumeLabel()
+{
+	Next(); Next();
+}
+
+bool Parser::IsLabelDefinition() const
 {
 	return m_pos + 1 < m_tokens.size() && m_tokens[m_pos + 1].type == TokenType::COLON;
 }
@@ -239,6 +256,7 @@ const Token& Parser::Next()
 
 uint32_t Parser::ConsumeNumber()
 {
+	std::cout << "In consume number" << std::endl;
 	const Token& token = Next();
 	assert(token.type == TokenType::NUMBER);
 	return Utils::ParseNumber(token.value);

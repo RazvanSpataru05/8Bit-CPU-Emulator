@@ -49,7 +49,9 @@ private:
 	void ExpectComma();
 	void ExpectColon();
 
-	bool IsLabelDefinition();
+	void ConsumeLabel();
+
+	bool IsLabelDefinition() const;
 
 	/* Helpers */
 	const Token& Peek() const;
