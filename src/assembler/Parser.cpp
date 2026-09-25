@@ -37,6 +37,7 @@ void Parser::BuildSymbolTable()
 	std::cout << "In" << std::endl;
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
+		std::cout << "Position: " << m_pos << " " << m_tokens[m_pos].value << std::endl;
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
 		if (Peek().type == TokenType::IDENTIFIER && IsLabelDefinition())
@@ -51,7 +52,7 @@ void Parser::BuildSymbolTable()
 		if (!entry) continue;
 
 		m_currentAddress += entry->size;
-		SkipOperandTokens(entry->size);
+		SkipOperandTokens(entry->operatorKind);
 		ExpectEndOfStatement();
 	}
 	std::cout << "Out" << std::endl;
@@ -145,8 +146,8 @@ void Parser::HandleMnemonicToken(const Token& token)
 
 	switch (entry->operatorKind)
 	{
-	case OperatorKind::NONE: { break; }
-	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8(); Next();		break; }
+	case OperatorKind::NONE: { Next(); break; }
+	case OperatorKind::IMM_8: { m_currentStatement.operands = ConsumeImm8();		break; }
 	case OperatorKind::ADDR_16: { m_currentStatement.operands = ConsumeAddr16();	break; }
 	case OperatorKind::REG: { m_currentStatement.operands = ConsumeReg();			break; }
 	case OperatorKind::REG_REG: { m_currentStatement.operands = ConsumeRegReg();	break; }
@@ -171,9 +172,20 @@ void Parser::HandleNewLineToken(const Token& token)
 	++m_lineNumber;
 }
 
-void Parser::SkipOperandTokens(uint8_t size)
+void Parser::SkipOperandTokens(OperatorKind operatorKind)
 {
-	m_pos += size;
+	switch (operatorKind)
+	{
+	case OperatorKind::NONE: { ++m_pos; return; }
+	case OperatorKind::REG_REG: { m_pos += 4; return; } // mnemonic, first reg, comma, second reg 
+	case OperatorKind::IMM_8:
+	case OperatorKind::ADDR_16:
+	case OperatorKind::REG:
+	{
+		m_pos += 2; return; // mnemonic, operand
+	}
+	default: return;
+	}
 }
 
 std::array<uint8_t, 2> Parser::ConsumeImm8()
@@ -181,6 +193,7 @@ std::array<uint8_t, 2> Parser::ConsumeImm8()
 	std::array<uint8_t, 2> operand{};
 
 	operand[0] = static_cast<uint8_t>(ConsumeNumber());
+	Next();
 	return operand;
 }
 
@@ -191,6 +204,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	const uint16_t address = static_cast<uint16_t>(ConsumeNumber());
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
 	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
+	Next();
 	return operands;
 }
 
@@ -198,6 +212,7 @@ std::array<uint8_t, 2> Parser::ConsumeReg()
 {
 	std::array<uint8_t, 2> operands{};
 	operands[0] = ConsumeSelector();
+	Next();
 
 	return operands;
 }
@@ -220,8 +235,8 @@ void Parser::ExpectEndOfStatement()
 	if (m_pos + 1 < m_tokens.size())
 	{
 		Next();
+		++m_lineNumber;
 	}
-	++m_lineNumber;
 }
 
 void Parser::ExpectComma()

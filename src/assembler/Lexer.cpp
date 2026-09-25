@@ -40,7 +40,7 @@ bool Lexer::LexerErrors() const noexcept
 	return !m_errors.empty();
 }
 
-std::string Lexer::GetTokenizedSourceCode() const
+std::string Lexer::GetTokenizedSourceCode() const noexcept
 {
 	std::string tokenizedSourceCode;
 	for (const auto& token : m_tokens)

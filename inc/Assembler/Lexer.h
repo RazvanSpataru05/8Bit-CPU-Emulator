@@ -27,7 +27,7 @@ public:
 
 	bool LexerErrors() const noexcept;
 
-	std::string GetTokenizedSourceCode() const;
+	std::string GetTokenizedSourceCode() const noexcept;
 	void PrintTokenizedSourceCode() const noexcept;
 
 	void SetSourceCode(std::string_view sourceCode);

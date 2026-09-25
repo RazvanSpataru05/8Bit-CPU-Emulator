@@ -4,6 +4,8 @@
 #include "Assembler/LabelInfo.h"
 #include "Assembler/Statement.h"
 
+using namespace ISA;
+
 using StatementHandler = std::function<void(const Token&)>;
 
 class Parser
@@ -37,7 +39,7 @@ private:
 	void HandleIdentifierToken(const Token& token);
 	void HandleNewLineToken(const Token& token);
 
-	void SkipOperandTokens(uint8_t size);
+	void SkipOperandTokens(OperatorKind operatorKind);
 
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
@@ -45,6 +47,7 @@ private:
 	std::array<uint8_t, 2> ConsumeRegReg();
 
 	void AddStatement();
+
 	void ExpectEndOfStatement();
 	void ExpectComma();
 	void ExpectColon();
