@@ -20,6 +20,11 @@ std::span<const Statement> Parser::GetStatements() const noexcept
 	return m_statements;
 }
 
+std::span<const AssemblerError> Parser::GetParserErrors() const noexcept
+{
+	return m_errors;
+}
+
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());

@@ -27,3 +27,8 @@ std::span<const Statement> Assembler::GetStatements() const noexcept
 {
 	return m_parser.GetStatements();
 }
+
+std::span<const AssemblerError> Assembler::GetAssemblerErrors() const noexcept
+{
+	return m_errors;
+}

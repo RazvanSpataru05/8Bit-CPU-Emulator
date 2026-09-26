@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assembler/AssemblerError.h"
 #include "Assembler/Parser.h"
 
 class Assembler
@@ -9,7 +10,8 @@ public:
 
 	bool Assemble(std::string_view sourceCode);
 
-	[[nodiscard]] std::span<const Statement> GetStatements() const noexcept;
+	[[nodiscard]] std::span<const Statement>		GetStatements()			const noexcept;
+	[[nodiscard]] std::span<const AssemblerError>	GetAssemblerErrors()	const noexcept;
 
 private:
 	Assembler(const Assembler&) = delete;
@@ -20,4 +22,6 @@ private:
 private:
 	Lexer m_lexer;
 	Parser m_parser;
+
+	std::vector<AssemblerError> m_errors;
 };

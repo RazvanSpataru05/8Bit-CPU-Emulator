@@ -22,7 +22,8 @@ public:
 
 	bool ParserErrors() const noexcept;
 
-	std::span<const Statement> GetStatements() const noexcept;
+	std::span<const Statement>		GetStatements()			const noexcept;
+	std::span<const AssemblerError> GetParserErrors()		const noexcept;
 
 	void SetTokens(std::span<const Token> tokens);
 
