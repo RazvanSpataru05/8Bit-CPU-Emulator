@@ -27,8 +27,7 @@ public:
 
 	bool LexerErrors() const noexcept;
 
-	std::string GetTokenizedSourceCode()			const noexcept;
-	void		PrintTokenizedSourceCode()			const noexcept;
+	void PrintTokenizedSourceCode() const noexcept;
 
 	void SetSourceCode(std::string_view sourceCode);
 
@@ -50,7 +49,7 @@ private:
 	// Helper for other tokens
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
-	void ReportError(std::string_view error);
+	void AddError(std::string_view error);
 
 	Token BuildToken(std::string_view word);
 
@@ -61,6 +60,7 @@ private:
 private:
 	std::string m_sourceCode;
 	uint32_t m_lineNumber{};
+	uint32_t m_columnNumber{};
 	size_t m_currentIndex{};
 
 	std::vector<Token> m_tokens;

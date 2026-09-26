@@ -3,9 +3,9 @@
 Lexer::Lexer(std::string_view sourceCode) :
 	m_sourceCode{ sourceCode },
 	m_lineNumber{ 1u },
+	m_columnNumber{ 1u },
 	m_currentIndex{ 0 }
 {
-	std::cout << "String View Source Code Size: " << m_sourceCode.size() << std::endl;
 }
 
 void Lexer::Tokenize()
@@ -14,6 +14,7 @@ void Lexer::Tokenize()
 	m_errors.clear();
 	m_currentIndex = 0;
 	m_lineNumber = 1u;
+	m_columnNumber = 1u;
 
 	while (m_currentIndex < m_sourceCode.size())
 	{
@@ -29,10 +30,10 @@ void Lexer::Tokenize()
 		}
 		else
 		{
-			ReportError("Unknown character " + currentChar);
+			AddError("Unknown character " + currentChar);
 		}
 	}
-	m_tokens.emplace_back(TokenType::END_OF_FILE, "END_OF_FILE", ++m_lineNumber);
+	m_tokens.emplace_back(TokenType::END_OF_FILE, "END_OF_FILE", ++m_lineNumber, 1u);
 }
 
 bool Lexer::LexerErrors() const noexcept
@@ -40,20 +41,15 @@ bool Lexer::LexerErrors() const noexcept
 	return !m_errors.empty();
 }
 
-std::string Lexer::GetTokenizedSourceCode() const noexcept
-{
-	std::string tokenizedSourceCode;
-	for (const auto& token : m_tokens)
-	{
-		tokenizedSourceCode += Utils::TokenTypeToString(token) + ": " + token.value + '\n';
-	}
-	return tokenizedSourceCode;
-}
-
 void Lexer::PrintTokenizedSourceCode() const noexcept
 {
-	std::cout << m_tokens.size() << std::endl << std::endl;
-	std::cout << GetTokenizedSourceCode();
+	for (const auto& token : m_tokens)
+	{
+		std::cout << "Token Type: " << Utils::TokenTypeToString(token) << std::endl;
+		std::cout << "Token Value: " << token.value << std::endl;
+		std::cout << "Token Line: " << token.line << std::endl;
+		std::cout << "Token Column: " << token.column << std::endl << std::endl;
+ 	}
 }
 
 void Lexer::SetSourceCode(std::string_view sourceCode)
@@ -78,6 +74,7 @@ void Lexer::ConsumeWord()
 		(isalnum(m_sourceCode[m_currentIndex]) || m_sourceCode[m_currentIndex] == '_'))
 	{
 		word += m_sourceCode[m_currentIndex];
+		++m_columnNumber;
 		++m_currentIndex;
 	}
 	m_tokens.push_back(BuildToken(word));
@@ -90,6 +87,7 @@ void Lexer::ConsumeWhiteSpace()
 			m_sourceCode[m_currentIndex] == '\t'))
 	{
 		++m_currentIndex;
+		++m_columnNumber;
 	}
 }
 
@@ -98,6 +96,7 @@ void Lexer::ConsumeComment()
 	while (m_currentIndex < m_sourceCode.size() && m_sourceCode[m_currentIndex] != '\n')
 	{
 		++m_currentIndex;
+		++m_columnNumber;
 	}
 }
 
@@ -105,6 +104,7 @@ void Lexer::ConsumeNewLine()
 {
 	ConsumeSymbol(TokenType::NEW_LINE, "\n");
 	++m_lineNumber;
+	m_columnNumber = 1u;
 }
 
 void Lexer::ConsumeColon()
@@ -139,11 +139,12 @@ void Lexer::ConsumeRightBracket()
 
 void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 {
-	m_tokens.emplace_back(tokenType, symbol, m_lineNumber);
+	m_tokens.emplace_back(tokenType, symbol, m_lineNumber, m_columnNumber);
 	++m_currentIndex;
+	++m_columnNumber;
 }
 
-void Lexer::ReportError(std::string_view error)
+void Lexer::AddError(std::string_view error)
 {
 	//m_errors.emplace_back(m_lineNumber, error);
 }
@@ -151,14 +152,15 @@ void Lexer::ReportError(std::string_view error)
 Token Lexer::BuildToken(std::string_view word)
 {
 	const std::string upperWord = Utils::ToUpper(word);
+	const uint32_t wordColumnStart = static_cast<uint32_t>(m_columnNumber - word.size());
 
-	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber };
-	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber };
+	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber, wordColumnStart };
+	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber, wordColumnStart };
 
 	if (Utils::StartsLikeNumber(word))
 	{
-		if (!Utils::IsNumber(word)) ReportError("Invalid number");
-		return { TokenType::NUMBER, word, m_lineNumber };
+		if (!Utils::IsNumber(word)) AddError("Invalid number");
+		return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
 	}
-	return { TokenType::IDENTIFIER, word, m_lineNumber };
+	return { TokenType::IDENTIFIER, word, m_lineNumber, wordColumnStart };
 }
