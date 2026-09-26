@@ -51,7 +51,6 @@ private:
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
 	void ReportError(std::string_view error);
-	std::string GetTokenType(const Token& token) const;
 
 	Token BuildToken(std::string_view word);
 

@@ -75,6 +75,30 @@ std::string_view Utils::OperatorKindToString(ISA::OperatorKind operatorKind)
 	return "Error";
 }
 
+std::string Utils::TokenTypeToString(const Token& token)
+{
+	switch (token.type)
+	{
+	case TokenType::REGISTER:		return "REGISTER";
+	case TokenType::MNEMONIC:		return "MNEMONIC";
+	case TokenType::IDENTIFIER:		return "IDENTIFIER";
+	case TokenType::NUMBER:			return "NUMBER";
+	case TokenType::NEW_LINE:		return "NEW_LINE";
+
+	case TokenType::LEFT_PARAN:		return "LEFT_PARAN";
+	case TokenType::RIGHT_PARAN:	return "RIGHT_PARAN";
+	case TokenType::LEFT_BRACKET:	return "LEFT_BRACKET";
+	case TokenType::RIGHT_BRACKET:	return "RIGHT_BRACKET";
+
+	case TokenType::COLON:			return "COLON";
+	case TokenType::COMMA:			return "COMMA";
+
+	case TokenType::END_OF_FILE:	return "END_OF_FILE";
+
+	default:						return "ERROR";
+	}
+}
+
 const char* Utils::FlagToString(bool value)
 {
 	return value ? "True" : "False";
