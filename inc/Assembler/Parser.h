@@ -64,7 +64,7 @@ private:
 
 private:
 	std::vector<Token> m_tokens;
-	std::vector<Error> m_errors;
+	std::vector<AssemblerError> m_errors;
 	std::unordered_map<std::string, LabelInfo> m_labels;
 
 	uint16_t m_currentAddress{ 0x0000 };

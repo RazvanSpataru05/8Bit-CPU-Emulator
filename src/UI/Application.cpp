@@ -68,6 +68,7 @@ void Application::RenderUI()
 	UIEditor::DrawMenu(m_CPU->GetMemoryUnit(), m_executeAuto, m_followPC, *m_CPU);
 	UIEditor::DrawSpeedSlider(m_autoSpeed);
 	UIEditor::DrawHelpMenu();
+	UIEditor::DrawErrorList(*m_assembler);
 
 	ImGui::SFML::Render(m_window);
 	m_window.display();

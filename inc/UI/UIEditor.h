@@ -42,4 +42,5 @@ namespace UIEditor
 				  bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
+	void DrawErrorList(const Assembler& assembler);
 }

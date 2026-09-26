@@ -61,7 +61,7 @@ void Lexer::SetSourceCode(std::string_view sourceCode)
 	m_sourceCode = sourceCode;
 }
 
-std::span<const Error> Lexer::GetErrors() const
+std::span<const AssemblerError> Lexer::GetErrors() const
 {
 	return m_errors;
 }
@@ -145,8 +145,7 @@ void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 
 void Lexer::ReportError(std::string_view error)
 {
-	std::cout << "Invalid number";
-	m_errors.emplace_back(m_lineNumber, error);
+	//m_errors.emplace_back(m_lineNumber, error);
 }
 
 Token Lexer::BuildToken(std::string_view word)

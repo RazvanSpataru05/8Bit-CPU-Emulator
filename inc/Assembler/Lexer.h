@@ -3,7 +3,7 @@
 #include "Assembler/InstructionDef.h"
 #include "Assembler/ISAEntry.h"
 #include "Assembler/Token.h"
-#include "Assembler/Error.h"
+#include "Assembler/AssemblerError.h"
 
 #include "Utils/CharacterUtils.h"
 #include "Utils/StringUtils.h"
@@ -32,8 +32,8 @@ public:
 
 	void SetSourceCode(std::string_view sourceCode);
 
-	std::span<const Error> GetErrors() const;
-	std::span<const Token> GetTokens() const;
+	std::span<const AssemblerError> GetErrors() const;
+	std::span<const Token>			GetTokens() const;
 
 private:
 	void ConsumeWord();
@@ -64,7 +64,7 @@ private:
 	size_t m_currentIndex{};
 
 	std::vector<Token> m_tokens;
-	std::vector<Error> m_errors;
+	std::vector<AssemblerError> m_errors;
 
 	const std::vector<std::pair<std::function<bool(unsigned char)>, TokenHandler>> m_handlers =
 	{

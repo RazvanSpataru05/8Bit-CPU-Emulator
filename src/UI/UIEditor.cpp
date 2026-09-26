@@ -522,4 +522,11 @@ namespace UIEditor
 			ImGui::End();
 		}
 	}
+
+	void DrawErrorList(const Assembler& assembler)
+	{
+		ImGui::Begin("Error List");
+
+		ImGui::End();
+	}
 }
