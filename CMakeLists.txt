@@ -43,7 +43,7 @@ set(HEADERS
     inc/Assembler/LabelInfo.h
     inc/Assembler/Token.h
     inc/Assembler/Statement.h
-    inc/Assembler/Error.h
+    inc/Assembler/AssemblerError.h
     inc/Assembler/Assembler.h
 
     inc/Core/CPU.h
