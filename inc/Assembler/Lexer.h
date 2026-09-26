@@ -27,12 +27,12 @@ public:
 
 	bool LexerErrors() const noexcept;
 
-	std::string GetTokenizedSourceCode() const noexcept;
-	void PrintTokenizedSourceCode() const noexcept;
+	std::string GetTokenizedSourceCode()			const noexcept;
+	void		PrintTokenizedSourceCode()			const noexcept;
 
 	void SetSourceCode(std::string_view sourceCode);
 
-	const std::vector<Error>& GetErrors() const;
+	std::span<const Error> GetErrors() const;
 	std::span<const Token> GetTokens() const;
 
 private:
@@ -66,17 +66,26 @@ private:
 	std::vector<Token> m_tokens;
 	std::vector<Error> m_errors;
 
-	std::vector<std::pair<std::function<bool(unsigned char)>, TokenHandler>> m_handlers =
+	const std::vector<std::pair<std::function<bool(unsigned char)>, TokenHandler>> m_handlers =
 	{
 		{[](unsigned char c) {return isalnum(c);}, [this] {ConsumeWord();}},
+
 		{[](unsigned char c) {return c == ';';}, [this] {ConsumeComment();} },
+
 		{[](unsigned char c) {return c == ' ' || c == '\t';}, [this] {ConsumeWhiteSpace();}},
+
 		{[](unsigned char c) {return c == '\n';}, [this] {ConsumeNewLine();}},
+
 		{[](unsigned char c) {return c == ':';}, [this] {ConsumeColon();}},
+
 		{[](unsigned char c) {return c == ',';}, [this] {ConsumeComma();}},
+
 		{[](unsigned char c) {return c == '(';}, [this] {ConsumeLeftParanthesis();} },
+
 		{[](unsigned char c) {return c == ')';}, [this] {ConsumeRightParanthesis();} },
+
 		{[](unsigned char c) {return c == '[';}, [this] {ConsumeLeftBracket();} },
+
 		{[](unsigned char c) {return c == ']';}, [this] {ConsumeRightBracket();} }
 	};
 };

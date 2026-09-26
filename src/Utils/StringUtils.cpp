@@ -58,7 +58,7 @@ uint32_t Utils::ParseNumber(const std::string& word)
 		const std::string prefix = word.substr(0, 2);
 		CheckBase(prefix, base);
 	}
-	std::cout << "Out Parse number" << std::endl;
+
 	return static_cast<uint32_t>(std::stoi(word, nullptr, base));
 }
 

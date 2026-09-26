@@ -61,7 +61,7 @@ void Lexer::SetSourceCode(std::string_view sourceCode)
 	m_sourceCode = sourceCode;
 }
 
-const std::vector<Error>& Lexer::GetErrors() const
+std::span<const Error> Lexer::GetErrors() const
 {
 	return m_errors;
 }

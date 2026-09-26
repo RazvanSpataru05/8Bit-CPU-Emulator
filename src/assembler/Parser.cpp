@@ -38,12 +38,17 @@ void Parser::BuildSymbolTable()
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		std::cout << "Position: " << m_pos << " " << m_tokens[m_pos].value << std::endl;
+
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
 		if (Peek().type == TokenType::IDENTIFIER && IsLabelDefinition())
 		{
 			const std::string label = Utils::ToLower(Peek().value);
-			m_labels[label] = LabelInfo(m_currentAddress, m_lineNumber);
+			if (m_labels.find(label) != m_labels.end())
+			{
+				assert(0 == 1);
+			}
+			m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
 			ConsumeLabel();
 			continue;
 		}
@@ -75,9 +80,8 @@ void Parser::ParseInstructions()
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
-		std::cout << currentToken.value << std::endl;
-
-		if (currentToken.type == TokenType::NEW_LINE) { Next(); continue; }
+		std::cout << "Value: " << Peek().value << std::endl;
+		std::cout << "Token type: " << Utils::TokenTypeToString(Peek()) << std::endl << std::endl;
 
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -169,6 +173,7 @@ void Parser::HandleIdentifierToken(const Token& token)
 void Parser::HandleNewLineToken(const Token& token)
 {
 	ResetCurrentStatement();
+	Next();
 	++m_lineNumber;
 }
 
@@ -176,7 +181,7 @@ void Parser::SkipOperandTokens(OperatorKind operatorKind)
 {
 	switch (operatorKind)
 	{
-	case OperatorKind::NONE: { ++m_pos; return; }
+	case OperatorKind::NONE: { ++m_pos; return; } // mnemonic
 	case OperatorKind::REG_REG: { m_pos += 4; return; } // mnemonic, first reg, comma, second reg 
 	case OperatorKind::IMM_8:
 	case OperatorKind::ADDR_16:
@@ -200,10 +205,27 @@ std::array<uint8_t, 2> Parser::ConsumeImm8()
 std::array<uint8_t, 2> Parser::ConsumeAddr16()
 {
 	std::array<uint8_t, 2> operands{};
+	uint16_t address{};
+	const Token& token = Next();
 
-	const uint16_t address = static_cast<uint16_t>(ConsumeNumber());
+	if (token.type == TokenType::IDENTIFIER)
+	{
+		const std::string label = Utils::ToLower(Peek().value);
+		assert(m_labels.contains(label));
+		address = m_labels.at(label).address;
+	}
+	else if (token.type == TokenType::NUMBER)
+	{
+		address = static_cast<uint16_t>(ConsumeNumber());
+	}
+	else
+	{
+		// handle error
+	}
+
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
 	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
+
 	Next();
 	return operands;
 }
@@ -212,8 +234,8 @@ std::array<uint8_t, 2> Parser::ConsumeReg()
 {
 	std::array<uint8_t, 2> operands{};
 	operands[0] = ConsumeSelector();
-	Next();
 
+	Next();
 	return operands;
 }
 
@@ -224,6 +246,7 @@ std::array<uint8_t, 2> Parser::ConsumeRegReg()
 	ExpectComma();
 	operands[1] = ConsumeSelector();
 
+	Next();
 	return operands;
 }
 
@@ -271,7 +294,6 @@ const Token& Parser::Next()
 
 uint32_t Parser::ConsumeNumber()
 {
-	std::cout << "In consume number" << std::endl;
 	const Token& token = Next();
 	assert(token.type == TokenType::NUMBER);
 	return Utils::ParseNumber(token.value);
@@ -281,6 +303,7 @@ uint8_t Parser::ConsumeSelector()
 {
 	const Token& token = Next();
 	assert(token.type == TokenType::REGISTER || token.type == TokenType::NUMBER);
+
 	if (token.type == TokenType::REGISTER)
 	{
 		const std::string upper = Utils::ToUpper(token.value);
