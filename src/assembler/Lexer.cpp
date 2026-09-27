@@ -170,7 +170,10 @@ Token Lexer::BuildToken(std::string_view word)
 			AddError("Lexer Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
 			": '" + std::string(word) + "'" + "is not a valid number.\n", wordColumnStart);
 		}
-		return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
+		else
+		{
+			return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
+		}
 	}
 	return { TokenType::IDENTIFIER, word, m_lineNumber, wordColumnStart };
 }

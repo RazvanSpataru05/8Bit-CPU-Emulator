@@ -11,7 +11,7 @@ public:
 	bool Assemble(std::string_view sourceCode);
 
 	[[nodiscard]] std::span<const Statement>		GetStatements()			const noexcept;
-	[[nodiscard]] std::span<const AssemblerError>	GetAssemblerErrors()	const noexcept;
+	[[nodiscard]] std::span<const AssemblerError>	GetErrors()	const noexcept;
 
 private:
 	Assembler(const Assembler&) = delete;

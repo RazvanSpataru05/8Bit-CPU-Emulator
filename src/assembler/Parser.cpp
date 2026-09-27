@@ -4,6 +4,7 @@ using namespace ISA;
 
 Parser::Parser(std::span<const Token> tokens) :
 	m_lineNumber{ 1u },
+	m_columnNumber{ 1u },
 	m_pos{ 0 }
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
@@ -37,6 +38,7 @@ void Parser::BuildSymbolTable()
 	m_labels.clear();
 	m_pos = 0;
 	m_lineNumber = 1u;
+	m_columnNumber = 1u;
 	m_currentAddress = 0x0000;
 
 	std::cout << "In" << std::endl;
@@ -51,9 +53,14 @@ void Parser::BuildSymbolTable()
 			const std::string label = Utils::ToLower(Peek().value);
 			if (m_labels.find(label) != m_labels.end())
 			{
-				assert(0 == 1);
+				AddParserError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
+				+ ": '" + std::string(Peek().value) + "' already exists.");
 			}
-			m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
+			else
+			{
+				m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
+			}
+			
 			ConsumeLabel();
 			continue;
 		}
@@ -105,6 +112,11 @@ void Parser::ParseInstructions()
 void Parser::AddStatement()
 {
 	m_statements.emplace_back(m_currentStatement);
+}
+
+void Parser::AddParserError(std::string_view message)
+{
+	m_errors.emplace_back(Severity::ERROR, Stage::PARSER, m_lineNumber, m_columnNumber, message);
 }
 
 void Parser::ResetCurrentStatement()
@@ -180,6 +192,7 @@ void Parser::HandleNewLineToken(const Token& token)
 	ResetCurrentStatement();
 	Next();
 	++m_lineNumber;
+	++m_columnNumber = 1;
 }
 
 void Parser::SkipOperandTokens(OperatorKind operatorKind)
@@ -259,11 +272,17 @@ void Parser::ExpectEndOfStatement()
 {
 	if (m_pos >= m_tokens.size()) return;
 
-	assert(Peek().type == TokenType::NEW_LINE || Peek().type == TokenType::END_OF_FILE);
+	if (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
+	{
+		AddParserError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+			": expected newline or end of file at the end of statement. Found " + Utils::TokenTypeToString(Peek()) + ".");
+	}
+
 	if (m_pos + 1 < m_tokens.size())
 	{
 		Next();
 		++m_lineNumber;
+		m_columnNumber = 1;
 	}
 }
 

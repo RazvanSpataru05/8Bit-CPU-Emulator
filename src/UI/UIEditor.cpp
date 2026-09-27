@@ -252,11 +252,8 @@ namespace UIEditor
 					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 					memoryUnit.LoadValuesIntoMemory(values);
 				}
-				else
-				{
-					// display Assembler errors
-				}
 			}
+			DrawErrorList(assembler);
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
@@ -525,8 +522,23 @@ namespace UIEditor
 
 	void DrawErrorList(const Assembler& assembler)
 	{
-		ImGui::Begin("Error List");
+		ImGui::Separator();
+		ImGui::TextUnformatted("Error List");
 
-		ImGui::End();
+		ImGui::BeginChild("##errorList", ImVec2(-1, 150), true);
+
+		const auto& errors = assembler.GetErrors();
+		if (errors.empty())
+		{
+			ImGui::TextDisabled("No errors.");
+		}
+		else
+		{
+			for (const auto& error : errors)
+			{
+				ImGui::TextWrapped("%s", error.message.c_str());
+			}
+		}
+		ImGui::EndChild();
 	}
 }

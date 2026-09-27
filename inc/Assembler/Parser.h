@@ -48,6 +48,7 @@ private:
 	std::array<uint8_t, 2> ConsumeRegReg();
 
 	void AddStatement();
+	void AddParserError(std::string_view message);
 
 	void ExpectEndOfStatement();
 	void ExpectComma();
@@ -69,7 +70,8 @@ private:
 	std::unordered_map<std::string, LabelInfo> m_labels;
 
 	uint16_t m_currentAddress{ 0x0000 };
-	uint32_t m_lineNumber{};
+	uint32_t m_lineNumber{ 1u };
+	uint32_t m_columnNumber{ 1u };
 	size_t m_pos{};
 
 	Statement m_currentStatement;

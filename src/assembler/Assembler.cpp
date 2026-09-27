@@ -9,6 +9,8 @@ Assembler::Assembler() :
 
 bool Assembler::Assemble(std::string_view sourceCode)
 {
+	m_errors.clear();
+
 	m_lexer.SetSourceCode(sourceCode);
 	m_lexer.Tokenize();
 	m_lexer.PrintTokenizedSourceCode();
@@ -28,7 +30,7 @@ std::span<const Statement> Assembler::GetStatements() const noexcept
 	return m_parser.GetStatements();
 }
 
-std::span<const AssemblerError> Assembler::GetAssemblerErrors() const noexcept
+std::span<const AssemblerError> Assembler::GetErrors() const noexcept
 {
 	return m_errors;
 }
