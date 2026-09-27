@@ -79,23 +79,23 @@ std::string Utils::TokenTypeToString(const Token& token)
 {
 	switch (token.type)
 	{
-	case TokenType::REGISTER:		return "REGISTER";
-	case TokenType::MNEMONIC:		return "MNEMONIC";
-	case TokenType::IDENTIFIER:		return "IDENTIFIER";
-	case TokenType::NUMBER:			return "NUMBER";
-	case TokenType::NEW_LINE:		return "NEW_LINE";
+	case TokenType::REGISTER:		return "register";
+	case TokenType::MNEMONIC:		return "mnemonic";
+	case TokenType::IDENTIFIER:		return "identifier";
+	case TokenType::NUMBER:			return "number";
+	case TokenType::NEW_LINE:		return "newline";
 
-	case TokenType::LEFT_PARAN:		return "LEFT_PARAN";
-	case TokenType::RIGHT_PARAN:	return "RIGHT_PARAN";
-	case TokenType::LEFT_BRACKET:	return "LEFT_BRACKET";
-	case TokenType::RIGHT_BRACKET:	return "RIGHT_BRACKET";
+	case TokenType::LEFT_PARAN:		return "left paranthesis";
+	case TokenType::RIGHT_PARAN:	return "right paranthesis";
+	case TokenType::LEFT_BRACKET:	return "left bracket";
+	case TokenType::RIGHT_BRACKET:	return "right bracket";
 
-	case TokenType::COLON:			return "COLON";
-	case TokenType::COMMA:			return "COMMA";
+	case TokenType::COLON:			return "colon";
+	case TokenType::COMMA:			return "comma";
 
-	case TokenType::END_OF_FILE:	return "END_OF_FILE";
+	case TokenType::END_OF_FILE:	return "end of file";
 
-	default:						return "ERROR";
+	default:						return "error";
 	}
 }
 

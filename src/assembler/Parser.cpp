@@ -21,7 +21,7 @@ std::span<const Statement> Parser::GetStatements() const noexcept
 	return m_statements;
 }
 
-std::span<const AssemblerError> Parser::GetParserErrors() const noexcept
+std::span<const AssemblerError> Parser::GetErrors() const noexcept
 {
 	return m_errors;
 }
@@ -53,7 +53,7 @@ void Parser::BuildSymbolTable()
 			const std::string label = Utils::ToLower(Peek().value);
 			if (m_labels.find(label) != m_labels.end())
 			{
-				AddParserError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
+				AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
 				+ ": '" + std::string(Peek().value) + "' already exists.");
 			}
 			else
@@ -104,7 +104,8 @@ void Parser::ParseInstructions()
 		}
 		else
 		{
-			// error handling
+			AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+				": '" + currentToken.value + "' is not a recognized instruction.");
 		}
 	}
 }
@@ -114,7 +115,7 @@ void Parser::AddStatement()
 	m_statements.emplace_back(m_currentStatement);
 }
 
-void Parser::AddParserError(std::string_view message)
+void Parser::AddError(std::string_view message)
 {
 	m_errors.emplace_back(Severity::ERROR, Stage::PARSER, m_lineNumber, m_columnNumber, message);
 }
@@ -238,7 +239,8 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	}
 	else
 	{
-		// handle error
+		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+			": expected 16-bit address or label, found " + Utils::TokenTypeToString(token) + ".");
 	}
 
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
@@ -274,7 +276,7 @@ void Parser::ExpectEndOfStatement()
 
 	if (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
-		AddParserError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
 			": expected newline or end of file at the end of statement. Found " + Utils::TokenTypeToString(Peek()) + ".");
 	}
 
@@ -288,12 +290,20 @@ void Parser::ExpectEndOfStatement()
 
 void Parser::ExpectComma()
 {
-	assert(Next().type == TokenType::COMMA);
+	if (Next().type != TokenType::COMMA)
+	{
+		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+		": expected ',' after first operand of 'MOV', found " + Utils::TokenTypeToString(Peek()) + ".");
+	}
 }
 
 void Parser::ExpectColon()
 {
-	assert(Next().type == TokenType::COLON);
+	if (Next().type != TokenType::COLON)
+	{
+		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+			": expected ':' after label definition, found " + Utils::TokenTypeToString(Peek()) + ".");
+	}
 }
 
 void Parser::ConsumeLabel()
@@ -326,18 +336,30 @@ uint32_t Parser::ConsumeNumber()
 uint8_t Parser::ConsumeSelector()
 {
 	const Token& token = Next();
-	assert(token.type == TokenType::REGISTER || token.type == TokenType::NUMBER);
 
 	if (token.type == TokenType::REGISTER)
 	{
 		const std::string upper = Utils::ToUpper(token.value);
-		assert(nameToSelector.contains(upper));
+		if (!nameToSelector.contains(upper))
+		{
+			AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+				": '" + token.value + "' is not a valid register name (valid range: A-D).");
+		}
 		return nameToSelector.at(upper);
 	}
-	else // token type is number
+	else if (token.type == TokenType::NUMBER)
 	{
 		const uint32_t selector = (Utils::ParseNumber(token.value));
-		assert(selectorToName.contains(static_cast<uint8_t>(selector)));
+		if (!selectorToName.contains(static_cast<uint8_t>(selector)))
+		{
+			AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+				": '" + std::to_string(static_cast<int>(selector)) + "' is not a valid register selector (valid range: 0x00-0x03).");
+		}
 		return static_cast<uint8_t>(selector);
+	}
+	else
+	{
+		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
+			": expected register selector or name, found " + Utils::TokenTypeToString(Peek()) + ".");
 	}
 }

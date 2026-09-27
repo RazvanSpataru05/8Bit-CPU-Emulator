@@ -23,7 +23,7 @@ public:
 	bool ParserErrors() const noexcept;
 
 	std::span<const Statement>		GetStatements()			const noexcept;
-	std::span<const AssemblerError> GetParserErrors()		const noexcept;
+	std::span<const AssemblerError> GetErrors()		const noexcept;
 
 	void SetTokens(std::span<const Token> tokens);
 
@@ -48,7 +48,7 @@ private:
 	std::array<uint8_t, 2> ConsumeRegReg();
 
 	void AddStatement();
-	void AddParserError(std::string_view message);
+	void AddError(std::string_view message);
 
 	void ExpectEndOfStatement();
 	void ExpectComma();

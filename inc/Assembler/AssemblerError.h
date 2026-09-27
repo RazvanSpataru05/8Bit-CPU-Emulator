@@ -28,4 +28,17 @@ struct AssemblerError
 		severity{ sev }, stage{ st }, line{ l }, column{ c }, message{ m }
 	{
 	}
+
+	const bool operator<(const AssemblerError& other) const
+	{
+		if (severity == other.severity)
+		{
+			if (line == other.line)
+			{
+				return column < other.column;
+			}
+			return line < other.line;
+		}
+		return severity < other.severity;
+	}
 };
