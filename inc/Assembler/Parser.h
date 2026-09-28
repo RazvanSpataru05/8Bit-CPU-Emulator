@@ -40,6 +40,8 @@ private:
 	void HandleIdentifierToken(const Token& token);
 	void HandleNewLineToken(const Token& token);
 
+	void HandleLabel();
+
 	void SkipOperandTokens(OperatorKind operatorKind);
 
 	std::array<uint8_t, 2> ConsumeImm8();
@@ -63,6 +65,7 @@ private:
 	const Token& Next();
 	uint32_t ConsumeNumber();
 	uint8_t ConsumeSelector();
+	void ConsumeLine();
 
 private:
 	std::vector<Token> m_tokens;
@@ -82,7 +85,7 @@ private:
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
 			[this](const Token& token) {HandleMnemonicToken(token);}},
 
-		{[](const Token& token) {return token.type == TokenType::IDENTIFIER;},
+		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER && IsLabelDefinition();},
 			[this](const Token& token) {HandleIdentifierToken(token);}},
 
 		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},

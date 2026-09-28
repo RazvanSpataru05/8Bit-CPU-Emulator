@@ -48,20 +48,9 @@ void Parser::BuildSymbolTable()
 
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
-		if (Peek().type == TokenType::IDENTIFIER && IsLabelDefinition())
+		if (Peek().type == TokenType::IDENTIFIER)
 		{
-			const std::string label = Utils::ToLower(Peek().value);
-			if (m_labels.find(label) != m_labels.end())
-			{
-				AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
-				+ ": '" + std::string(Peek().value) + "' already exists.");
-			}
-			else
-			{
-				m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
-			}
-			
-			ConsumeLabel();
+			HandleLabel();
 			continue;
 		}
 
@@ -81,7 +70,10 @@ void Parser::ParseInstructions()
 	PrintLabels();
 
 	std::cout << "SECOND PASS\n\n";
-
+	if (!m_errors.empty())
+	{
+		std::cout << "We have parser errors\n\n\n";
+	}
 	m_statements.clear();
 	m_errors.clear();
 	m_lineNumber = 1u;
@@ -106,6 +98,7 @@ void Parser::ParseInstructions()
 		{
 			AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
 				": '" + currentToken.value + "' is not a recognized instruction.");
+			ConsumeLine();
 		}
 	}
 }
@@ -182,10 +175,7 @@ void Parser::HandleMnemonicToken(const Token& token)
 
 void Parser::HandleIdentifierToken(const Token& token)
 {
-	if (IsLabelDefinition())
-	{
-		ConsumeLabel();
-	}
+	ConsumeLabel();
 }
 
 void Parser::HandleNewLineToken(const Token& token)
@@ -194,6 +184,28 @@ void Parser::HandleNewLineToken(const Token& token)
 	Next();
 	++m_lineNumber;
 	++m_columnNumber = 1;
+}
+
+void Parser::HandleLabel()
+{
+	if (IsLabelDefinition())
+	{
+		const std::string label = Utils::ToLower(Peek().value);
+		if (m_labels.find(label) != m_labels.end())
+		{
+			AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
+				+ ": '" + std::string(Peek().value) + "' already exists.");
+		}
+		else
+		{
+			m_labels.insert({ label, LabelInfo(m_currentAddress, m_lineNumber) });
+		}
+		ConsumeLabel();
+	}
+	else
+	{
+		ConsumeLine();
+	}
 }
 
 void Parser::SkipOperandTokens(OperatorKind operatorKind)
@@ -362,4 +374,13 @@ uint8_t Parser::ConsumeSelector()
 		AddError("Parser Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) +
 			": expected register selector or name, found " + Utils::TokenTypeToString(Peek()) + ".");
 	}
+}
+
+void Parser::ConsumeLine()
+{
+	while (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
+	{
+		Next();
+	}
+	if (Peek().type == TokenType::NEW_LINE) { Next(); }
 }
