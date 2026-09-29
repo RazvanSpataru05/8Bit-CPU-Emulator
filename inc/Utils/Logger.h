@@ -6,5 +6,5 @@
 namespace Logger
 {
 	void AddInfoMessage(std::string_view message);
-
+	void ClearLogFile();
 }

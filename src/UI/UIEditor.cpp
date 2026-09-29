@@ -244,6 +244,7 @@ namespace UIEditor
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 			if (ImGui::Button("Assemble & Load"))
 			{
+				Logger::ClearLogFile();
 				if (assembler.Assemble(editorBuffer))
 				{
 					const auto statements = assembler.GetStatements();

@@ -27,7 +27,7 @@ std::span<const AssemblerError> Parser::GetErrors() const noexcept
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
-	Logger::AddInfoMessage("Tokens: " + std::to_string(m_tokens.size()) + " \n");
+	Logger::AddInfoMessage(std::format("Tokens: {}\n", m_tokens.size()));
 }
 
 void Parser::BuildSymbolTable()
@@ -36,10 +36,10 @@ void Parser::BuildSymbolTable()
 	m_pos = 0;
 	m_currentAddress = 0x0000;
 
-	Logger::AddInfoMessage("In\n");
+	Logger::AddInfoMessage("In First Pass\n");
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
-		std::cout << "Position: " << m_pos << " " << m_tokens[m_pos].value << std::endl;
+		Logger::AddInfoMessage(std::format("Position: {}, {}\n", m_pos, m_tokens[m_pos].value));
 
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
@@ -56,7 +56,7 @@ void Parser::BuildSymbolTable()
 		SkipOperandTokens(entry->operatorKind);
 		ExpectEndOfStatement();
 	}
-	std::cout << "Out" << std::endl;
+	Logger::AddInfoMessage("Out First Pass\n");
 }
 
 void Parser::ParseInstructions()
@@ -73,8 +73,8 @@ void Parser::ParseInstructions()
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
-		Logger::AddInfoMessage("Value: " + Peek().value + "\n");
-		Logger::AddInfoMessage("Token type: " + Utils::TokenTypeToString(Peek()) + "\n");
+		Logger::AddInfoMessage(std::format("Value: {}\n", Peek().value));
+		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::TokenTypeToString(Peek())));
 
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -117,13 +117,13 @@ void Parser::PrintStatements() const noexcept
 		if (statement.ISAEntry)
 		{
 			const std::string mnemonic = statement.ISAEntry->mnemonic;
-			Logger::AddInfoMessage("MNEMONIC: " + mnemonic);
+			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", mnemonic));
 		}
-		Logger::AddInfoMessage("OPCODE: 0x" + std::to_string(static_cast<int>(statement.opcode)) + "\n");
+		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode)));
 		Logger::AddInfoMessage("VALUE(S): ");
 		for (size_t index = 0; index < statement.operatorCount; ++index)
 		{
-			Logger::AddInfoMessage("0x" + static_cast<int>(statement.operands[index]));
+			Logger::AddInfoMessage(std::format("0x{}, ", static_cast<int>(statement.operands[index])));
 		}
 		Logger::AddInfoMessage("\n\n");
 	}
@@ -131,12 +131,12 @@ void Parser::PrintStatements() const noexcept
 
 void Parser::PrintLabels() const noexcept
 {
-	Logger::AddInfoMessage("Labels: " + std::to_string(m_labels.size()) + "\n\n");
+	Logger::AddInfoMessage(std::format("Labels: {}\n\n", m_labels.size()));
 	for (auto it = m_labels.begin(); it != m_labels.end(); it++)
 	{
-		Logger::AddInfoMessage("Label: " + it->first + "\n");
-		Logger::AddInfoMessage("Address: " + std::to_string(static_cast<int>(it->second.address)) + "\n");
-		Logger::AddInfoMessage("Line declaration " + std::to_string(static_cast<int>(it->second.lineDeclaration)) + "\n");
+		Logger::AddInfoMessage(std::format("Label: {}\n", it->first));
+		Logger::AddInfoMessage(std::format("Address: {}\n", static_cast<int>(it->second.address))); 
+		Logger::AddInfoMessage(std::format("Line declaration: {}\n", static_cast<int>(it->second.lineDeclaration))); 
 	}
 }
 
@@ -237,6 +237,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 			AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
 				": undefined label '" + Peek().value + "'.");
 			ConsumeLine();
+			return {};
 		}
 		else
 		{
@@ -284,8 +285,6 @@ std::array<uint8_t, 2> Parser::ConsumeRegReg()
 
 void Parser::ExpectEndOfStatement()
 {
-	if (m_pos >= m_tokens.size()) return;
-
 	if (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
@@ -389,6 +388,8 @@ void Parser::ConsumeLine()
 	Logger::AddInfoMessage("CONSUME LINE called\n\n");
 	while (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
+		std::cout << m_pos << " ";
 		Next();
 	}
+	Logger::AddInfoMessage("CONSUME LINE finished\n");
 }

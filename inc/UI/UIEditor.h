@@ -8,6 +8,7 @@
 #include "Debugger/Dissasembler.h"
 
 #include "Utils/StringUtils.h"
+#include "Utils/Logger.h"
 
 #include "ImGui/imgui.h"
 #include "ImGui/imgui-SFML.h"
