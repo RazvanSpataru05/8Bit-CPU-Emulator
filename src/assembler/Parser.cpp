@@ -3,7 +3,8 @@
 using namespace ISA;
 
 Parser::Parser(std::span<const Token> tokens) :
-	m_pos{ 0 }
+	m_pos{ 0 },
+	m_currentAddress{ false }
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
 	ResetCurrentStatement();
@@ -35,6 +36,7 @@ void Parser::BuildSymbolTable()
 	m_labels.clear();
 	m_pos = 0;
 	m_currentAddress = 0x0000;
+	m_currentStatementHasError = false;
 
 	Logger::AddInfoMessage("In First Pass\n");
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
@@ -53,8 +55,7 @@ void Parser::BuildSymbolTable()
 		if (!entry) continue;
 
 		m_currentAddress += entry->size;
-		SkipOperandTokens(entry->operatorKind);
-		ExpectEndOfStatement();
+		ConsumeLine();
 	}
 	Logger::AddInfoMessage("Out First Pass\n");
 }
@@ -197,22 +198,6 @@ void Parser::HandleLabel()
 	}
 }
 
-void Parser::SkipOperandTokens(OperatorKind operatorKind)
-{
-	switch (operatorKind)
-	{
-	case OperatorKind::NONE: { ++m_pos; return; } // mnemonic
-	case OperatorKind::REG_REG: { m_pos += 4; return; } // mnemonic, first reg, comma, second reg 
-	case OperatorKind::IMM_8:
-	case OperatorKind::ADDR_16:
-	case OperatorKind::REG:
-	{
-		m_pos += 2; return; // mnemonic, operand
-	}
-	default: return;
-	}
-}
-
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
@@ -266,18 +251,21 @@ std::array<uint8_t, 2> Parser::ConsumeReg()
 	std::array<uint8_t, 2> operands{};
 	operands[0] = ConsumeSelector();
 
-	Next();
 	return operands;
 }
 
 std::array<uint8_t, 2> Parser::ConsumeRegReg()
 {
 	std::array<uint8_t, 2> operands{};
+
 	operands[0] = ConsumeSelector();
+	if (m_currentStatementHasError) return operands;
+
 	ExpectComma();
+	if (m_currentStatementHasError) return operands; 
+
 	operands[1] = ConsumeSelector();
 
-	Next();
 	return operands;
 }
 
@@ -298,8 +286,9 @@ void Parser::ExpectEndOfStatement()
 
 void Parser::ExpectComma()
 {
-	if (Next().type != TokenType::COMMA)
+	if (Peek().type != TokenType::COMMA)
 	{
+		m_currentStatementHasError = true;
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
 		": expected ',' after first operand of 'MOV', found " + Utils::TokenTypeToString(Peek()) + ".");
 		ConsumeLine();
@@ -310,6 +299,7 @@ void Parser::ExpectColon()
 {
 	if (Next().type != TokenType::COLON)
 	{
+		m_currentStatementHasError = true;
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().line) +
 			": expected ':' after label definition, found " + Utils::TokenTypeToString(Peek()) + ".");
 		ConsumeLine();
@@ -361,10 +351,13 @@ uint8_t Parser::ConsumeSelector()
 		const std::string upper = Utils::ToUpper(token.value);
 		if (!nameToSelector.contains(upper))
 		{
+			m_currentStatementHasError = true;
 			AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
 				": '" + token.value + "' is not a valid register name (valid range: A-D).");
 			ConsumeLine();
 		}
+
+		Next();
 		return nameToSelector.at(upper);
 	}
 	else if (token.type == TokenType::NUMBER)
@@ -372,17 +365,24 @@ uint8_t Parser::ConsumeSelector()
 		const uint32_t selector = (Utils::ParseNumber(token.value));
 		if (!selectorToName.contains(static_cast<uint8_t>(selector)))
 		{
+			m_currentStatementHasError = true;
 			AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
 				": '" + std::to_string(static_cast<int>(selector)) + "' is not a valid register selector (valid range: 0x00-0x03).");
 			ConsumeLine();
+			return 0;
 		}
+
+		Next();
 		return static_cast<uint8_t>(selector);
 	}
 	else
 	{
+		m_currentStatementHasError = true;
 		AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-			": expected register selector or name, found " + Utils::TokenTypeToString(Peek()) + ".");
+			": expected register selector or name, found " + Utils::TokenTypeToString(Peek()) + " '" +
+		Peek().value + "'.");
 		ConsumeLine();
+		return 0;
 	}
 }
 

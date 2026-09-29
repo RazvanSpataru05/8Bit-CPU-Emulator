@@ -44,8 +44,6 @@ private:
 
 	void HandleLabel();
 
-	void SkipOperandTokens(OperatorKind operatorKind);
-
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
 	std::array<uint8_t, 2> ConsumeReg();
@@ -76,6 +74,8 @@ private:
 
 	uint16_t m_currentAddress{ 0x0000 };
 	size_t m_pos{};
+
+	bool m_currentStatementHasError{ false };
 
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
