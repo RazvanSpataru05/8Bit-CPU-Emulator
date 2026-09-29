@@ -30,8 +30,8 @@ void Lexer::Tokenize()
 		}
 		else
 		{
-			AddError("Lexer Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber) + ": unexpected character '" 
-				+ std::to_string(currentChar) + "'.\n", m_columnNumber);
+			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
+				+ ": unexpected character '"  + std::to_string(currentChar) + "'.", m_columnNumber);
 		}
 	}
 	m_tokens.emplace_back(TokenType::END_OF_FILE, "END_OF_FILE", ++m_lineNumber, 1u);
@@ -167,7 +167,7 @@ Token Lexer::BuildToken(std::string_view word)
 	{
 		if (!Utils::IsNumber(word))
 		{
-			AddError("Lexer Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
+			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
 			": '" + std::string(word) + "'" + "is not a valid number.\n", wordColumnStart);
 		}
 		else
