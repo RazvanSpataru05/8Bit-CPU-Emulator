@@ -217,9 +217,7 @@ std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
 
-	Next(); // change to imm8 value 
 	operand[0] = static_cast<uint8_t>(ConsumeNumber());
-	Next(); // go past imm8 value
 	return operand;
 }
 
@@ -340,13 +338,18 @@ const Token& Parser::Next()
 
 uint32_t Parser::ConsumeNumber()
 {
+	Next(); // go to imm8 value
 	if (Peek().type != TokenType::NUMBER)
 	{
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
 			": expected number, found " + Utils::TokenTypeToString(Peek()) + ".");
 		ConsumeLine();
+		return 0u;
 	}
-	return Utils::ParseNumber(Peek().value);
+
+	const Token& numberToken = Peek();
+	Next();
+	return Utils::ParseNumber(numberToken.value);
 }
 
 uint8_t Parser::ConsumeSelector()
