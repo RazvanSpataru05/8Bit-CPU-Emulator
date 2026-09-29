@@ -27,7 +27,7 @@ std::span<const AssemblerError> Parser::GetErrors() const noexcept
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
-	std::cout << "Tokens: " << m_tokens.size() << std::endl;
+	Logger::AddInfoMessage("Tokens: " + std::to_string(m_tokens.size()) + " \n");
 }
 
 void Parser::BuildSymbolTable()
@@ -36,7 +36,7 @@ void Parser::BuildSymbolTable()
 	m_pos = 0;
 	m_currentAddress = 0x0000;
 
-	std::cout << "In" << std::endl;
+	Logger::AddInfoMessage("In\n");
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		std::cout << "Position: " << m_pos << " " << m_tokens[m_pos].value << std::endl;
@@ -73,8 +73,8 @@ void Parser::ParseInstructions()
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
-		std::cout << "Value: " << Peek().value << std::endl;
-		std::cout << "Token type: " << Utils::TokenTypeToString(Peek()) << std::endl << std::endl;
+		Logger::AddInfoMessage("Value: " + Peek().value + "\n");
+		Logger::AddInfoMessage("Token type: " + Utils::TokenTypeToString(Peek()) + "\n");
 
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -116,26 +116,27 @@ void Parser::PrintStatements() const noexcept
 	{
 		if (statement.ISAEntry)
 		{
-			std::cout << "MNEMONIC: " << statement.ISAEntry->mnemonic << std::endl;
+			const std::string mnemonic = statement.ISAEntry->mnemonic;
+			Logger::AddInfoMessage("MNEMONIC: " + mnemonic);
 		}
-		std::cout << "OPCODE: 0x" << std::hex << static_cast<int>(statement.opcode) << std::endl;
-		std::cout << "VALUES: ";
+		Logger::AddInfoMessage("OPCODE: 0x" + std::to_string(static_cast<int>(statement.opcode)) + "\n");
+		Logger::AddInfoMessage("VALUE(S): ");
 		for (size_t index = 0; index < statement.operatorCount; ++index)
 		{
-			std::cout << "0x" << std::hex << static_cast<int>(statement.operands[index]) << " ";
+			Logger::AddInfoMessage("0x" + static_cast<int>(statement.operands[index]));
 		}
-		std::cout << std::endl << std::endl;
+		Logger::AddInfoMessage("\n\n");
 	}
 }
 
 void Parser::PrintLabels() const noexcept
 {
-	std::cout << "Labels: " << m_labels.size() << std::endl;
+	Logger::AddInfoMessage("Labels: " + std::to_string(m_labels.size()) + "\n\n");
 	for (auto it = m_labels.begin(); it != m_labels.end(); it++)
 	{
-		std::cout << "Label: " << it->first << std::endl;
-		std::cout << "Address: " << it->second.address << std::endl;
-		std::cout << "Line declaration: " << static_cast<int>(it->second.lineDeclaration) << std::endl;
+		Logger::AddInfoMessage("Label: " + it->first + "\n");
+		Logger::AddInfoMessage("Address: " + std::to_string(static_cast<int>(it->second.address)) + "\n");
+		Logger::AddInfoMessage("Line declaration " + std::to_string(static_cast<int>(it->second.lineDeclaration)) + "\n");
 	}
 }
 
@@ -227,7 +228,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	std::array<uint8_t, 2> operands{};
 	uint16_t address{};
 	const Token& token = Next();
-	std::cout << "Next token is " << token.value << "\nNext token type: " << Utils::TokenTypeToString(token) << "\n\n";
+
 	if (token.type == TokenType::IDENTIFIER)
 	{
 		const std::string label = Utils::ToLower(Peek().value);
@@ -245,7 +246,6 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	}
 	else if (token.type == TokenType::NUMBER)
 	{
-		std::cout << "token type is number\n\n";
 		address = static_cast<uint16_t>(ConsumeNumber());
 	}
 	else
@@ -386,7 +386,7 @@ uint8_t Parser::ConsumeSelector()
 
 void Parser::ConsumeLine()
 {
-	std::cout << "CONSUME LINE called\n";
+	Logger::AddInfoMessage("CONSUME LINE called\n\n");
 	while (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
 		Next();

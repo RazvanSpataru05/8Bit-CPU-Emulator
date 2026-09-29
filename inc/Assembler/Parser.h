@@ -4,6 +4,8 @@
 #include "Assembler/LabelInfo.h"
 #include "Assembler/Statement.h"
 
+#include "Utils/Logger.h"
+
 using namespace ISA;
 
 using StatementHandler = std::function<void(const Token&)>;

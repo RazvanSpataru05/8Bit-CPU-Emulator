@@ -33,6 +33,7 @@ set(SOURCES
 
     src/Utils/CharacterUtils.cpp
     src/Utils/StringUtils.cpp
+    src/Utils/Logger.cpp
 )
 
 set(HEADERS
@@ -58,6 +59,7 @@ set(HEADERS
 
     inc/Utils/CharacterUtils.h
     inc/Utils/StringUtils.h
+    inc/Utils/Logger.h
 )
 
 # ============================================================
