@@ -4,6 +4,7 @@
 #include "Assembler/ISAEntry.h"
 #include "Assembler/Token.h"
 #include "Assembler/AssemblerError.h"
+#include "Assembler/AssemblerWarning.h"
 
 #include "Utils/CharacterUtils.h"
 #include "Utils/StringUtils.h"
@@ -27,14 +28,13 @@ public:
 
 	bool LexerErrors() const noexcept;
 
-	std::span<const AssemblerError> GetLexerErrors() const noexcept;
+	std::span<const Token>				GetTokens()		const noexcept;
+	std::span<const AssemblerError>		GetErrors()		const noexcept;
+	std::span<const AssemblerWarning>	GetWarnings()	const noexcept;
 
 	void PrintTokenizedSourceCode() const noexcept;
 
 	void SetSourceCode(std::string_view sourceCode);
-
-	std::span<const AssemblerError> GetErrors() const;
-	std::span<const Token>			GetTokens() const;
 
 private:
 	void ConsumeWord();
@@ -51,7 +51,8 @@ private:
 	// Helper for other tokens
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
-	void AddError(std::string_view error, uint32_t column);
+	void AddError(std::string_view message, uint32_t column);
+	void AddWarning(std::string_view message, uint32_t column);
 
 	Token BuildToken(std::string_view word);
 
@@ -67,6 +68,7 @@ private:
 
 	std::vector<Token> m_tokens;
 	std::vector<AssemblerError> m_errors;
+	std::vector<AssemblerWarning> m_warnings;
 
 	const std::vector<std::pair<std::function<bool(unsigned char)>, TokenHandler>> m_handlers =
 	{

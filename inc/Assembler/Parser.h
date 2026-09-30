@@ -24,8 +24,9 @@ public:
 
 	bool ParserErrors() const noexcept;
 
-	std::span<const Statement>		GetStatements()			const noexcept;
-	std::span<const AssemblerError> GetErrors()		const noexcept;
+	std::span<const Statement>			GetStatements()			const noexcept;
+	std::span<const AssemblerError>		GetErrors()				const noexcept;
+	std::span<const AssemblerWarning>	GetWarnings()			const noexcept;
 
 	void SetTokens(std::span<const Token> tokens);
 
@@ -51,6 +52,7 @@ private:
 
 	void AddStatement();
 	void AddError(std::string_view message);
+	void AddWarning(std::string_view message);
 
 	void ExpectEndOfStatement();
 	void ExpectComma();
@@ -70,6 +72,7 @@ private:
 private:
 	std::vector<Token> m_tokens;
 	std::vector<AssemblerError> m_errors;
+	std::vector<AssemblerWarning> m_warnings;
 	std::unordered_map<std::string, LabelInfo> m_labels;
 
 	uint16_t m_currentAddress{ 0x0000 };

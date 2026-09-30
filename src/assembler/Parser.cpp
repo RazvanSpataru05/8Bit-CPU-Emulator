@@ -67,6 +67,7 @@ void Parser::ParseInstructions()
 
 	m_statements.clear();
 	m_errors.clear();
+	m_warnings.clear();
 	m_pos = 0;
 	m_currentAddress = 0x0000;
 	ResetCurrentStatement();
@@ -74,6 +75,7 @@ void Parser::ParseInstructions()
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
+
 		Logger::AddInfoMessage(std::format("Value: {}\n", Peek().value));
 		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::TokenTypeToString(Peek())));
 
@@ -100,7 +102,12 @@ void Parser::AddStatement()
 
 void Parser::AddError(std::string_view message)
 {
-	m_errors.emplace_back(Severity::ERROR, Stage::PARSER, Peek().line, Peek().column, message);
+	m_errors.emplace_back(AssemblerStage::PARSER, Peek().line, Peek().column, message);
+}
+
+void Parser::AddWarning(std::string_view message)
+{
+	m_warnings.emplace_back(AssemblerStage::PARSER, Peek().line, Peek().column, message);
 }
 
 void Parser::ResetCurrentStatement()

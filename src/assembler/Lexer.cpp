@@ -42,9 +42,14 @@ bool Lexer::LexerErrors() const noexcept
 	return !m_errors.empty();
 }
 
-std::span<const AssemblerError> Lexer::GetLexerErrors() const noexcept
+std::span<const AssemblerError> Lexer::GetErrors() const noexcept
 {
 	return m_errors;
+}
+
+std::span<const AssemblerWarning> Lexer::GetWarnings() const noexcept
+{
+	return m_warnings;
 }
 
 void Lexer::PrintTokenizedSourceCode() const noexcept
@@ -63,12 +68,7 @@ void Lexer::SetSourceCode(std::string_view sourceCode)
 	m_sourceCode = sourceCode;
 }
 
-std::span<const AssemblerError> Lexer::GetErrors() const
-{
-	return m_errors;
-}
-
-std::span<const Token> Lexer::GetTokens() const
+std::span<const Token> Lexer::GetTokens() const noexcept
 {
 	return m_tokens;
 }
@@ -150,9 +150,14 @@ void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 	++m_columnNumber;
 }
 
-void Lexer::AddError(std::string_view error, uint32_t column)
+void Lexer::AddError(std::string_view message, uint32_t column)
 {
-	m_errors.emplace_back(Severity::ERROR, Stage::LEXER, m_lineNumber, column, error);
+	m_errors.emplace_back(AssemblerStage::LEXER, m_lineNumber, column, message);
+}
+
+void Lexer::AddWarning(std::string_view message, uint32_t column)
+{
+	m_warnings.emplace_back(AssemblerStage::LEXER, m_lineNumber, column, message);
 }
 
 Token Lexer::BuildToken(std::string_view word)

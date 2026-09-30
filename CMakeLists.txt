@@ -44,7 +44,9 @@ set(HEADERS
     inc/Assembler/LabelInfo.h
     inc/Assembler/Token.h
     inc/Assembler/Statement.h
+    inc/Assembler/AssemblerStage.h
     inc/Assembler/AssemblerError.h
+    inc/Assembler/AssemblerWarning.h
     inc/Assembler/Assembler.h
 
     inc/Core/CPU.h
