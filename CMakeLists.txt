@@ -40,6 +40,7 @@ set(HEADERS
     inc/Assembler/InstructionDef.h
     inc/Assembler/ISAEntry.h
     inc/Assembler/Lexer.h
+    inc/Assembler/ParsedNumber.h
     inc/Assembler/Parser.h
     inc/Assembler/LabelInfo.h
     inc/Assembler/Token.h

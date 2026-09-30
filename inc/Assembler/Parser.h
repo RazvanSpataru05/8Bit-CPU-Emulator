@@ -65,9 +65,12 @@ private:
 	/* Helpers */
 	const Token& Peek() const;
 	const Token& Next();
-	uint32_t ConsumeNumber();
+	ParsedNumber ConsumeNumber();
 	uint8_t ConsumeSelector();
 	void ConsumeLine();
+
+	template <typename T>
+	bool CheckNumericLimit(const ParsedNumber& parsedNumber);
 
 private:
 	std::vector<Token> m_tokens;
@@ -95,3 +98,23 @@ private:
 			[this](const Token& token) {HandleNewLineToken(token);}},
 	};
 };
+
+template<typename T>
+inline bool Parser::CheckNumericLimit(const ParsedNumber& parsedNumber)
+{
+	if (parsedNumber.outOfRange)
+	{
+		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
+			": '" + Peek().value + "' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).");
+		ConsumeLine();
+		return false;
+	}
+
+	const std::string size = std::is_same_v<T, uint8_t> ? "8" : "16";
+	if (parsedNumber.value > std::numeric_limits<T>::max())
+	{
+		AddWarning("Warning at line " + std::to_string(Peek().line) + ", column" + std::to_string(Peek().column) +
+			": value '" + Peek().value + "' exceeds " + size + " bits and will be truncated.");
+	}
+	return true;
+}

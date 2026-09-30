@@ -209,14 +209,17 @@ void Parser::HandleLabel()
 	{
 		ConsumeLine();
 	}
-}
+} 
 
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
 	Next(); // go to imm8 value
 
-	operand[0] = static_cast<uint8_t>(ConsumeNumber());
+	ParsedNumber parsedNumber = ConsumeNumber();
+	if (!CheckNumericLimit<uint8_t>(parsedNumber)) return {};
+
+	operand[0] = static_cast<uint8_t>(parsedNumber.value);
 	Next(); // go to newline
 
 	return operand;
@@ -248,7 +251,10 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	}
 	else if (token.type == TokenType::NUMBER)
 	{
-		address = static_cast<uint16_t>(ConsumeNumber());
+		ParsedNumber parsedNumber = ConsumeNumber();
+		if (!CheckNumericLimit<uint16_t>(parsedNumber)) return {};
+
+		address = static_cast<uint16_t>(parsedNumber.value);
 		Next();
 	}
 	else
@@ -357,18 +363,17 @@ const Token& Parser::Next()
 	return m_tokens[++m_pos];
 }
 
-uint32_t Parser::ConsumeNumber()
+ParsedNumber Parser::ConsumeNumber()
 {
 	if (Peek().type != TokenType::NUMBER)
 	{
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
 			": expected number, found " + Utils::TokenTypeToString(Peek()) + ".");
 		ConsumeLine();
-		return 0u;
+		return { 0u, false };
 	}
 
-	const Token& numberToken = Peek();
-	return Utils::ParseNumber(numberToken.value);
+	return Utils::ParseNumber(Peek().value);
 }
 
 uint8_t Parser::ConsumeSelector()
@@ -391,18 +396,20 @@ uint8_t Parser::ConsumeSelector()
 	}
 	else if (token.type == TokenType::NUMBER)
 	{
-		const uint32_t selector = (Utils::ParseNumber(token.value));
-		if (!selectorToName.contains(static_cast<uint8_t>(selector)))
+		ParsedNumber parsedNumber = ConsumeNumber();
+		if (!CheckNumericLimit<uint8_t>(parsedNumber)) return 0u;
+
+		if (!selectorToName.contains(static_cast<uint8_t>(parsedNumber.value)))
 		{
 			m_currentStatementHasError = true;
 			AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-				": '" + std::to_string(static_cast<int>(selector)) + "' is not a valid register selector (valid range: 0x00-0x03).");
+				": '" + std::to_string(static_cast<int>(parsedNumber.value)) + "' is not a valid register selector (valid range: 0x00-0x03).");
 			ConsumeLine();
-			return 0;
+			return 0u;
 		}
 
 		Next();
-		return static_cast<uint8_t>(selector);
+		return static_cast<uint8_t>(parsedNumber.value);
 	}
 	else
 	{

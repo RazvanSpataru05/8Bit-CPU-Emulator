@@ -6,6 +6,7 @@
 
 #include "Assembler/ISAEntry.h"
 #include "Assembler/Token.h"
+#include "Assembler/ParsedNumber.h"
 
 #include <string>
 #include <algorithm>
@@ -20,9 +21,9 @@ namespace Utils
 	bool HasPrefix(std::string_view word);
 	bool StartsLikeNumber(std::string_view word);
 	bool IsNumber(std::string_view word);
-	uint32_t ParseNumber(const std::string& word);
+	ParsedNumber ParseNumber(const std::string& word);
 
 	std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
 	std::string TokenTypeToString(const Token& token);
 	const char* FlagToString(bool value);
-};
+};  

@@ -186,14 +186,14 @@ Token Lexer::BuildToken(std::string_view word)
 
 	if (Utils::StartsLikeNumber(word))
 	{
-		if (!Utils::IsNumber(word))
+		if (Utils::IsNumber(word))
 		{
-			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
-			": '" + std::string(word) + "'" + "is not a valid number.\n", wordColumnStart);
+			return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
 		}
 		else
 		{
-			return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
+			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
+				": '" + std::string(word) + "'" + "is not a valid number.\n", wordColumnStart);
 		}
 	}
 	return { TokenType::IDENTIFIER, word, m_lineNumber, wordColumnStart };
