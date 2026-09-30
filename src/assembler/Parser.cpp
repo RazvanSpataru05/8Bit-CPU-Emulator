@@ -201,8 +201,11 @@ void Parser::HandleLabel()
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
 	std::array<uint8_t, 2> operand{};
+	Next(); // go to imm8 value
 
 	operand[0] = static_cast<uint8_t>(ConsumeNumber());
+	Next(); // go to newline
+
 	return operand;
 }
 
@@ -210,7 +213,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 {
 	std::array<uint8_t, 2> operands{};
 	uint16_t address{};
-	const Token& token = Next();
+	const Token& token = Next(); // go to addr
 
 	if (token.type == TokenType::IDENTIFIER)
 	{
@@ -225,24 +228,26 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 		else
 		{
 			address = m_labels.at(label).address;
+			Next(); // go to newline
 		}
 		
 	}
 	else if (token.type == TokenType::NUMBER)
 	{
 		address = static_cast<uint16_t>(ConsumeNumber());
+		Next();
 	}
 	else
 	{
 		AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
 			": expected 16-bit address or label, found " + Utils::TokenTypeToString(token) + ".");
 		ConsumeLine();
+		return {};
 	}
 
 	operands[0] = static_cast<uint8_t>(address >> 8); // hi part
 	operands[1] = static_cast<uint8_t>(address & 0xFF); // lo part
 
-	Next();
 	return operands;
 }
 
@@ -328,7 +333,6 @@ const Token& Parser::Next()
 
 uint32_t Parser::ConsumeNumber()
 {
-	Next(); // go to imm8 value
 	if (Peek().type != TokenType::NUMBER)
 	{
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
@@ -338,7 +342,6 @@ uint32_t Parser::ConsumeNumber()
 	}
 
 	const Token& numberToken = Peek();
-	Next();
 	return Utils::ParseNumber(numberToken.value);
 }
 
