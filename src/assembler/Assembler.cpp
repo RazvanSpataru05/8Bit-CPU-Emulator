@@ -10,6 +10,7 @@ Assembler::Assembler() :
 bool Assembler::Assemble(std::string_view sourceCode)
 {
 	m_errors.clear();
+	m_warnings.clear();
 
 	RunLexer(sourceCode);
 	if (m_lexer.LexerErrors())
@@ -19,6 +20,9 @@ bool Assembler::Assemble(std::string_view sourceCode)
 		return false;
 	}
 
+	const auto& lexerWarnings = m_lexer.GetWarnings();
+	m_warnings.insert(m_warnings.end(), lexerWarnings.begin(), lexerWarnings.end());
+
 	RunParser();
 	if (m_parser.ParserErrors())
 	{
@@ -26,6 +30,10 @@ bool Assembler::Assemble(std::string_view sourceCode)
 		m_errors.insert(m_errors.end(), parserErrors.begin(), parserErrors.end());
 		return false;
 	}
+
+	const auto& parserWarnings = m_parser.GetWarnings();
+	std::cout << "Parser Warnings: " << parserWarnings.size() << "\n";
+	m_warnings.insert(m_warnings.end(), parserWarnings.begin(), parserWarnings.end());
 
 	SortErrors();
 	return m_errors.empty();
@@ -39,6 +47,11 @@ std::span<const Statement> Assembler::GetStatements() const noexcept
 std::span<const AssemblerError> Assembler::GetErrors() const noexcept
 {
 	return m_errors;
+}
+
+std::span<const AssemblerWarning> Assembler::GetWarnings() const noexcept
+{
+	return m_warnings;
 }
 
 void Assembler::SortErrors() noexcept

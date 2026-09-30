@@ -12,6 +12,7 @@ public:
 
 	[[nodiscard]] std::span<const Statement>		GetStatements()			const noexcept;
 	[[nodiscard]] std::span<const AssemblerError>	GetErrors()				const noexcept;
+	[[nodiscard]] std::span<const AssemblerWarning> GetWarnings()			const noexcept;
 
 	void SortErrors() noexcept;
 
@@ -30,4 +31,5 @@ private:
 	Parser m_parser;
 
 	std::vector<AssemblerError> m_errors;
+	std::vector<AssemblerWarning> m_warnings;
 };

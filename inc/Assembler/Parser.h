@@ -58,8 +58,8 @@ private:
 	void ExpectComma();
 	void ExpectColon();
 
+	void CheckUnusedLabels();
 	void ConsumeLabel();
-
 	bool IsLabelDefinition() const;
 
 	/* Helpers */

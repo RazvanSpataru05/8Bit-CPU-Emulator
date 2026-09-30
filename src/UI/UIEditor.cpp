@@ -242,12 +242,13 @@ namespace UIEditor
 		{
 			ImGui::InputTextMultiline
 			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
+
 			if (ImGui::Button("Assemble & Load"))
 			{
 				Logger::ClearLogFile();
 				if (assembler.Assemble(editorBuffer))
 				{
-					const auto statements = assembler.GetStatements();
+					const auto& statements = assembler.GetStatements();
 					const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
 
 					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
@@ -529,12 +530,18 @@ namespace UIEditor
 		ImGui::BeginChild("##errorList", ImVec2(-1, 150), true);
 
 		const auto& errors = assembler.GetErrors();
-		if (errors.empty())
+		const auto& warnings = assembler.GetWarnings();
+		if (errors.empty() && warnings.empty())
 		{
 			ImGui::TextDisabled("No errors.");
 		}
 		else
 		{
+			for (const auto& warning : warnings)
+			{
+				ImGui::TextWrapped("%s", warning.message.c_str());
+			}
+
 			for (const auto& error : errors)
 			{
 				ImGui::TextWrapped("%s", error.message.c_str());

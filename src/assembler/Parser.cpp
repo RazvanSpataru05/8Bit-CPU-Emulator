@@ -25,6 +25,11 @@ std::span<const AssemblerError> Parser::GetErrors() const noexcept
 	return m_errors;
 }
 
+std::span<const AssemblerWarning> Parser::GetWarnings() const noexcept
+{
+	return m_warnings;
+}
+
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
@@ -93,6 +98,7 @@ void Parser::ParseInstructions()
 			ConsumeLine();
 		}
 	}
+	CheckUnusedLabels();
 }
 
 void Parser::AddStatement()
@@ -235,6 +241,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 		else
 		{
 			address = m_labels.at(label).address;
+			m_labels.at(label).used = true;
 			Next(); // go to newline
 		}
 		
@@ -315,6 +322,18 @@ void Parser::ExpectColon()
 		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().line) +
 			": expected ':' after label definition, found " + Utils::TokenTypeToString(Peek()) + ".");
 		ConsumeLine();
+	}
+}
+
+void Parser::CheckUnusedLabels()
+{
+	for (const auto& [label, info] : m_labels)
+	{
+		if (!info.used)
+		{
+			AddWarning("Warning at line " + std::to_string(info.lineDeclaration) +
+				": label '" + label + "' is defined but never used.");
+		}
 	}
 }
 
