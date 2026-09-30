@@ -15,4 +15,13 @@ struct AssemblerWarning
 		: stage{ s }, line{ l }, column{ c }, message{ m }
 	{
 	}
+
+	constexpr bool operator<(const AssemblerWarning& rhs) const
+	{
+		if (line == rhs.line)
+		{
+			return column < rhs.column;
+		}
+		return line < rhs.line;
+	}
 };

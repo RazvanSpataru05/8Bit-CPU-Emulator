@@ -16,12 +16,12 @@ struct AssemblerError
 	{
 	}
 
-	const bool operator<(const AssemblerError& other) const
+	constexpr bool operator<(const AssemblerError& rhs) const
 	{
-		if (line == other.line)
+		if (line == rhs.line)
 		{
-			return column < other.column;
+			return column < rhs.column;
 		}
-		return line < other.line;
+		return line < rhs.line;
 	}
 };

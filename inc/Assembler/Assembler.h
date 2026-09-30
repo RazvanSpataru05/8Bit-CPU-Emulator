@@ -14,7 +14,8 @@ public:
 	[[nodiscard]] std::span<const AssemblerError>	GetErrors()				const noexcept;
 	[[nodiscard]] std::span<const AssemblerWarning> GetWarnings()			const noexcept;
 
-	void SortErrors() noexcept;
+	void SortErrors()	noexcept;
+	void SortWarnings() noexcept;
 
 private:
 	Assembler(const Assembler&) = delete;

@@ -51,6 +51,8 @@ private:
 	// Helper for other tokens
 	void ConsumeSymbol(TokenType tokenType, std::string_view symbol);
 
+	void CheckMixedCase(const Token& token);
+
 	void AddError(std::string_view message, uint32_t column);
 	void AddWarning(std::string_view message, uint32_t column);
 

@@ -83,7 +83,10 @@ void Lexer::ConsumeWord()
 		++m_columnNumber;
 		++m_currentIndex;
 	}
-	m_tokens.push_back(BuildToken(word));
+	
+	const Token& token = BuildToken(word);
+	m_tokens.emplace_back(token);
+	CheckMixedCase(token);
 }
 
 void Lexer::ConsumeWhiteSpace()
@@ -148,6 +151,19 @@ void Lexer::ConsumeSymbol(TokenType tokenType, std::string_view symbol)
 	m_tokens.emplace_back(tokenType, symbol, m_lineNumber, m_columnNumber);
 	++m_currentIndex;
 	++m_columnNumber;
+}
+
+void Lexer::CheckMixedCase(const Token& token)
+{
+	if (token.type != TokenType::REGISTER && token.type != TokenType::MNEMONIC) return;
+
+	const std::string upperWord = Utils::ToUpper(token.value);
+
+	if (token.value == upperWord) return;
+
+	const std::string kind = token.type == TokenType::MNEMONIC ? "mnemonic" : "register";
+	AddWarning("Warning at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
+		": " + kind + " '" + token.value + "' is not uppercase. Consider " + upperWord + ".", token.column);
 }
 
 void Lexer::AddError(std::string_view message, uint32_t column)

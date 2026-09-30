@@ -32,10 +32,10 @@ bool Assembler::Assemble(std::string_view sourceCode)
 	}
 
 	const auto& parserWarnings = m_parser.GetWarnings();
-	std::cout << "Parser Warnings: " << parserWarnings.size() << "\n";
 	m_warnings.insert(m_warnings.end(), parserWarnings.begin(), parserWarnings.end());
 
 	SortErrors();
+	SortWarnings();
 	return m_errors.empty();
 }
 
@@ -57,6 +57,11 @@ std::span<const AssemblerWarning> Assembler::GetWarnings() const noexcept
 void Assembler::SortErrors() noexcept
 {
 	std::sort(m_errors.begin(), m_errors.end());
+}
+
+void Assembler::SortWarnings() noexcept
+{
+	std::sort(m_warnings.begin(), m_warnings.end());
 }
 
 void Assembler::RunLexer(std::string_view sourceCode)
