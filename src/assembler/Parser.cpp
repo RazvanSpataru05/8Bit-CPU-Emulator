@@ -33,7 +33,6 @@ std::span<const AssemblerWarning> Parser::GetWarnings() const noexcept
 void Parser::SetTokens(std::span<const Token> tokens)
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
-	Logger::AddInfoMessage(std::format("Tokens: {}\n", m_tokens.size()));
 }
 
 void Parser::BuildSymbolTable()
@@ -92,9 +91,9 @@ void Parser::ParseInstructions()
 			it->second(currentToken);
 		}
 		else
-		{
-			AddError("Error at line " + std::to_string(currentToken.line) + ", column " + std::to_string(currentToken.column) +
-				": '" + currentToken.value + "' is not a recognized instruction.");
+		{	
+			AddError(std::format("Error at line {}, column {}: '{}' is not a recognized instruction",
+				currentToken.line, currentToken.column, currentToken.value));
 			ConsumeLine();
 		}
 	}
@@ -130,8 +129,7 @@ void Parser::PrintStatements() const noexcept
 	{
 		if (statement.ISAEntry)
 		{
-			const std::string mnemonic = statement.ISAEntry->mnemonic;
-			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", mnemonic));
+			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", statement.ISAEntry->mnemonic));
 		}
 		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode)));
 		Logger::AddInfoMessage("VALUE(S): ");
@@ -195,8 +193,8 @@ void Parser::HandleLabel()
 		const std::string label = Utils::ToLower(Peek().value);
 		if (m_labels.find(label) != m_labels.end())
 		{
-			AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column)
-				+ ": '" + std::string(Peek().value) + "' already exists.");
+			AddError(std::format("Error at line {}, column {}: '{}' already exists.",
+				Peek().line, Peek().column, Peek().value));
 			ConsumeLine();
 		}
 		else
@@ -236,9 +234,10 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 		const std::string label = Utils::ToLower(Peek().value);
 		if (!m_labels.contains(label))
 		{
-			AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
-				": undefined label '" + Peek().value + "'.");
+			AddError(std::format("Error at line {}, {}: undefined label '{}'.",
+				Peek().line, Peek().column, Peek().value));
 			ConsumeLine();
+
 			return {};
 		}
 		else
@@ -259,9 +258,10 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	}
 	else
 	{
-		AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-			": expected 16-bit address or label, found " + Utils::TokenTypeToString(token) + ".");
+		AddError(std::format("Error at line {}, column {}: expected 16-bit address or label, found {}.",
+			token.line, token.column, Utils::TokenTypeToString(token)));
 		ConsumeLine();
+
 		return {};
 	}
 
@@ -298,8 +298,9 @@ void Parser::ExpectEndOfStatement()
 {
 	if (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
-		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
-			": expected newline or end of file at the end of statement. Found " + Utils::TokenTypeToString(Peek()) + ".");
+
+		AddError(std::format("Error at line {}, column {}: expected newline or end of file at the end of statement. Found {}.",
+			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 
@@ -314,8 +315,9 @@ void Parser::ExpectComma()
 	if (Peek().type != TokenType::COMMA)
 	{
 		m_currentStatementHasError = true;
-		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
-		": expected ',' after first operand of 'MOV', found " + Utils::TokenTypeToString(Peek()) + ".");
+
+		AddError(std::format("Error at line {}, column {}: expected ',' after first operand of 'MOV', found {}.",
+			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 }
@@ -325,8 +327,9 @@ void Parser::ExpectColon()
 	if (Next().type != TokenType::COLON)
 	{
 		m_currentStatementHasError = true;
-		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().line) +
-			": expected ':' after label definition, found " + Utils::TokenTypeToString(Peek()) + ".");
+
+		AddError(std::format("Error at line {}, column {}: expected ':' after label definition, found {}.",
+			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 }
@@ -337,8 +340,8 @@ void Parser::CheckUnusedLabels()
 	{
 		if (!info.used)
 		{
-			AddWarning("Warning at line " + std::to_string(info.lineDeclaration) +
-				": label '" + label + "' is defined but never used.");
+			AddWarning(std::format("Warning at line {}: label '{}' is defined but never used.",
+				info.lineDeclaration, label));
 		}
 	}
 }
@@ -367,9 +370,10 @@ ParsedNumber Parser::ConsumeNumber()
 {
 	if (Peek().type != TokenType::NUMBER)
 	{
-		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
-			": expected number, found " + Utils::TokenTypeToString(Peek()) + ".");
+		AddError(std::format("Error at line {}, column {}: expected number, found {}.",
+			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
 		ConsumeLine();
+
 		return { 0u, false };
 	}
 
@@ -386,8 +390,9 @@ uint8_t Parser::ConsumeSelector()
 		if (!nameToSelector.contains(upper))
 		{
 			m_currentStatementHasError = true;
-			AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-				": '" + token.value + "' is not a valid register name (valid range: A-D).");
+
+			AddError(std::format("Error at line {}, column {}: '{}' is not a valid register name (valid range: A-D).",
+				token.line, token.column, token.value));
 			ConsumeLine();
 		}
 
@@ -402,9 +407,11 @@ uint8_t Parser::ConsumeSelector()
 		if (!selectorToName.contains(static_cast<uint8_t>(parsedNumber.value)))
 		{
 			m_currentStatementHasError = true;
-			AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-				": '" + std::to_string(static_cast<int>(parsedNumber.value)) + "' is not a valid register selector (valid range: 0x00-0x03).");
+
+			AddError(std::format("Error at line {}, column {}: '{}' is not a valid register selector (valid range: 0x00-0x03).",
+				token.line, token.column, parsedNumber.value));
 			ConsumeLine();
+
 			return 0u;
 		}
 
@@ -414,11 +421,12 @@ uint8_t Parser::ConsumeSelector()
 	else
 	{
 		m_currentStatementHasError = true;
-		AddError("Error at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-			": expected register selector or name, found " + Utils::TokenTypeToString(Peek()) + " '" +
-		Peek().value + "'.");
+
+		AddError(std::format("Error at line {}, column {}: expected register selector or name, found {}.",
+			token.line, token.column, Utils::TokenTypeToString(Peek())));
 		ConsumeLine();
-		return 0;
+
+		return 0u;
 	}
 }
 

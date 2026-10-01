@@ -104,8 +104,8 @@ inline bool Parser::CheckNumericLimit(const ParsedNumber& parsedNumber)
 {
 	if (parsedNumber.outOfRange)
 	{
-		AddError("Error at line " + std::to_string(Peek().line) + ", column " + std::to_string(Peek().column) +
-			": '" + Peek().value + "' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).");
+		AddError(std::format("Error at line {}, {}: '{}' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).",
+			Peek().line, Peek().column, Peek().value));
 		ConsumeLine();
 		return false;
 	}
@@ -113,8 +113,8 @@ inline bool Parser::CheckNumericLimit(const ParsedNumber& parsedNumber)
 	const std::string size = std::is_same_v<T, uint8_t> ? "8" : "16";
 	if (parsedNumber.value > std::numeric_limits<T>::max())
 	{
-		AddWarning("Warning at line " + std::to_string(Peek().line) + ", column" + std::to_string(Peek().column) +
-			": value '" + Peek().value + "' exceeds " + size + " bits and will be truncated.");
+		AddWarning(std::format("Warning at line {}, column {}: value '{}' exceeds {} bits and will be truncated.",
+			Peek().line, Peek().column, Peek().value, size));
 	}
 	return true;
 }

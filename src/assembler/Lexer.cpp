@@ -30,8 +30,8 @@ void Lexer::Tokenize()
 		}
 		else
 		{
-			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(m_columnNumber)
-				+ ": unexpected character '"  + std::to_string(currentChar) + "'.", m_columnNumber);
+			AddError(std::format("Error at line {}, column {}: unexpected character '{}'.",
+				m_lineNumber, m_columnNumber, currentChar), m_columnNumber);
 		}
 	}
 	m_tokens.emplace_back(TokenType::END_OF_FILE, "END_OF_FILE", ++m_lineNumber, 1u);
@@ -75,7 +75,7 @@ std::span<const Token> Lexer::GetTokens() const noexcept
 
 void Lexer::ConsumeWord()
 {
-	std::string word;
+	std::string word{};
 	while (m_currentIndex < m_sourceCode.size() &&
 		(isalnum(m_sourceCode[m_currentIndex]) || m_sourceCode[m_currentIndex] == '_'))
 	{
@@ -162,8 +162,9 @@ void Lexer::CheckMixedCase(const Token& token)
 	if (token.value == upperWord) return;
 
 	const std::string kind = token.type == TokenType::MNEMONIC ? "mnemonic" : "register";
-	AddWarning("Warning at line " + std::to_string(token.line) + ", column " + std::to_string(token.column) +
-		": " + kind + " '" + token.value + "' is not uppercase. Consider " + upperWord + ".", token.column);
+
+	AddWarning(std::format("Warning at line {}, column {}: {} '{}' is not uppercase. Consider {}.",
+		token.line, token.column, kind, token.value), token.column);
 }
 
 void Lexer::AddError(std::string_view message, uint32_t column)
@@ -192,8 +193,8 @@ Token Lexer::BuildToken(std::string_view word)
 		}
 		else
 		{
-			AddError("Error at line " + std::to_string(m_lineNumber) + ", column " + std::to_string(wordColumnStart) +
-				": '" + std::string(word) + "'" + "is not a valid number.\n", wordColumnStart);
+			AddError(std::format("Error at line {}, column {}: '{}' is not a valid number.",
+				m_lineNumber, wordColumnStart, word), wordColumnStart);
 		}
 	}
 	return { TokenType::IDENTIFIER, word, m_lineNumber, wordColumnStart };
