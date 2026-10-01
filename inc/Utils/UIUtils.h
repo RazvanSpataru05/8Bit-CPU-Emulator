@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI/UIEditor.h"
+#include "UI/UICommon.h"
 
 using namespace UIEditor;
 

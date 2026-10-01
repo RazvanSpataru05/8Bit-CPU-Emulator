@@ -61,6 +61,7 @@ set(HEADERS
     inc/IO/DataLoader.h
 
     inc/UI/UIEditor.h
+    inc/UI/UICommon.h
     inc/UI/Application.h
 
     inc/Utils/CharacterUtils.h

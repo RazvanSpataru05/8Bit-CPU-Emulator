@@ -1,5 +1,4 @@
 #include "UI/UIEditor.h"
-#include "Utils/UIUtils.h"
 #include "Assembler/Assembler.h"
 
 namespace UIEditor
