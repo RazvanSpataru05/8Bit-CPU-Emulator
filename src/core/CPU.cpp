@@ -1,6 +1,7 @@
 #include "Core/CPU.h"
 
-CPU::CPU()
+CPU::CPU() : 
+	m_interruptController{ InterruptController() }
 {
 	Reset();
 }
@@ -698,6 +699,11 @@ const MemoryUnit& CPU::GetMemoryUnit() const noexcept
 MemoryUnit& CPU::GetMemoryUnit() noexcept
 {
 	return m_memoryUnit;
+}
+
+InterruptController& CPU::GetInterruptController() noexcept
+{
+	return m_interruptController;
 }
 
 uint16_t CPU::ComputeAddress(uint16_t programCounter)

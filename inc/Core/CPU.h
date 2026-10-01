@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/InterruptController.h"
 #include "Core/MemoryUnit.h"
 
 #include <string>
@@ -10,7 +11,7 @@ public:
 	const size_t MEMORY_UNIT_SIZE{ 65536 };
 
 public:
-	CPU();
+	explicit CPU();
 
 	void Fetch();
 	void Step();
@@ -29,18 +30,19 @@ public:
 	[[nodiscard]] uint8_t		GetIR() const noexcept;
 
 	//Flag getters
-	[[nodiscard]] bool			GetZeroFlag() const noexcept;
-	[[nodiscard]] bool			GetHaltFlag() const noexcept;
-	[[nodiscard]] bool			GetCarryFlag() const noexcept;
-	[[nodiscard]] bool			GetNegativeFlag() const noexcept;
-	[[nodiscard]] bool			GetOverflowFlag() const noexcept;
+	[[nodiscard]] bool GetZeroFlag()		const noexcept;
+	[[nodiscard]] bool GetHaltFlag()		const noexcept;
+	[[nodiscard]] bool GetCarryFlag()		const noexcept;
+	[[nodiscard]] bool GetNegativeFlag()	const noexcept;
+	[[nodiscard]] bool GetOverflowFlag()	const noexcept;
 
 	bool IsReadingInstruction() const noexcept;
 	bool IsWritingInstruction() const noexcept;
 
 	// Memory Unit getter (const & non-const)
-	[[nodiscard]] const MemoryUnit&			GetMemoryUnit() const noexcept;
-	[[nodiscard]]		MemoryUnit&			GetMemoryUnit() noexcept;
+	[[nodiscard]] const MemoryUnit& GetMemoryUnit()				const noexcept;
+	[[nodiscard]] MemoryUnit& GetMemoryUnit()					noexcept;
+	[[nodiscard]] InterruptController& GetInterruptController() noexcept;
 
 private:
 	[[nodiscard]] uint8_t	ReadRegister(uint8_t selector) const noexcept;
@@ -57,21 +59,24 @@ private:
 
 private:
 
-	// General Registry
-	uint8_t m_A;
-	uint8_t m_B;
-	uint8_t m_C;
-	uint8_t m_D;
-
-	uint16_t m_SP; // Stack Pointer Registry
-	uint16_t m_PC; // Program Counter Registry
-	uint8_t m_IR; // Instruction Registry
-
-	bool m_ZeroFlag;
-	bool m_CarryFlag;
-	bool m_NegativeFlag;
-	bool m_OverflowFlag;
-	bool m_HaltFlag;
 	MemoryUnit m_memoryUnit;
+	InterruptController m_interruptController;
+
+	// General Registry
+	uint8_t m_A{};
+	uint8_t m_B{};
+	uint8_t m_C{};
+	uint8_t m_D{};
+
+	uint16_t m_SP{};		// Stack Pointer Registry
+	uint16_t m_PC{};		// Program Counter Registry
+	uint8_t m_IR{};			// Instruction Registry
+
+	bool m_ZeroFlag{ false };
+	bool m_CarryFlag{ false };
+	bool m_NegativeFlag{ false };
+	bool m_OverflowFlag{ false };
+	bool m_HaltFlag{ false };
+	
 };
 
