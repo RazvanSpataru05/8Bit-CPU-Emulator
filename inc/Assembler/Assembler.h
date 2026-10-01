@@ -10,6 +10,8 @@ public:
 
 	bool Assemble(std::string_view sourceCode);
 
+	bool HasErrors() const noexcept;
+
 	[[nodiscard]] std::span<const Statement>		GetStatements()			const noexcept;
 	[[nodiscard]] std::span<const AssemblerError>	GetErrors()				const noexcept;
 	[[nodiscard]] std::span<const AssemblerWarning> GetWarnings()			const noexcept;

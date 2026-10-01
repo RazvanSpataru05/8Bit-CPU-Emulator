@@ -39,6 +39,11 @@ bool Assembler::Assemble(std::string_view sourceCode)
 	return m_errors.empty();
 }
 
+bool Assembler::HasErrors() const noexcept
+{
+	return !m_errors.empty();
+}
+
 std::span<const Statement> Assembler::GetStatements() const noexcept
 {
 	return m_parser.GetStatements();

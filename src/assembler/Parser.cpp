@@ -233,7 +233,7 @@ std::array<uint8_t, 2> Parser::ConsumeImm8()
 	if (!CheckNumericLimit<uint8_t>(parsedNumber)) return {};
 
 	operand[0] = static_cast<uint8_t>(parsedNumber.value);
-	Next(); // go to newline
+	Next(); // go to newline or end of file
 
 	return operand;
 }
@@ -259,7 +259,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 		{
 			address = m_labels.at(label).address;
 			m_labels.at(label).used = true;
-			Next(); // go to newline
+			Next(); // go to newline or end of file
 		}
 		
 	}
@@ -378,6 +378,7 @@ const Token& Parser::Peek() const
 
 const Token& Parser::Next()
 {
+	if (m_pos == m_tokens.size() - 1) return m_tokens[m_pos];
 	return m_tokens[++m_pos];
 }
 

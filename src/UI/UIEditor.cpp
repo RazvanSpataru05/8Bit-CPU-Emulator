@@ -5,7 +5,7 @@ namespace UIEditor
 {
 	namespace
 	{
-		OutputMode output{ OutputMode::NONE };
+		OutputMode output{ OutputMode::ERROR_LIST };
 		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
 
 		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
@@ -34,7 +34,7 @@ namespace UIEditor
 
 		uint8_t currentPage{};
 
-		bool helpMenuVisibility = false;
+		bool helpMenuVisibility{ false };
 
 		void NextPage()
 		{
@@ -256,6 +256,11 @@ namespace UIEditor
 
 					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 					memoryUnit.LoadValuesIntoMemory(values);
+					output = OutputMode::CONSOLE;
+				}
+				else
+				{
+					output = OutputMode::ERROR_LIST;
 				}
 			}
 			DrawOutput(assembler);
@@ -529,36 +534,32 @@ namespace UIEditor
 	{
 		ImGui::Separator();
 
-		const char* childName = output == OutputMode::ERROR_LIST ? "##errorlist" : "##console";
-		ImGui::BeginChild(childName, ImVec2(-1, 150), true);
-
-		if (ImGui::BeginTabBar("##bottomPanel"))
+		if (ImGui::BeginChild("##output", ImVec2(-1, 150), true))
 		{
-			if (ImGui::BeginTabItem("Error List"))
+			if (ImGui::BeginTabBar("##bottomPanel"))
 			{
-				output = OutputMode::ERROR_LIST;
-				DrawErrorList(assembler.GetErrors(), assembler.GetWarnings());
-				ImGui::EndTabItem();
+				//ImGuiTabItemFlags_ errorListTabFlag = 
+				if (ImGui::BeginTabItem("Error List"))
+				{
+					output = OutputMode::ERROR_LIST;
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("Console"))
+				{
+					output = OutputMode::CONSOLE;
+					ImGui::EndTabItem();
+				}
+				ImGui::EndTabBar();
 			}
 
-			if (ImGui::BeginTabItem("Console"))
+			switch (output)
 			{
-				output = OutputMode::CONSOLE;
-				DrawConsole();
-				ImGui::EndTabItem();
+			case OutputMode::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
+			case OutputMode::CONSOLE: {		DrawConsole(); break; }
 			}
-			
+			ImGui::EndChild();
 		}
-		ImGui::EndTabBar();
-
-		switch (output)
-		{
-		case OutputMode::NONE: { break; }
-		case OutputMode::ERROR_LIST:	{		DrawErrorList(assembler.GetErrors(), assembler.GetWarnings());	break; }
-		case OutputMode::CONSOLE:		{		DrawConsole();													break; }
-		}
-
-		ImGui::EndChild();
 	}
 
 	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings)
@@ -583,6 +584,6 @@ namespace UIEditor
 
 	void DrawConsole()
 	{
-
+		ImGui::TextDisabled("Console");
 	}
 }

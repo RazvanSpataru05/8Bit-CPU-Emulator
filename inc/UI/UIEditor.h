@@ -19,17 +19,16 @@ struct AssemblerWarning;
 
 namespace UIEditor
 {
+	enum class OutputMode : uint8_t
+	{
+		ERROR_LIST = 1u,
+		CONSOLE
+	};
+
 	enum class Mode : uint8_t
 	{
 		EDIT = 1u,
 		DISSASEMBLY
-	};
-
-	enum class OutputMode : uint8_t
-	{
-		NONE = 0u,
-		ERROR_LIST,
-		CONSOLE
 	};
 
 	enum class PageType : uint8_t
