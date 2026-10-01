@@ -5,7 +5,9 @@ namespace UIEditor
 {
 	namespace
 	{
+		OutputMode output{ OutputMode::NONE };
 		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
+
 		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
 
 		constexpr uint16_t PAGE_SIZE = 256u;
@@ -256,7 +258,7 @@ namespace UIEditor
 					memoryUnit.LoadValuesIntoMemory(values);
 				}
 			}
-			DrawErrorList(assembler);
+			DrawOutput(assembler);
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
@@ -523,15 +525,44 @@ namespace UIEditor
 		}
 	}
 
-	void DrawErrorList(const Assembler& assembler)
+	void DrawOutput(const Assembler& assembler)
 	{
 		ImGui::Separator();
-		ImGui::TextUnformatted("Error List");
 
-		ImGui::BeginChild("##errorList", ImVec2(-1, 150), true);
+		const char* childName = output == OutputMode::ERROR_LIST ? "##errorlist" : "##console";
+		ImGui::BeginChild(childName, ImVec2(-1, 150), true);
 
-		const auto& errors = assembler.GetErrors();
-		const auto& warnings = assembler.GetWarnings();
+		if (ImGui::BeginTabBar("##bottomPanel"))
+		{
+			if (ImGui::BeginTabItem("Error List"))
+			{
+				output = OutputMode::ERROR_LIST;
+				DrawErrorList(assembler.GetErrors(), assembler.GetWarnings());
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Console"))
+			{
+				output = OutputMode::CONSOLE;
+				DrawConsole();
+				ImGui::EndTabItem();
+			}
+			
+		}
+		ImGui::EndTabBar();
+
+		switch (output)
+		{
+		case OutputMode::NONE: { break; }
+		case OutputMode::ERROR_LIST:	{		DrawErrorList(assembler.GetErrors(), assembler.GetWarnings());	break; }
+		case OutputMode::CONSOLE:		{		DrawConsole();													break; }
+		}
+
+		ImGui::EndChild();
+	}
+
+	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings)
+	{
 		if (errors.empty() && warnings.empty())
 		{
 			ImGui::TextDisabled("No errors.");
@@ -548,6 +579,10 @@ namespace UIEditor
 				ImGui::TextWrapped("%s", error.message.c_str());
 			}
 		}
-		ImGui::EndChild();
+	}
+
+	void DrawConsole()
+	{
+
 	}
 }

@@ -138,12 +138,15 @@ void Parser::PrintStatements() const noexcept
 		{
 			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", statement.ISAEntry->mnemonic));
 		}
+
 		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode)));
 		Logger::AddInfoMessage("VALUE(S): ");
+
 		for (size_t index = 0; index < statement.operatorCount; ++index)
 		{
 			Logger::AddInfoMessage(std::format("0x{}, ", static_cast<int>(statement.operands[index])));
 		}
+
 		Logger::AddInfoMessage("\n\n");
 	}
 }

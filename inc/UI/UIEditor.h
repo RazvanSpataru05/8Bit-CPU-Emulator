@@ -14,13 +14,22 @@
 #include "ImGui/imgui-SFML.h"
 
 class Assembler;
+struct AssemblerError;
+struct AssemblerWarning;
 
 namespace UIEditor
 {
 	enum class Mode : uint8_t
 	{
-		EDIT = 0u,
+		EDIT = 1u,
 		DISSASEMBLY
+	};
+
+	enum class OutputMode : uint8_t
+	{
+		NONE = 0u,
+		ERROR_LIST,
+		CONSOLE
 	};
 
 	enum class PageType : uint8_t
@@ -43,5 +52,8 @@ namespace UIEditor
 				  bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
-	void DrawErrorList(const Assembler& assembler);
+	void DrawOutput(const Assembler& assembler);
+
+	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings);
+	void DrawConsole();
 }
