@@ -12,6 +12,7 @@ void Lexer::Tokenize()
 {
 	m_tokens.clear();
 	m_errors.clear();
+	m_warnings.clear();
 	m_currentIndex = 0;
 	m_lineNumber = 1u;
 	m_columnNumber = 1u;

@@ -19,9 +19,10 @@ struct AssemblerWarning;
 
 namespace UIEditor
 {
-	enum class OutputMode : uint8_t
+	enum class SelectedTab : uint8_t
 	{
-		ERROR_LIST = 1u,
+		NONE = 0u,
+		ERROR_LIST,
 		CONSOLE
 	};
 

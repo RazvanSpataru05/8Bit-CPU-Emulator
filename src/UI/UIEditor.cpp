@@ -1,11 +1,12 @@
 #include "UI/UIEditor.h"
+#include "Utils/UIUtils.h"
 #include "Assembler/Assembler.h"
 
 namespace UIEditor
 {
 	namespace
 	{
-		OutputMode output{ OutputMode::ERROR_LIST };
+		SelectedTab tab{ SelectedTab::ERROR_LIST };
 		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
 
 		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
@@ -256,11 +257,11 @@ namespace UIEditor
 
 					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 					memoryUnit.LoadValuesIntoMemory(values);
-					output = OutputMode::CONSOLE;
+					tab = SelectedTab::CONSOLE;
 				}
 				else
 				{
-					output = OutputMode::ERROR_LIST;
+					tab = SelectedTab::ERROR_LIST;
 				}
 			}
 			DrawOutput(assembler);
@@ -532,31 +533,46 @@ namespace UIEditor
 
 	void DrawOutput(const Assembler& assembler)
 	{
+		static SelectedTab clickedTab{ SelectedTab::NONE };
+
 		ImGui::Separator();
 
 		if (ImGui::BeginChild("##output", ImVec2(-1, 150), true))
 		{
 			if (ImGui::BeginTabBar("##bottomPanel"))
 			{
-				//ImGuiTabItemFlags_ errorListTabFlag = 
-				if (ImGui::BeginTabItem("Error List"))
+				const auto errorListTabFlag = Utils::ErrorListTab(tab) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+				if (ImGui::BeginTabItem("Error List", nullptr, errorListTabFlag))
 				{
-					output = OutputMode::ERROR_LIST;
+					if (ImGui::IsItemClicked())
+					{
+						clickedTab = SelectedTab::ERROR_LIST;
+					}
+						
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("Console"))
+				const auto consoleTabFlag = Utils::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
+				if (ImGui::BeginTabItem("Console", nullptr, consoleTabFlag))
 				{
-					output = OutputMode::CONSOLE;
+					if (ImGui::IsItemClicked())
+					{
+						clickedTab = SelectedTab::CONSOLE;
+					}
 					ImGui::EndTabItem();
 				}
 				ImGui::EndTabBar();
 			}
 
-			switch (output)
+			if (clickedTab != SelectedTab::NONE)
 			{
-			case OutputMode::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
-			case OutputMode::CONSOLE: {		DrawConsole(); break; }
+				tab = clickedTab;
+			}
+
+			switch (tab)
+			{
+			case SelectedTab::ERROR_LIST: {	DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
+			case SelectedTab::CONSOLE: {		DrawConsole(); break; }
 			}
 			ImGui::EndChild();
 		}
