@@ -533,8 +533,6 @@ namespace UIEditor
 
 	void DrawOutput(const Assembler& assembler)
 	{
-		static SelectedTab clickedTab{ SelectedTab::NONE };
-
 		ImGui::Separator();
 
 		if (ImGui::BeginChild("##output", ImVec2(-1, 150), true))
@@ -546,10 +544,14 @@ namespace UIEditor
 				{
 					if (ImGui::IsItemClicked())
 					{
-						clickedTab = SelectedTab::ERROR_LIST;
+						tab = SelectedTab::ERROR_LIST;
 					}
 						
 					ImGui::EndTabItem();
+				}
+				if (ImGui::IsItemClicked())
+				{
+					tab = SelectedTab::ERROR_LIST;
 				}
 
 				const auto consoleTabFlag = Utils::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
@@ -557,16 +559,16 @@ namespace UIEditor
 				{
 					if (ImGui::IsItemClicked())
 					{
-						clickedTab = SelectedTab::CONSOLE;
+						tab = SelectedTab::CONSOLE;
 					}
 					ImGui::EndTabItem();
 				}
+				if (ImGui::IsItemClicked())
+				{
+					tab = SelectedTab::CONSOLE;
+				}
 				ImGui::EndTabBar();
-			}
-
-			if (clickedTab != SelectedTab::NONE)
-			{
-				tab = clickedTab;
+				
 			}
 
 			switch (tab)
