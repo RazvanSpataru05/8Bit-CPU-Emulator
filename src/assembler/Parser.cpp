@@ -35,7 +35,7 @@ void Parser::SetTokens(std::span<const Token> tokens)
 	m_tokens.assign(tokens.begin(), tokens.end());
 }
 
-void Parser::BuildSymbolTable()
+void Parser::AddLabels()
 {
 	m_labels.clear();
 	m_pos = 0;
@@ -64,16 +64,19 @@ void Parser::BuildSymbolTable()
 	Logger::AddInfoMessage("Out First Pass\n");
 }
 
-void Parser::ParseInstructions()
+void Parser::ParseTokens()
 {
-	BuildSymbolTable();
+	AddLabels();
 	PrintLabels();
 
 	m_statements.clear();
 	m_errors.clear();
 	m_warnings.clear();
+
 	m_pos = 0;
 	m_currentAddress = 0x0000;
+	m_currentStatementHasError = false;
+	m_seenHLT = false;
 	ResetCurrentStatement();
 
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
@@ -98,6 +101,10 @@ void Parser::ParseInstructions()
 		}
 	}
 	CheckUnusedLabels();
+	if (!m_seenHLT)
+	{
+		AddWarning(std::format("Warning: no 'HLT' instruction found anywhere in the program."));
+	}
 }
 
 void Parser::AddStatement()
@@ -160,6 +167,8 @@ void Parser::HandleMnemonicToken(const Token& token)
 	m_currentStatement.opcode = entry->opcode;
 	m_currentStatement.ISAEntry = entry;
 	m_currentStatement.operatorCount = entry->size - 1;
+
+	if (entry->mnemonic == "HLT") m_seenHLT = true;
 
 	switch (entry->operatorKind)
 	{

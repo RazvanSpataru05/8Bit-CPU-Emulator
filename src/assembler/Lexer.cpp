@@ -164,7 +164,7 @@ void Lexer::CheckMixedCase(const Token& token)
 	const std::string kind = token.type == TokenType::MNEMONIC ? "mnemonic" : "register";
 
 	AddWarning(std::format("Warning at line {}, column {}: {} '{}' is not uppercase. Consider {}.",
-		token.line, token.column, kind, token.value), token.column);
+		token.line, token.column, kind, token.value, upperWord), token.column);
 }
 
 void Lexer::AddError(std::string_view message, uint32_t column)

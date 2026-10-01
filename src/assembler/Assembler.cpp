@@ -74,7 +74,7 @@ void Assembler::RunLexer(std::string_view sourceCode)
 void Assembler::RunParser()
 {
 	m_parser.SetTokens(m_lexer.GetTokens());
-	m_parser.ParseInstructions();
+	m_parser.ParseTokens();
 	m_parser.PrintStatements();
 	m_parser.PrintLabels();
 }

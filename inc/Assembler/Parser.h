@@ -19,8 +19,8 @@ public:
 	Parser(Parser&&) = default;
 	Parser& operator=(Parser&&) = default;
 
-	void BuildSymbolTable();
-	void ParseInstructions();
+	void AddLabels();
+	void ParseTokens();
 
 	bool ParserErrors() const noexcept;
 
@@ -82,6 +82,7 @@ private:
 	size_t m_pos{};
 
 	bool m_currentStatementHasError{ false };
+	bool m_seenHLT{ false };
 
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
