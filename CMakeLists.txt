@@ -23,6 +23,7 @@ set(SOURCES
 
     src/Core/CPU.cpp
     src/Core/MemoryUnit.cpp
+    src/Core/InterruptController.cpp
 
     src/Debugger/Dissasembler.cpp
 
@@ -52,6 +53,7 @@ set(HEADERS
 
     inc/Core/CPU.h
     inc/Core/MemoryUnit.h
+    inc/Core/InterruptController.h
 
     inc/Debugger/Dissasembler.h
 
