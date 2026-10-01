@@ -65,7 +65,7 @@ namespace Utils
 		}
 
 		uint32_t value{};
-		auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value);
+		auto [ptr, ec] = std::from_chars(digits.data(), digits.data() + digits.size(), value, base);
 
 		if (ec == std::errc::result_out_of_range)
 		{

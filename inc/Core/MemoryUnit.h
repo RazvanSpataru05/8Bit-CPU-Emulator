@@ -13,6 +13,9 @@ class MemoryUnit
 public:
 	explicit MemoryUnit();
 
+	MemoryUnit(MemoryUnit&&) = default;
+	MemoryUnit& operator=(MemoryUnit&&) = default;
+
 	[[nodiscard]] bool IsMemoryEmpty() const noexcept;
 
 	[[nodiscard]] uint8_t Read(uint16_t address) const noexcept;
@@ -26,14 +29,18 @@ public:
 	void LoadValuesIntoMemory(std::span<const uint8_t> program, uint16_t startAddress = 0x0000);
 	void LoadProgramFromFIle(const std::filesystem::path& filename);
 
+	const uint8_t& operator[](uint16_t address) const;
+	uint8_t& operator[](uint16_t address);
+
 private:
 	MemoryUnit(const MemoryUnit&) = delete;
 	MemoryUnit& operator=(const MemoryUnit&) = delete;
 
 private:
-	std::array<uint8_t, 65536> m_memory;
-	bool m_hasData;
+	std::array<uint8_t, 65536> m_memory{};
+
+	bool m_hasData{ false };
 	std::vector<uint8_t> m_snapshotData;
-	uint16_t m_snapshotStartAddress;
+	uint16_t m_snapshotStartAddress{};
 };
 

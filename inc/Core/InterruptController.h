@@ -19,11 +19,12 @@ public:
 	void RaiseInterrupt(uint8_t line);
 	std::optional<uint8_t> PollPendingInterrupt();
 
+	// keyboard interrupt line
 	void SetKeyboardData(uint8_t key);
 	uint8_t ReadKeyboardData() const noexcept;
 
-	bool InterruptsEnabled() const noexcept;
-	void SetInterruptsEnabled(bool enabled);
+	bool GetInterruptFlag()			const noexcept;
+	void EnableInterrupts(bool enabled) noexcept;
 
 private:
 	InterruptController(const InterruptController&) = delete;
@@ -31,6 +32,7 @@ private:
 
 private:
 	std::array<bool, INTERRUPT_LINE_COUNT> m_pending{};
+
 	uint8_t m_keyboardData{};
-	bool m_interruptsEnabled{ false };
+	bool m_interruptFlag{ false };
 };

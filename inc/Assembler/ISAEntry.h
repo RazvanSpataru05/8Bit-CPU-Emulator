@@ -97,12 +97,14 @@ namespace ISA
             {"CALL",    0x62,   OperatorKind::ADDR_16,  3, "Jumps to subroutines at given address, saving return address on the stack"},
             {"RET",     0x63,   OperatorKind::NONE,     1, "Assigns the return address to PC register"},
 
-            /* Misc (3 total) */
+            /* Misc (5 total) */
             {"NOP",     0x00,   OperatorKind::NONE,     1, "No operation"},
             {"MOV",     0x70,   OperatorKind::REG_REG,  3, "Copies the value of a register to another register"},
-            {"HLT",     0xFF,   OperatorKind::NONE,     1, "Stops the execution of the program"}
+            {"EI",      0xF8,   OperatorKind::NONE,     1, "Enables interrupt service routines"},
+            {"DI",      0xF3,   OperatorKind::NONE,     1, "Disables interrupt service routines"},
+            {"HLT",     0xFF,   OperatorKind::NONE,     1, "Stops the Program Counter from reading further"}
 
-            /* ISA Table size : 59 total */
+            /* ISA Table size : 61 total */
         };
 
         std::unordered_map<std::string, const ISAEntry*> BuildOpcodeTable()

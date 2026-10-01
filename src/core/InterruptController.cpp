@@ -28,12 +28,12 @@ uint8_t InterruptController::ReadKeyboardData() const noexcept
 	return m_keyboardData;
 }
 
-bool InterruptController::InterruptsEnabled() const noexcept
+bool InterruptController::GetInterruptFlag() const noexcept
 {
-	return m_interruptsEnabled;
+	return m_interruptFlag;
 }
 
-void InterruptController::SetInterruptsEnabled(bool enabled)
+void InterruptController::EnableInterrupts(bool enabled) noexcept
 {
-	m_interruptsEnabled = enabled;
+	m_interruptFlag = enabled;
 }

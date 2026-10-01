@@ -168,7 +168,10 @@ void Parser::HandleMnemonicToken(const Token& token)
 	m_currentStatement.ISAEntry = entry;
 	m_currentStatement.operatorCount = entry->size - 1;
 
-	if (entry->mnemonic == "HLT") m_seenHLT = true;
+	if (Utils::ToUpper(token.value) == "HLT")
+	{
+		m_seenHLT = true;
+	}
 
 	switch (entry->operatorKind)
 	{

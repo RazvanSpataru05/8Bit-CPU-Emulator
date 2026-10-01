@@ -48,7 +48,7 @@ void CPU::Step()
 	{
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
-		m_memoryUnit.Write(address, m_A);
+		m_memoryUnit[address] = m_A;
 		return;
 	}
 
@@ -551,6 +551,18 @@ void CPU::Step()
 		return;
 	}
 
+	case 0xF8: // EI 1by
+	{
+		m_interruptController.EnableInterrupts(true);
+		return;
+	}
+
+	case 0xF3: // DI 1by
+	{
+		m_interruptController.EnableInterrupts(false);
+		return;
+	}
+
 	case 0xFF: // HLT 1by
 	{
 		m_HaltFlag = true;
@@ -567,13 +579,14 @@ void CPU::Reset()
 	m_D = 0u;
 	m_PC = 0x0000;
 	m_SP = 0xFFFF;
-	m_IR = 0u;
+	m_IR = m_memoryUnit.Read(m_PC);
 
 	m_ZeroFlag = false;
 	m_CarryFlag = false;
 	m_NegativeFlag = false;
 	m_OverflowFlag = false;
 	m_HaltFlag = false;
+	m_interruptController.EnableInterrupts(false);
 }
 
 uint8_t CPU::ReadRegister(uint8_t selector) const noexcept
@@ -701,14 +714,14 @@ MemoryUnit& CPU::GetMemoryUnit() noexcept
 	return m_memoryUnit;
 }
 
-InterruptController& CPU::GetInterruptController() noexcept
+const InterruptController& CPU::GetInterruptController() const noexcept
 {
 	return m_interruptController;
 }
 
 uint16_t CPU::ComputeAddress(uint16_t programCounter)
 {
-	uint8_t high = m_memoryUnit.Read(programCounter++);
-	uint8_t low = m_memoryUnit.Read(programCounter++);
+	uint8_t high = m_memoryUnit[programCounter++];
+	uint8_t low = m_memoryUnit[programCounter++];
 	return (high << 8) | low;
 }

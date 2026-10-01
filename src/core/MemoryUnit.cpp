@@ -68,3 +68,13 @@ void MemoryUnit::LoadProgramFromFIle(const std::filesystem::path& filename)
 	const std::filesystem::path fullPath = std::filesystem::path("resources") / filename;
 	LoadValuesIntoMemory(DataLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
 }
+
+const uint8_t& MemoryUnit::operator[](uint16_t address) const
+{
+	return m_memory[address];
+}
+
+uint8_t& MemoryUnit::operator[](uint16_t address)
+{
+	return m_memory[address];
+}

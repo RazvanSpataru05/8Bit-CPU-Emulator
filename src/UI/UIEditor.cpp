@@ -212,6 +212,7 @@ namespace UIEditor
 		ImGui::Separator();
 
 		ImGui::Text("\nFlags");
+		ImGui::Text("Interrupt Flag: %s", Utils::FlagToString(cpu.GetInterruptController().GetInterruptFlag()));
 		ImGui::Text("Zero Flag: %s", Utils::FlagToString(cpu.GetZeroFlag()));
 		ImGui::Text("Carry Flag: %s", Utils::FlagToString(cpu.GetCarryFlag()));
 		ImGui::Text("Negative Flag: %s", Utils::FlagToString(cpu.GetNegativeFlag()));
@@ -514,7 +515,7 @@ namespace UIEditor
 			}
 			case PageType::MISC_PAGE:
 			{
-				DisplayTable("Misc Instructions Table", "misc_table", { 0x00, 0x70, 0xFF });
+				DisplayTable("Misc Instructions Table", "misc_table", { 0x00, 0x70, 0xF8, 0xF3, 0xFF });
 				break;
 			}
 			}
