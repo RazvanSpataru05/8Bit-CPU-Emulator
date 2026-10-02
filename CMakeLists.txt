@@ -22,8 +22,10 @@ set(SOURCES
     src/Assembler/Assembler.cpp
 
     src/Core/CPU.cpp
+    src/Core/Keyboard.cpp
     src/Core/MemoryUnit.cpp
     src/Core/InterruptController.cpp
+    src/Core/Terminal.cpp
 
     src/Debugger/Dissasembler.cpp
 
@@ -31,7 +33,6 @@ set(SOURCES
 
     src/UI/UIEditor.cpp
     src/UI/Application.cpp
-    src/UI/Terminal.cpp
 
     src/Utils/CharacterUtils.cpp
     src/Utils/StringUtils.cpp
@@ -55,7 +56,10 @@ set(HEADERS
 
     inc/Core/CPU.h
     inc/Core/MemoryUnit.h
+    inc/Core/Keyboard.h
     inc/Core/InterruptController.h
+    inc/Core/Terminal.h
+    inc/Core/TerminalLine.h
 
     inc/Debugger/Dissasembler.h
 
@@ -64,8 +68,6 @@ set(HEADERS
     inc/UI/UIEditor.h
     inc/UI/UICommon.h
     inc/UI/Application.h
-    inc/UI/Terminal.h
-    inc/UI/TerminalLine.h
 
     inc/Utils/CharacterUtils.h
     inc/Utils/StringUtils.h

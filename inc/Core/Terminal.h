@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Utils/StringUtils.h"
+#include "Core/TerminalLine.h"
 
-#include "UI/TerminalLine.h"
+#include "Utils/StringUtils.h"
 
 #include <vector>
 #include <span>

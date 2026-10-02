@@ -4,11 +4,11 @@
 
 #include "Core/CPU.h"
 #include "Core/MemoryUnit.h"
+#include "Core/Terminal.h"
 
 #include "Debugger/Dissasembler.h"
 
 #include "UI/UICommon.h"
-#include "UI/Terminal.h"
 
 #include "Utils/StringUtils.h"
 #include "Utils/Logger.h"

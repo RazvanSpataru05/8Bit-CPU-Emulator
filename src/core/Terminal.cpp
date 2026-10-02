@@ -1,4 +1,4 @@
-#include "UI/Terminal.h"
+#include "Core/Terminal.h"
 
 void Terminal::ExecuteCommand(std::string_view line)
 {
