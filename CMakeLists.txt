@@ -65,6 +65,7 @@ set(HEADERS
     inc/UI/UICommon.h
     inc/UI/Application.h
     inc/UI/Terminal.h
+    inc/UI/TerminalLine.h
 
     inc/Utils/CharacterUtils.h
     inc/Utils/StringUtils.h

@@ -15,6 +15,7 @@ namespace Utils
 {
 	std::string ToUpper(std::string_view word);
 	std::string ToLower(std::string_view word);
+	std::string RemoveWhiteSpace(std::string_view word);
 
 	void CheckBase(std::string_view prefix, uint8_t& base);
 

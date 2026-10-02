@@ -646,7 +646,12 @@ namespace UIEditor
 			const std::string line(consoleBuffer);
 			terminal.AddLine("> " + line);
 
-			std::fill(std::begin(consoleBuffer), std::end(consoleBuffer), '\0');
+			if (!terminal.ExecuteCommand(line))
+			{
+				
+			}
+
+			consoleBuffer[0] = '\0';
 			scrollToBottom = true;
 		}
 

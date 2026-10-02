@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Utils/StringUtils.h"
+
+#include "UI/TerminalLine.h"
+
 #include <vector>
 #include <string>
 #include <span>
@@ -9,10 +13,12 @@ class Terminal
 public:
 	Terminal() = default;
 
-	void Clear() noexcept;
-	void AddLine(const std::string& line) noexcept;
+	bool ExecuteCommand(std::string_view line);
 
-	const std::vector<std::string>& GetLines() const noexcept;
+	void Clear() noexcept;
+	void AddLine(const TerminalLine& line) noexcept;
+
+	std::span<const TerminalLine> GetLines() const noexcept;
 
 private:
 	Terminal(const Terminal&) = delete;
@@ -23,5 +29,5 @@ private:
 
 private:
 	
-	std::vector<std::string> m_lines;
+	std::vector<TerminalLine> m_lines;
 };

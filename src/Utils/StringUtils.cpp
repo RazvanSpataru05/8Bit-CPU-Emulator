@@ -16,6 +16,15 @@ namespace Utils
 		return lower;
 	}
 
+	std::string RemoveWhiteSpace(std::string_view word)
+	{
+		std::string s{ word };
+		std::remove_if(s.begin(), s.end(), [](unsigned char c) {
+			return c == ' ';
+			});
+		return s;
+	}
+
 	void CheckBase(std::string_view prefix, uint8_t& base)
 	{
 		if (prefix == "0b" || prefix == "0B") base = 2u;
