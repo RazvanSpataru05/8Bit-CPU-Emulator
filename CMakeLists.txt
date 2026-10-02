@@ -31,6 +31,7 @@ set(SOURCES
 
     src/UI/UIEditor.cpp
     src/UI/Application.cpp
+    src/UI/Terminal.cpp
 
     src/Utils/CharacterUtils.cpp
     src/Utils/StringUtils.cpp
@@ -63,6 +64,7 @@ set(HEADERS
     inc/UI/UIEditor.h
     inc/UI/UICommon.h
     inc/UI/Application.h
+    inc/UI/Terminal.h
 
     inc/Utils/CharacterUtils.h
     inc/Utils/StringUtils.h

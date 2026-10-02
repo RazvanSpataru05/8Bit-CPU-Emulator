@@ -8,6 +8,7 @@
 #include "Debugger/Dissasembler.h"
 
 #include "UI/UICommon.h"
+#include "UI/Terminal.h"
 
 #include "Utils/StringUtils.h"
 #include "Utils/Logger.h"

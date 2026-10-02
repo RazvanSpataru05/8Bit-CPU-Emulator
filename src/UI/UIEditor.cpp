@@ -31,10 +31,13 @@ namespace UIEditor
 		constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
 		const size_t BUFFER_SIZE{ 8192 };
+		const size_t CONSOLE_BUFFER_SIZE{ 8192 };
 
 		uint8_t currentPage{};
 
 		bool helpMenuVisibility{ false };
+
+		Terminal terminal;
 
 		void NextPage()
 		{
@@ -601,6 +604,11 @@ namespace UIEditor
 
 	void DrawConsole()
 	{
-		ImGui::TextDisabled("Console");
+		const auto& lines = terminal.GetLines();
+
+		for (const auto& line : lines)
+		{
+			ImGui::Text("%s", line.c_str());
+		}
 	}
 }
