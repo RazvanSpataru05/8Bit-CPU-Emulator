@@ -10,9 +10,9 @@ public:
 	Terminal() = default;
 
 	void Clear() noexcept;
-	void AddLine(std::string_view message) noexcept;
+	void AddLine(const std::string& line) noexcept;
 
-	std::span<const std::string> GetLines() const noexcept;
+	const std::vector<std::string>& GetLines() const noexcept;
 
 private:
 	Terminal(const Terminal&) = delete;

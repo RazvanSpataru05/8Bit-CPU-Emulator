@@ -31,7 +31,7 @@ namespace UIEditor
 		constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
 		const size_t BUFFER_SIZE{ 8192 };
-		const size_t CONSOLE_BUFFER_SIZE{ 8192 };
+		const size_t CONSOLE_BUFFER_SIZE{ 256 };
 
 		uint8_t currentPage{};
 
@@ -247,7 +247,7 @@ namespace UIEditor
 		if (mode == Mode::EDIT)
 		{
 			ImGui::InputTextMultiline
-			("##editor", editorBuffer, sizeof(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
+			("##editor", editorBuffer, IM_ARRAYSIZE(editorBuffer), ImVec2(-1, 300), ImGuiInputTextFlags_AllowTabInput);
 
 			if (ImGui::Button("Assemble & Load"))
 			{
@@ -537,53 +537,49 @@ namespace UIEditor
 	{
 		ImGui::Separator();
 
-		if (ImGui::BeginChild("##output", ImVec2(-1, 150), true))
+		if (ImGui::BeginTabBar("##bottomPanel"))
 		{
-			if (ImGui::BeginTabBar("##bottomPanel"))
+			const auto errorListTabFlag = Utils::ErrorListTab(tab) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+			if (ImGui::BeginTabItem("Error List", nullptr, errorListTabFlag))
 			{
-				const auto errorListTabFlag = Utils::ErrorListTab(tab) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
-				if (ImGui::BeginTabItem("Error List", nullptr, errorListTabFlag))
-				{
-					if (ImGui::IsItemClicked())
-					{
-						tab = SelectedTab::ERROR_LIST;
-					}
-						
-					ImGui::EndTabItem();
-				}
 				if (ImGui::IsItemClicked())
 				{
 					tab = SelectedTab::ERROR_LIST;
 				}
 
-				const auto consoleTabFlag = Utils::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
-				if (ImGui::BeginTabItem("Console", nullptr, consoleTabFlag))
-				{
-					if (ImGui::IsItemClicked())
-					{
-						tab = SelectedTab::CONSOLE;
-					}
-					ImGui::EndTabItem();
-				}
+				ImGui::EndTabItem();
+			}
+			if (ImGui::IsItemClicked())
+			{
+				tab = SelectedTab::ERROR_LIST;
+			}
+
+			const auto consoleTabFlag = Utils::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
+			if (ImGui::BeginTabItem("Console", nullptr, consoleTabFlag))
+			{
 				if (ImGui::IsItemClicked())
 				{
 					tab = SelectedTab::CONSOLE;
 				}
-				ImGui::EndTabBar();
-				
+				ImGui::EndTabItem();
 			}
+			if (ImGui::IsItemClicked())
+			{
+				tab = SelectedTab::CONSOLE;
+			}
+			ImGui::EndTabBar();
 
 			switch (tab)
 			{
-			case SelectedTab::ERROR_LIST: {	DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
-			case SelectedTab::CONSOLE: {		DrawConsole(); break; }
+			case SelectedTab::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
+			case SelectedTab::CONSOLE: { DrawConsole(); break; }
 			}
-			ImGui::EndChild();
 		}
 	}
 
 	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings)
 	{
+		ImGui::BeginChild("##errorList", ImVec2(-1, 150), true);
 		if (errors.empty() && warnings.empty())
 		{
 			ImGui::TextDisabled("No errors.");
@@ -600,15 +596,68 @@ namespace UIEditor
 				ImGui::TextWrapped("%s", error.message.c_str());
 			}
 		}
+		ImGui::EndChild();
 	}
 
 	void DrawConsole()
 	{
-		const auto& lines = terminal.GetLines();
+		static char consoleBuffer[CONSOLE_BUFFER_SIZE];
+		static bool scrollToBottom = true;
 
-		for (const auto& line : lines)
+		ImGuiStyle& style = ImGui::GetStyle();
+		const ImVec4 consoleBg = ImVec4(0.05f, 0.05f, 0.05f, 1.0f);
+		const ImVec4 consoleText = ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+
+		ImGui::PushStyleColor(ImGuiCol_ChildBg, consoleBg);
+		ImGui::BeginChild("##consoleOutput", ImVec2(-1, 200), true);
+
+		ImGui::PushStyleColor(ImGuiCol_Text, consoleText);
+		for (const auto& line : terminal.GetLines())
 		{
 			ImGui::Text("%s", line.c_str());
 		}
+		ImGui::PopStyleColor();
+
+		if (scrollToBottom || ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+		{
+			ImGui::SetScrollHereY(1.0f);
+		}
+		scrollToBottom = false;
+
+		ImGui::PopStyleColor();
+
+		ImGui::PushStyleColor(ImGuiCol_FrameBg, consoleBg);
+		ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, consoleBg);
+		ImGui::PushStyleColor(ImGuiCol_FrameBgActive, consoleBg);
+		ImGui::PushStyleColor(ImGuiCol_Text, consoleText);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
+
+		ImGui::TextUnformatted(">");
+		ImGui::SameLine();
+
+		ImGui::SetNextItemWidth(-1);
+
+		const bool reclaimFocus = ImGui::IsWindowAppearing();
+		const auto inputFlags = ImGuiInputTextFlags_EnterReturnsTrue;
+
+		if (ImGui::InputText("##consoleInput", consoleBuffer, IM_ARRAYSIZE(consoleBuffer), inputFlags))
+		{
+			std::cout << "Line no.: " << terminal.GetLines().size() << "\n";
+			const std::string line(consoleBuffer);
+			terminal.AddLine("> " + line);
+
+			std::fill(std::begin(consoleBuffer), std::end(consoleBuffer), '\0');
+			scrollToBottom = true;
+		}
+
+		if (reclaimFocus || (ImGui::IsItemDeactivatedAfterEdit()))
+		{
+			ImGui::SetKeyboardFocusHere(-1);
+		}
+
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(4);
+
+		ImGui::EndChild();
 	}
 }

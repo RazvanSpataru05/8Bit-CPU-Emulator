@@ -5,12 +5,12 @@ void Terminal::Clear() noexcept
     m_lines.clear();
 }
 
-void Terminal::AddLine(std::string_view message) noexcept
+void Terminal::AddLine(const std::string& line) noexcept
 {
-    m_lines.emplace_back(message);
+    m_lines.emplace_back(line);
 }
 
-std::span<const std::string> Terminal::GetLines() const noexcept
+const std::vector<std::string>& Terminal::GetLines() const noexcept
 {
     return m_lines;
 }
