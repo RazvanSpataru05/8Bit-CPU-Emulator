@@ -607,14 +607,27 @@ namespace UIEditor
 		ImGuiStyle& style = ImGui::GetStyle();
 		const ImVec4 consoleBg = ImVec4(0.05f, 0.05f, 0.05f, 1.0f);
 		const ImVec4 consoleText = ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+		const ImVec4 errorText = ImVec4(0.90f, 0.29f, 0.23f, 1.0f);
 
 		ImGui::PushStyleColor(ImGuiCol_ChildBg, consoleBg);
 		ImGui::BeginChild("##consoleOutput", ImVec2(-1, 200), true);
 
 		ImGui::PushStyleColor(ImGuiCol_Text, consoleText);
-		for (const auto& line : terminal.GetLines())
+		for (const auto& terminalLine : terminal.GetLines())
 		{
-			ImGui::Text("%s", line.c_str());
+			if (terminalLine.lineType == LineType::ERROR)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, errorText);
+				ImGui::TextWrapped("%s", terminalLine.command.c_str());
+				ImGui::PopStyleColor();
+			}
+			else
+			{
+				ImGui::PushStyleColor(ImGuiCol_Text, consoleText);
+				ImGui::TextWrapped("%s", terminalLine.command.c_str());
+				ImGui::PopStyleColor();
+			}
+			
 		}
 		ImGui::PopStyleColor();
 
@@ -642,14 +655,7 @@ namespace UIEditor
 
 		if (ImGui::InputText("##consoleInput", consoleBuffer, IM_ARRAYSIZE(consoleBuffer), inputFlags))
 		{
-			std::cout << "Line no.: " << terminal.GetLines().size() << "\n";
-			const std::string line(consoleBuffer);
-			terminal.AddLine("> " + line);
-
-			if (!terminal.ExecuteCommand(line))
-			{
-				
-			}
+			terminal.ExecuteCommand(consoleBuffer);
 
 			consoleBuffer[0] = '\0';
 			scrollToBottom = true;

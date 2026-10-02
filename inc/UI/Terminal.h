@@ -13,7 +13,7 @@ class Terminal
 public:
 	Terminal() = default;
 
-	bool ExecuteCommand(std::string_view line);
+	void ExecuteCommand(std::string_view line);
 
 	void Clear() noexcept;
 	void AddLine(const TerminalLine& line) noexcept;

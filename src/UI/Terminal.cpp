@@ -1,15 +1,22 @@
 #include "UI/Terminal.h"
 
-bool Terminal::ExecuteCommand(std::string_view line)
+void Terminal::ExecuteCommand(std::string_view line)
 {
     const std::string command = Utils::RemoveWhiteSpace(Utils::ToLower(line));
+    AddLine({ std::format("> {}", command), LineType::INFO });
+
     if (command == "clear")
     {
         Clear();
-        return true;
+        return;
     }
 
-    return false;
+    if (command == "error")
+    {
+        AddLine({std::format("{} : The term '{}' is not recognized as the name of a cmdlet, function, script file, or operable program.", 
+            line, line), LineType::ERROR});
+        return;
+    }
 }
 
 void Terminal::Clear() noexcept
