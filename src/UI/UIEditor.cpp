@@ -227,7 +227,7 @@ namespace UIEditor
 		ImGui::End();
 	}
 
-	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, const Dissasembler& dissasembler,
+	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit, const Dissasembler& dissasembler,
 		CPU& cpu, Assembler& assembler)
 	{
 		static char editorBuffer[BUFFER_SIZE];
@@ -257,7 +257,6 @@ namespace UIEditor
 					const auto& statements = assembler.GetStatements();
 					const std::vector<uint8_t> values = DataLoader::ParseStatements(statements);
 
-					MemoryUnit& memoryUnit = cpu.GetMemoryUnit();
 					memoryUnit.LoadValuesIntoMemory(values);
 					tab = SelectedTab::CONSOLE;
 				}
@@ -266,7 +265,7 @@ namespace UIEditor
 					tab = SelectedTab::ERROR_LIST;
 				}
 			}
-			DrawOutput(assembler);
+			DrawOutput(assembler, cpu.GetInterruptController());
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
@@ -533,7 +532,7 @@ namespace UIEditor
 		}
 	}
 
-	void DrawOutput(const Assembler& assembler)
+	void DrawOutput(const Assembler& assembler, InterruptController& interruptController)
 	{
 		ImGui::Separator();
 
@@ -572,7 +571,7 @@ namespace UIEditor
 			switch (tab)
 			{
 			case SelectedTab::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
-			case SelectedTab::CONSOLE: { DrawConsole(); break; }
+			case SelectedTab::CONSOLE: { DrawConsole(interruptController); break; }
 			}
 		}
 	}
@@ -599,7 +598,7 @@ namespace UIEditor
 		ImGui::EndChild();
 	}
 
-	void DrawConsole()
+	void DrawConsole(InterruptController& interruptController)
 	{
 		static char consoleBuffer[CONSOLE_BUFFER_SIZE];
 		static bool scrollToBottom = true;
@@ -655,9 +654,19 @@ namespace UIEditor
 
 		if (ImGui::InputText("##consoleInput", consoleBuffer, IM_ARRAYSIZE(consoleBuffer), inputFlags))
 		{
-			terminal.ExecuteCommand(consoleBuffer);
+			const std::string line{ consoleBuffer };
+			if (interruptController.GetInterruptFlag())
+			{
+				interruptController.EnableInterrupts(false);
+				interruptController.SetKeyboardData(line[line.size() - 1]);
+				std::cout << interruptController.ReadKeyboardData();
+			}
+			else
+			{
+				terminal.ExecuteCommand(line);
+			}
 
-			consoleBuffer[0] = '\0';
+			consoleBuffer[0] = '\0'; // empty buffer
 			scrollToBottom = true;
 		}
 

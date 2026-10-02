@@ -24,15 +24,15 @@ struct AssemblerWarning;
 namespace UIEditor
 {
 	void DrawCPUState(const CPU& cpu);
-	void DrawAssemblyPanel(Mode& mode, const MemoryUnit& memoryUnit, 
+	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit, 
 						   const Dissasembler& dissasembler, CPU& cpu, Assembler& assembler);
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
 				  bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
-	void DrawOutput(const Assembler& assembler);
+	void DrawOutput(const Assembler& assembler, InterruptController& interruptController);
 
 	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings);
-	void DrawConsole();
+	void DrawConsole(InterruptController& interruptController);
 }

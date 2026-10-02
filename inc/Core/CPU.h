@@ -43,6 +43,7 @@ public:
 	[[nodiscard]] const MemoryUnit& GetMemoryUnit()						const noexcept;
 	[[nodiscard]] MemoryUnit& GetMemoryUnit()							noexcept;
 	[[nodiscard]] const InterruptController& GetInterruptController()	const noexcept;
+	[[nodiscard]] InterruptController& GetInterruptController()			noexcept;
 
 private:
 	[[nodiscard]] uint8_t	ReadRegister(uint8_t selector) const noexcept;

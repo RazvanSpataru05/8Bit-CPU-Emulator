@@ -579,7 +579,7 @@ void CPU::Reset()
 	m_D = 0u;
 	m_PC = 0x0000;
 	m_SP = 0xFFFF;
-	m_IR = m_memoryUnit.Read(m_PC);
+	m_IR = m_memoryUnit[m_PC];
 
 	m_ZeroFlag = false;
 	m_CarryFlag = false;
@@ -715,6 +715,11 @@ MemoryUnit& CPU::GetMemoryUnit() noexcept
 }
 
 const InterruptController& CPU::GetInterruptController() const noexcept
+{
+	return m_interruptController;
+}
+
+InterruptController& CPU::GetInterruptController() noexcept
 {
 	return m_interruptController;
 }

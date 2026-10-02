@@ -5,7 +5,6 @@
 #include "UI/TerminalLine.h"
 
 #include <vector>
-#include <string>
 #include <span>
 
 class Terminal

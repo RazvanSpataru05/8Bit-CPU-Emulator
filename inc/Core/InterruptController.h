@@ -23,7 +23,7 @@ public:
 	void SetKeyboardData(uint8_t key);
 	uint8_t ReadKeyboardData() const noexcept;
 
-	bool GetInterruptFlag()			const noexcept;
+	bool GetInterruptFlag()				const noexcept;
 	void EnableInterrupts(bool enabled) noexcept;
 
 private:
