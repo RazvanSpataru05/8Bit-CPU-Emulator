@@ -11,7 +11,10 @@ public:
 	const size_t MEMORY_UNIT_SIZE{ 65536 };
 
 public:
-	explicit CPU();
+	explicit CPU(InterruptController& interruptContrroller);
+
+	CPU(CPU&&) = default;
+	CPU& operator=(CPU&&) = default;
 
 	void Fetch();
 	void Step();
@@ -20,14 +23,14 @@ public:
 	uint16_t ComputeAddress(uint16_t programCounter);
 
 	//Registry getters
-	[[nodiscard]] uint8_t		GetA() const noexcept;
-	[[nodiscard]] uint8_t		GetB() const noexcept;
-	[[nodiscard]] uint8_t		GetC() const noexcept;
-	[[nodiscard]] uint8_t		GetD() const noexcept;
+	[[nodiscard]] uint8_t		GetA()		const noexcept;
+	[[nodiscard]] uint8_t		GetB()		const noexcept;
+	[[nodiscard]] uint8_t		GetC()		const noexcept;
+	[[nodiscard]] uint8_t		GetD()		const noexcept;
 
-	[[nodiscard]] uint16_t		GetPC() const noexcept;
-	[[nodiscard]] uint16_t		GetSP() const noexcept;
-	[[nodiscard]] uint8_t		GetIR() const noexcept;
+	[[nodiscard]] uint16_t		GetPC()		const noexcept;
+	[[nodiscard]] uint16_t		GetSP()		const noexcept;
+	[[nodiscard]] uint8_t		GetIR()		const noexcept;
 
 	//Flag getters
 	[[nodiscard]] bool GetZeroFlag()		const noexcept;
@@ -39,7 +42,7 @@ public:
 	bool IsReadingInstruction() const noexcept;
 	bool IsWritingInstruction() const noexcept;
 
-	// Memory Unit getter (const & non-const)
+	// Memory Unit / Interrupt Controller getter (const & non-const)
 	[[nodiscard]] const MemoryUnit& GetMemoryUnit()						const noexcept;
 	[[nodiscard]] MemoryUnit& GetMemoryUnit()							noexcept;
 	[[nodiscard]] const InterruptController& GetInterruptController()	const noexcept;
@@ -55,13 +58,11 @@ private:
 private:
 	CPU(const CPU&) = delete;
 	CPU& operator=(const CPU&) = delete;
-	CPU(CPU&&) = delete;
-	CPU& operator=(CPU&&) = delete;
 
 private:
 
 	MemoryUnit m_memoryUnit;
-	InterruptController m_interruptController;
+	InterruptController& m_interruptController;
 
 	// General Registry
 	uint8_t m_A{};

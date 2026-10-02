@@ -1,5 +1,10 @@
 #include "Core/Keyboard.h"
 
+Keyboard::Keyboard(InterruptController& interruptController) :
+	m_interruptController{ interruptController } 
+{
+}
+
 void Keyboard::AddKey(uint8_t key)
 {
 	m_buffer.emplace(key);

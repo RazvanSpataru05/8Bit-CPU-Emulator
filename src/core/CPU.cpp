@@ -1,7 +1,7 @@
 #include "Core/CPU.h"
 
-CPU::CPU() : 
-	m_interruptController{ InterruptController() }
+CPU::CPU(InterruptController& interruptController) : 
+	m_interruptController{ interruptController }
 {
 	Reset();
 }

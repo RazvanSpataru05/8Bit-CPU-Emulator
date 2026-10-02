@@ -1,4 +1,5 @@
 #include "UI/UIEditor.h"
+
 #include "Assembler/Assembler.h"
 
 namespace UIEditor
@@ -36,8 +37,6 @@ namespace UIEditor
 		uint8_t currentPage{};
 
 		bool helpMenuVisibility{ false };
-
-		Terminal terminal;
 
 		void NextPage()
 		{
@@ -228,7 +227,7 @@ namespace UIEditor
 	}
 
 	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit, const Dissasembler& dissasembler,
-		CPU& cpu, Assembler& assembler)
+		CPU& cpu, Assembler& assembler, Terminal& terminal, InterruptController& interruptController)
 	{
 		static char editorBuffer[BUFFER_SIZE];
 
@@ -265,7 +264,7 @@ namespace UIEditor
 					tab = SelectedTab::ERROR_LIST;
 				}
 			}
-			DrawOutput(assembler, cpu.GetInterruptController());
+			DrawOutput(assembler, terminal, interruptController);
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
@@ -532,7 +531,7 @@ namespace UIEditor
 		}
 	}
 
-	void DrawOutput(const Assembler& assembler, InterruptController& interruptController)
+	void DrawOutput(const Assembler& assembler, Terminal& terminal, InterruptController& interruptController)
 	{
 		ImGui::Separator();
 
@@ -571,7 +570,7 @@ namespace UIEditor
 			switch (tab)
 			{
 			case SelectedTab::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
-			case SelectedTab::CONSOLE: { DrawConsole(interruptController); break; }
+			case SelectedTab::CONSOLE: { DrawConsole(terminal, interruptController); break; }
 			}
 		}
 	}
@@ -598,7 +597,7 @@ namespace UIEditor
 		ImGui::EndChild();
 	}
 
-	void DrawConsole(InterruptController& interruptController)
+	void DrawConsole(Terminal& terminal, InterruptController& interruptController)
 	{
 		static char consoleBuffer[CONSOLE_BUFFER_SIZE];
 		static bool scrollToBottom = true;

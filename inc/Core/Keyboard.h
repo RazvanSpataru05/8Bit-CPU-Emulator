@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/InterruptController.h"
+
 #include <optional>
 #include <cstdint>
 #include <queue>
@@ -7,7 +9,7 @@
 class Keyboard
 {
 public:
-	Keyboard() = default;
+	explicit Keyboard(InterruptController& interruptController);
 
 	void AddKey(uint8_t key);
 	std::optional<uint8_t> ConsumeKey();
@@ -20,5 +22,6 @@ private:
 	Keyboard& operator=(Keyboard&&) = delete;
 
 private:
+	InterruptController& m_interruptController;
 	std::queue<uint8_t> m_buffer;
 };

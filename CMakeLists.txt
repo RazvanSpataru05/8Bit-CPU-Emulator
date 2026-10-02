@@ -22,6 +22,7 @@ set(SOURCES
     src/Assembler/Assembler.cpp
 
     src/Core/CPU.cpp
+    src/Core/Emulator.cpp
     src/Core/Keyboard.cpp
     src/Core/MemoryUnit.cpp
     src/Core/InterruptController.cpp
@@ -55,6 +56,7 @@ set(HEADERS
     inc/Assembler/Assembler.h
 
     inc/Core/CPU.h
+    inc/Core/Emulator.h
     inc/Core/MemoryUnit.h
     inc/Core/Keyboard.h
     inc/Core/InterruptController.h

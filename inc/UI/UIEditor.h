@@ -2,11 +2,11 @@
 
 #include "Assembler/ISAEntry.h"
 
-#include "Core/CPU.h"
-#include "Core/MemoryUnit.h"
-#include "Core/Terminal.h"
-
 #include "Debugger/Dissasembler.h"
+
+#include "Core/CPU.h"
+#include "Core/InterruptController.h"
+#include "Core/Terminal.h"
 
 #include "UI/UICommon.h"
 
@@ -21,18 +21,23 @@ class Assembler;
 struct AssemblerError;
 struct AssemblerWarning;
 
+class Terminal;
+class InterruptController;
+
 namespace UIEditor
 {
 	void DrawCPUState(const CPU& cpu);
-	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit, 
-						   const Dissasembler& dissasembler, CPU& cpu, Assembler& assembler);
+	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit,
+							const Dissasembler& dissasembler, CPU& cpu, Assembler& assembler,
+							Terminal& terminal, InterruptController& interruptController);
+
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
 				  bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
-	void DrawOutput(const Assembler& assembler, InterruptController& interruptController);
+	void DrawOutput(const Assembler& assembler, Terminal& terminal, InterruptController& interruptController);
 
 	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings);
-	void DrawConsole(InterruptController& interruptController);
+	void DrawConsole(Terminal& terminal, InterruptController& interruptController);
 }

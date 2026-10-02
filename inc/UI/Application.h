@@ -2,6 +2,8 @@
 
 #include "Assembler/Assembler.h"
 
+#include "Core/Emulator.h"
+
 #include "UI/UIEditor.h"
 
 #include <SFML/Graphics.hpp>
@@ -11,8 +13,6 @@ class Application
 {
 public:
 	explicit Application();
-
-	[[nodiscard]] const CPU& GetCPU() const;
 
 	Assembler& GetAssembler();
 
@@ -32,7 +32,7 @@ private:
 	Application& operator=(Application&&) = delete;
 
 private:
-	std::unique_ptr<CPU> m_CPU;
+	std::unique_ptr<Emulator> m_emulator;
 	std::unique_ptr<Dissasembler> m_dissasembler;
 	std::unique_ptr<Assembler> m_assembler;
 

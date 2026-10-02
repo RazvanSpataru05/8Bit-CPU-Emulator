@@ -11,7 +11,7 @@ class InterruptController
 {
 
 public:
-	InterruptController() = default;
+	explicit InterruptController() = default;
 
 	InterruptController(InterruptController&&) = default;
 	InterruptController& operator=(InterruptController&&) = default;

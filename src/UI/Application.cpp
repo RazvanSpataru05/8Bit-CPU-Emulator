@@ -1,7 +1,7 @@
 #include "UI/Application.h"
 
 Application::Application() :
-	m_CPU{ std::make_unique<CPU>() },
+	m_emulator{ std::make_unique<Emulator>()},
 	m_dissasembler{ std::make_unique<Dissasembler>() },
 	m_assembler{std::make_unique<Assembler>()},
 	m_editorMode{ UIEditor::Mode::EDIT },
@@ -11,11 +11,6 @@ Application::Application() :
 	m_autoSpeed{ 1.0f }
 {
 
-}
-
-const CPU& Application::GetCPU() const
-{
-	return *m_CPU;
 }
 
 Assembler& Application::GetAssembler()
@@ -52,7 +47,7 @@ void Application::Update()
 {
 	if (m_executeAuto && m_instructionCycle.getElapsedTime().asSeconds() >= m_autoSpeed)
 	{
-		m_CPU->Step();
+		m_emulator->GetCPU().Step();
 		m_instructionCycle.restart();
 	}
 	ImGui::SFML::Update(m_window, m_deltaClock.restart());
@@ -62,10 +57,16 @@ void Application::RenderUI()
 {
 	m_window.clear(sf::Color(65, 65, 65));
 
-	UIEditor::DrawCPUState(*m_CPU);
-	UIEditor::DrawAssemblyPanel(m_editorMode, m_CPU->GetMemoryUnit(), *m_dissasembler, *m_CPU, *m_assembler);
-	UIEditor::DrawMemoryView(m_CPU->GetMemoryUnit(), *m_CPU, m_followPC);
-	UIEditor::DrawMenu(m_CPU->GetMemoryUnit(), m_executeAuto, m_followPC, *m_CPU);
+	UIEditor::DrawCPUState(m_emulator->GetCPU());
+	UIEditor::DrawAssemblyPanel(m_editorMode, m_emulator->GetCPU().GetMemoryUnit(),
+		*m_dissasembler, m_emulator->GetCPU(), *m_assembler, m_emulator->GetTerminal(), m_emulator->GetInterruptController());
+
+	UIEditor::DrawMemoryView(m_emulator->GetCPU().GetMemoryUnit(),
+		m_emulator->GetCPU(), m_followPC);
+
+	UIEditor::DrawMenu(m_emulator->GetCPU().GetMemoryUnit(),
+		m_executeAuto, m_followPC, m_emulator->GetCPU());
+
 	UIEditor::DrawSpeedSlider(m_autoSpeed);
 	UIEditor::DrawHelpMenu();
 
@@ -100,12 +101,12 @@ void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 		break;
 
 	case sf::Keyboard::Key::Space:
-		m_CPU->Step();
+		m_emulator->GetCPU().Step();
 		break;
 
 	case sf::Keyboard::Key::R:
-		m_CPU->GetMemoryUnit().RestoreSnapshot();
-		m_CPU->Reset();
+		m_emulator->GetCPU().GetMemoryUnit().RestoreSnapshot();
+		m_emulator->GetCPU().Reset();
 		m_followPC = true;
 		m_executeAuto = false;
 		break;
