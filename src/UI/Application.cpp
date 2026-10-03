@@ -31,9 +31,10 @@ void Application::ProcessEvents()
 	while (const std::optional event = m_window.pollEvent())
 	{
 		ImGui::SFML::ProcessEvent(m_window, event.value());
+
 		if (event->is<sf::Event::KeyPressed>())
 		{
-			ProcessKeyStrokes(event);
+			ManageKeyStrokes(event);
 		}
 
 		if (event->is<sf::Event::Closed>())
@@ -66,7 +67,7 @@ void Application::RenderUI()
 		m_emulator->GetCPU(), m_followPC);
 
 	UIEditor::DrawMenu(m_emulator->GetCPU().GetMemoryUnit(),
-		m_executeAuto, m_followPC, m_emulator->GetCPU());
+		m_followPC, m_executeAuto, m_emulator->GetCPU());
 
 	UIEditor::DrawSpeedSlider(m_autoSpeed);
 	UIEditor::DrawHelpMenu();
@@ -87,7 +88,7 @@ void Application::Run()
 	ImGui::SFML::Shutdown();
 }
 
-void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
+void Application::ManageKeyStrokes(const std::optional<sf::Event>& event)
 {
 	if (ImGui::GetIO().WantCaptureKeyboard)
 	{
@@ -110,6 +111,7 @@ void Application::ProcessKeyStrokes(const std::optional<sf::Event>& event)
 		m_emulator->GetCPU().Reset();
 		m_followPC = true;
 		m_executeAuto = false;
+		m_autoSpeed = 1.0f;
 		break;
 
 	// Speed Slider Controls

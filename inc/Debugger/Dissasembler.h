@@ -8,7 +8,7 @@
 class Dissasembler
 {
 public:
-	Dissasembler();
+	explicit Dissasembler();
 
 	[[nodiscard]] const InstructionDef& GetInstructionDef(size_t index) const;
 

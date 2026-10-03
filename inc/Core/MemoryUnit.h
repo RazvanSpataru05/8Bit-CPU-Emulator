@@ -18,6 +18,9 @@ public:
 
 	[[nodiscard]] bool IsMemoryEmpty() const noexcept;
 
+	[[nodiscard]] uint16_t GetStartAddress() const noexcept;
+	[[nodiscard]] uint16_t GetEndAddress() const noexcept;
+
 	[[nodiscard]] uint8_t Read(uint16_t address) const noexcept;
 	void Write(uint16_t address, uint8_t value) noexcept;
 
@@ -39,8 +42,9 @@ private:
 private:
 	std::array<uint8_t, 65536> m_memory{};
 
-	bool m_hasData{ false };
+	bool m_hasData;
 	std::vector<uint8_t> m_snapshotData;
-	uint16_t m_snapshotStartAddress{};
+	uint16_t m_startAddress{};
+	uint16_t m_endAddress{};
 };
 

@@ -2,7 +2,8 @@
 
 MemoryUnit::MemoryUnit() :
 	m_hasData{ false },
-	m_snapshotStartAddress{ 0x00 }
+	m_startAddress{ 0x0000 },
+	m_endAddress{ 0x0000 }
 {
 	std::fill(m_memory.begin(), m_memory.end(), 0x00);
 }
@@ -10,7 +11,16 @@ MemoryUnit::MemoryUnit() :
 bool MemoryUnit::IsMemoryEmpty() const noexcept
 {
 	return !m_hasData;
-} 
+}
+uint16_t MemoryUnit::GetStartAddress() const noexcept
+{
+	return m_startAddress;
+}
+
+uint16_t MemoryUnit::GetEndAddress() const noexcept
+{
+	return m_endAddress;
+}
 
 uint8_t MemoryUnit::Read(uint16_t address) const noexcept
 {
@@ -37,12 +47,13 @@ void MemoryUnit::RestoreSnapshot()
 	Clear();
 	for (size_t index = 0; index < m_snapshotData.size(); ++index)
 	{
-		m_memory[m_snapshotStartAddress + index] = m_snapshotData[index];
-		if (m_snapshotStartAddress != 0x00)
+		m_memory[m_startAddress + index] = m_snapshotData[index];
+		if (m_snapshotData[index] != 0x00)
 		{
 			m_hasData = true;
 		}
 	}
+	m_endAddress = m_startAddress + m_snapshotData.size();
 }
 
 void MemoryUnit::PrintMemoryUntit() const
@@ -59,7 +70,8 @@ void MemoryUnit::LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t 
 
 	std::copy(values.begin(), values.end(), m_memory.begin() + startAddress);
 	m_snapshotData.assign(values.begin(), values.end());
-	m_snapshotStartAddress = startAddress;
+	m_startAddress = startAddress;
+	m_endAddress = startAddress + values.size();
 	m_hasData = true;
 }
 

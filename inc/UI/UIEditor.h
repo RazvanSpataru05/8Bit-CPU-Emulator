@@ -38,7 +38,7 @@ namespace UIEditor
 
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
-				  bool& executeAuto, bool& followPC, CPU& cpu);
+				  bool& followPC, bool& executeAuto, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
 	void DrawOutput(const Assembler& assembler, Terminal& terminal, 

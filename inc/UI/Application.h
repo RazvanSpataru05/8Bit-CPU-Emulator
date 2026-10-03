@@ -22,7 +22,7 @@ public:
 	void RenderUI();
 	void Run();
 
-	void ProcessKeyStrokes(const std::optional<sf::Event>& event);
+	void ManageKeyStrokes(const std::optional<sf::Event>& event);
 
 private:
 	Application(const Application&) = delete;

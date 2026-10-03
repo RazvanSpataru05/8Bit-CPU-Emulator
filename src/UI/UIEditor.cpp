@@ -68,7 +68,7 @@ namespace UIEditor
 		ImGui::Begin("CPU State");
 		ImGui::Text(std::format("Program Counter: {:#06X}", cpu.GetPC()).c_str());
 		ImGui::Text(std::format("Stack Pointer: {:#06X}", cpu.GetSP()).c_str());
-		ImGui::Text(std::format("Program Counter: {:#04X}", cpu.GetIR()).c_str());
+		ImGui::Text(std::format("Instruction Register: {:#04X}", cpu.GetIR()).c_str());
 		ImGui::Separator();
 
 		ImGui::Text("\nRegistry");
@@ -122,6 +122,7 @@ namespace UIEditor
 
 					memoryUnit.LoadValuesIntoMemory(values);
 					tab = SelectedTab::CONSOLE;
+					mode = Mode::DISSASEMBLY;
 				}
 				else
 				{
@@ -130,49 +131,29 @@ namespace UIEditor
 			}
 			DrawOutput(assembler, terminal, interruptController, keyboard, executeAuto);
 		}
+
 		else if (mode == Mode::DISSASEMBLY)
 		{
-			if (!cpu.GetMemoryUnit().IsMemoryEmpty())
+			if (!memoryUnit.IsMemoryEmpty())
 			{
-				for (size_t index = 0; index < cpu.MEMORY_UNIT_SIZE; ++index)
+				for (size_t index = memoryUnit.GetStartAddress(); index < memoryUnit.GetEndAddress(); ++index)
 				{
 					uint8_t opcode = memoryUnit[index];
-					const InstructionDef instruction = dissasembler.GetInstructionDef(opcode);
+					const InstructionDef& instruction = dissasembler.GetInstructionDef(opcode);
 
 					if (index == cpu.GetPC())
+					{
 						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+					}
 					else
+					{
 						ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
-
-					switch (instruction.size)
-					{
-					case 1:
-					{
-						ImGui::Text(std::format("{:#04x}: {}", opcode, instruction.mnemonic).c_str());
-						break;
 					}
-					case 2:
-					{
-						uint8_t secondByte = memoryUnit[index + 1];
-						ImGui::Text(std::format("{:#04x}: {} {}", opcode, instruction.mnemonic, secondByte).c_str());
-						break;
-					}
-					case 3:
-					{
-						uint8_t secondByte = memoryUnit[index + 1];
-						uint8_t thirdByte = memoryUnit[index + 2];
-						uint16_t address = (secondByte << 8) | thirdByte;
-						ImGui::Text(std::format("{:#04x}: {} {:#06X}", opcode, instruction.mnemonic, address).c_str());
-						break;
-					}
-					default:
-						ImGui::Text(std::format("{:#06x}: ???", index).c_str());
-						break;
-					}
+						
+					Utils::UI::DisplayInstruction(instruction, memoryUnit, index, opcode);
 
 					index += static_cast<size_t>(instruction.size - 1);
 					ImGui::PopStyleColor();
-					if (opcode == 0xFF) break;
 				}
 			}
 		}
@@ -196,6 +177,7 @@ namespace UIEditor
 		const std::string spaces = std::string(" ", 79);
 		ImGui::Text(spaces.c_str());
 		ImGui::SameLine();
+
 		if (ImGui::Button("\t\t\tNext\t\t\t"))
 		{
 			currentPage = (currentPage + 1) % 256;
@@ -209,7 +191,7 @@ namespace UIEditor
 			for (size_t index = startAddress; index < endAddress; ++index)
 			{
 				ImGui::TableNextColumn();
-				if (index == cpu.GetPC() && !cpu.GetHaltFlag())
+				if (index == cpu.GetPC())
 				{
 					ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(0, 0, 255, 255));
 				}

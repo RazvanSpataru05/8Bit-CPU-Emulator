@@ -8,14 +8,13 @@ CPU::CPU(InterruptController& interruptController) :
 
 void CPU::Fetch()
 {
-	if (m_HaltFlag) return;
-
-	m_IR = m_memoryUnit.Read(m_PC);
-	m_PC++;
+	m_IR = m_memoryUnit.Read(m_PC++);
 }
 
 void CPU::Step()
 {
+	if (m_HaltFlag || m_memoryUnit.IsMemoryEmpty()) return;
+
 	Fetch();
 
 	switch (m_IR)
@@ -26,7 +25,7 @@ void CPU::Step()
 	case 0x01: // LDA_IM 2by
 	{
 		m_A = m_memoryUnit.Read(m_PC++);
-		return;
+		break;
 	}
 
 	case 0x02: // LDA_DIR 3by
@@ -34,14 +33,14 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_A = m_memoryUnit.Read(address);
-		return;
+		break;
 	}
 
 	case 0x03: // LDA_REG 2by
 	{
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_A = ReadRegister(selector);
-		return;
+		break;
 	}
 
 	case 0x04: // STA_DIR 3by
@@ -49,29 +48,28 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_memoryUnit[address] = m_A;
-		return;
+		break;
 	}
 
 	case 0x05: // LDB_IM 2by
 	{
 		m_B = m_memoryUnit.Read(m_PC++);
-		return;
+		break;
 	}
-
 
 	case 0x06: // LDB_DIR 3by
 	{
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_B = m_memoryUnit.Read(address);
-		return;
+		break;
 	}
 
 	case 0x07: // LDB_REG 2by
 	{
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_B = ReadRegister(selector);
-		return;
+		break;
 	}
 
 	case 0x08: // STB_DIR 3by
@@ -79,13 +77,13 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_memoryUnit.Write(address, m_B);
-		return;
+		break;
 	}
 
 	case 0x09: // LDC_IM 2by
 	{
 		m_C = m_memoryUnit.Read(m_PC++);
-		return;
+		break;
 	}
 
 	case 0x0A: // LDC_DIR 3by
@@ -93,14 +91,14 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_C = m_memoryUnit.Read(address);
-		return;
+		break;
 	}
 
 	case 0x0B: // LDC_REG 2by
 	{
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_C = ReadRegister(selector);
-		return;
+		break;
 	}
 
 	case 0x0C: // STC_DIR 3by
@@ -108,13 +106,13 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_memoryUnit.Write(address, m_C);
-		return;
+		break;
 	}
 
 	case 0x0D: // LDD_IM 2by
 	{
 		m_D = m_memoryUnit.Read(m_PC++);
-		return;
+		break;
 	}
 
 	case 0x0E: // LDD_DIR 3by
@@ -122,14 +120,14 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_D = m_memoryUnit.Read(address);
-		return;
+		break;
 	}
 
 	case 0x0F: // LDD_REG 2by
 	{
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_D = ReadRegister(selector);
-		return;
+		break;
 	}
 
 	case 0x10: // STD_DIR 3by
@@ -137,28 +135,28 @@ void CPU::Step()
 		uint16_t address = ComputeAddress(m_PC);
 		m_PC += 2;
 		m_memoryUnit.Write(address, m_D);
-		return;
+		break;
 	}
 
 	case 0x11: // LDA_IND 1by
 	{
 		uint16_t bc = (m_B << 8) | m_C;
 		m_A = m_memoryUnit.Read(bc);
-		return;
+		break;
 	}
 
 	case 0x12: // STA_IND 1by
 	{
 		uint16_t bc = (m_B << 8) | m_C;
 		m_memoryUnit.Write(bc, m_A);
-		return;
+		break;
 	}
 
 	case 0x13: // LDW_IM 3by
 	{
 		m_B = m_memoryUnit.Read(m_PC++);
 		m_C = m_memoryUnit.Read(m_PC++);
-		return;
+		break;
 	}
 
 	case 0x14: // INCW 1by
@@ -167,7 +165,7 @@ void CPU::Step()
 		++BC;
 		m_B = (BC >> 8) & 0xFF;
 		m_C = BC & 0xFF;
-		return;
+		break;
 	}
 
 	/* Logical operations */
@@ -181,7 +179,7 @@ void CPU::Step()
 
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, operand, true);
-		return;
+		break;
 	}
 
 	case 0x21: // ADD_REG 2by
@@ -194,7 +192,7 @@ void CPU::Step()
 
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, reg, true);
-		return;
+		break;
 	}
 
 	case 0x22: // ADC_IM 2by
@@ -206,7 +204,7 @@ void CPU::Step()
 
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, operand, true);
-		return;
+		break;
 	}
 
 	case 0x23: // ADC_REG 2by
@@ -219,7 +217,7 @@ void CPU::Step()
 
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, reg, true);
-		return;
+		break;
 	}
 
 	case 0x24: // SUB_IM 2by
@@ -229,7 +227,7 @@ void CPU::Step()
 		m_CarryFlag = (operand > m_A);
 		m_A -= operand;
 		UpdateFlags(m_A, oldA, operand, false);
-		return;
+		break;
 	}
 
 	case 0x25: // SUB_REG 2by
@@ -240,7 +238,7 @@ void CPU::Step()
 		m_CarryFlag = (reg > m_A);
 		m_A -= reg;
 		UpdateFlags(m_A, oldA, reg, false);
-		return;
+		break;
 	}
 
 	case 0x26: // SBC_IM 2by
@@ -253,7 +251,7 @@ void CPU::Step()
 		m_CarryFlag = (m_A < operand + (oldCarry ? 1 : 0));
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, operand, false);
-		return;
+		break;
 	}
 
 	case 0x27: // SBC_REG 2by
@@ -267,7 +265,7 @@ void CPU::Step()
 		m_CarryFlag = (m_A < reg + (oldCarry ? 1 : 0));
 		m_A = static_cast<uint8_t>(result);
 		UpdateFlags(m_A, oldA, reg, false);
-		return;
+		break;
 	}
 
 	case 0x28: // INC 2by
@@ -276,7 +274,7 @@ void CPU::Step()
 		uint8_t result = ReadRegister(selector) + 1;
 		WriteRegister(selector, result);
 		UpdateFlags(result);
-		return;
+		break;
 	}
 
 	case 0x29: // DEC 2by
@@ -285,14 +283,14 @@ void CPU::Step()
 		uint8_t result = ReadRegister(selector) - 1;
 		WriteRegister(selector, result);
 		UpdateFlags(result);
-		return;
+		break;
 	}
 
 	case 0x2A: //MUL_IM 2by
 	{
 		m_A *= m_memoryUnit.Read(m_PC++);
 		UpdateFlags(m_A);
-		return;
+		break;
 	}
 
 	case 0x2B: //MUL_REG 2by
@@ -300,7 +298,7 @@ void CPU::Step()
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		m_A *= ReadRegister(selector);
 		UpdateFlags(m_A);
-		return;
+		break;
 	}
 
 	/* Logical operations*/
@@ -311,7 +309,7 @@ void CPU::Step()
 		m_A = m_A & operand;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x31: // AND_REG 2by
@@ -321,7 +319,7 @@ void CPU::Step()
 		m_A = m_A & reg;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x32: // OR_IM 2by
@@ -330,7 +328,7 @@ void CPU::Step()
 		m_A = m_A | operand;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x33: // OR_REG 2by
@@ -340,7 +338,7 @@ void CPU::Step()
 		m_A = m_A | reg;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x34: // XOR_IM 2by
@@ -349,7 +347,7 @@ void CPU::Step()
 		m_A = m_A ^ operand;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x35: // XOR_REG 2by
@@ -359,7 +357,7 @@ void CPU::Step()
 		m_A = m_A ^ reg;
 		UpdateFlags(m_A);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x36: //NOT 2by
@@ -370,7 +368,7 @@ void CPU::Step()
 		WriteRegister(selector, reg);
 		UpdateFlags(reg);
 		m_CarryFlag = false;
-		return;
+		break;
 	}
 
 	case 0x37: //SHL 2by
@@ -381,7 +379,7 @@ void CPU::Step()
 		reg = reg << 1;
 		WriteRegister(selector, reg);
 		UpdateFlags(reg);
-		return;
+		break;
 	}
 
 	case 0x38: //SHR 2by
@@ -392,7 +390,7 @@ void CPU::Step()
 		reg = reg >> 1;
 		WriteRegister(selector, reg);
 		UpdateFlags(reg);
-		return;
+		break;
 	}
 
 	/* Compare instructions */
@@ -403,7 +401,7 @@ void CPU::Step()
 		uint8_t result = m_A - operand;
 		m_CarryFlag = (operand > m_A);
 		UpdateFlags(result, m_A, operand, false);
-		return;
+		break;
 	}
 
 	case 0x41: // CMP_REG 2by
@@ -413,7 +411,7 @@ void CPU::Step()
 		uint8_t result = m_A - reg;
 		m_CarryFlag = (reg > m_A);
 		UpdateFlags(result, m_A, reg, false);
-		return;
+		break;
 	}
 
 	/* Jump/Branch instructions */
@@ -424,7 +422,7 @@ void CPU::Step()
 		uint8_t low = m_memoryUnit.Read(m_PC++);
 		uint16_t address = (high << 8) | low;
 		m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x51: // JZ 3by
@@ -433,7 +431,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (m_ZeroFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x52: // JNZ 3by
@@ -442,7 +440,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (!m_ZeroFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x53: // JC 3by
@@ -451,7 +449,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (m_CarryFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x54: // JNC 3by
@@ -460,7 +458,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (!m_CarryFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x55: // JN 3by
@@ -469,7 +467,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (m_NegativeFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x56: // JNN 3by
@@ -478,7 +476,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (!m_NegativeFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x57: // JO 3by
@@ -487,7 +485,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (m_OverflowFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x58: // JNO 3by
@@ -496,7 +494,7 @@ void CPU::Step()
 		m_PC += 2;
 
 		if (!m_OverflowFlag) m_PC = address;
-		return;
+		break;
 	}
 
 	/* Stack instructions */
@@ -506,7 +504,7 @@ void CPU::Step()
 		uint8_t selector = m_memoryUnit.Read(m_PC++);
 		uint8_t reg = ReadRegister(selector);
 		m_memoryUnit.Write(m_SP--, reg);
-		return;
+		break;
 	}
 
 	case 0x61: // POP 2by
@@ -515,7 +513,7 @@ void CPU::Step()
 		uint8_t reg = ReadRegister(selector);
 		reg = m_memoryUnit.Read(++m_SP);
 		WriteRegister(selector, reg);
-		return;
+		break;
 	}
 
 	case 0x62: // CALL 3by
@@ -525,7 +523,7 @@ void CPU::Step()
 		m_memoryUnit.Write(m_SP--, (m_PC >> 8) & 0xFF);
 		m_memoryUnit.Write(m_SP--, m_PC & 0xFF);
 		m_PC = address;
-		return;
+		break;
 	}
 
 	case 0x63: // RET 1by
@@ -533,14 +531,14 @@ void CPU::Step()
 		uint8_t low = m_memoryUnit.Read(++m_SP);
 		uint8_t high = m_memoryUnit.Read(++m_SP);
 		m_PC = (high << 8) | low;
-		return;
+		break;
 	}
 
 	/* Misc instructions */
 
 	case 0x00: // NOP 1by
 	{
-		return;
+		break;
 	}
 
 	case 0x70: // MOV 3by
@@ -548,26 +546,31 @@ void CPU::Step()
 		uint8_t destination = m_memoryUnit.Read(m_PC++);
 		uint8_t source = m_memoryUnit.Read(m_PC++);
 		WriteRegister(destination, ReadRegister(source));
-		return;
+		break;
 	}
 
 	case 0xF8: // EI 1by
 	{
 		m_interruptController.EnableInterrupts(true);
-		return;
+		break;
 	}
 
 	case 0xF3: // DI 1by
 	{
 		m_interruptController.EnableInterrupts(false);
-		return;
+		break;
 	}
 
 	case 0xFF: // HLT 1by
 	{
 		m_HaltFlag = true;
-		return;
+		break;
 	}
+	}
+
+	if (m_PC == m_memoryUnit.GetEndAddress())
+	{
+		m_HaltFlag = true;
 	}
 }
 

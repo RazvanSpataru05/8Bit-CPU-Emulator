@@ -121,7 +121,34 @@ namespace Utils
 			return tab == SelectedTab::CONSOLE;
 		}
 
-
+		void DisplayInstruction(const InstructionDef& instruction, MemoryUnit& memoryUnit, uint16_t index, uint8_t opcode)
+		{
+			switch (instruction.size)
+			{
+			case 1u:
+			{
+				ImGui::Text(std::format("{:#04x}: {}", opcode, instruction.mnemonic).c_str());
+				break;
+			}
+			case 2u:
+			{
+				uint8_t secondByte = memoryUnit[index + 1];
+				ImGui::Text(std::format("{:#04x}: {} {}", opcode, instruction.mnemonic, secondByte).c_str());
+				break;
+			}
+			case 3u:
+			{
+				uint8_t secondByte = memoryUnit[index + 1];
+				uint8_t thirdByte = memoryUnit[index + 2];
+				uint16_t address = (secondByte << 8) | thirdByte;
+				ImGui::Text(std::format("{:#04x}: {} {:#06X}", opcode, instruction.mnemonic, address).c_str());
+				break;
+			}
+			default:
+				ImGui::Text(std::format("{:#06x}: ???", index).c_str());
+				break;
+			}
+		}
 
 		void DisplayGlossaryPage()
 		{
