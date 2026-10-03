@@ -4,6 +4,17 @@ namespace Utils
 {
 	namespace
 	{
+		constexpr std::pair<const char*, const char*> glossary[] =
+		{
+			{"PC", "Program Counter"},
+			{"IR", "Instruction Register"},
+			{"SP", "Stack Pointer"},
+			{"A", "Accumulator Register"},
+			{"B", ""},
+			{"C", "Counter Register"},
+			{"D", ""}
+		};
+
 		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
 
 		void SetupInstructionsTableColumn()
@@ -110,6 +121,38 @@ namespace Utils
 			return tab == SelectedTab::CONSOLE;
 		}
 
+
+
+		void DisplayGlossaryPage()
+		{
+			const char* title = "Glossary";
+			const float titleWidth = ImGui::CalcTextSize(title).x;
+			const float windowWidth = ImGui::GetWindowSize().x;
+
+			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
+			ImGui::SetCursorPosY(windowWidth * 0.05f);
+			ImGui::Text(title);
+			ImGui::Spacing();
+			ImGui::Separator();
+			ImGui::Spacing();
+
+			if (ImGui::BeginTable("##glossary_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg))
+			{
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+				ImGui::TableSetupColumn("Definition", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableHeadersRow();
+
+				for (const auto& [mnemonic, definition] : glossary)
+				{
+					ImGui::TableNextRow();
+					ImGui::TableSetColumnIndex(0);
+					ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), mnemonic);
+					ImGui::TableSetColumnIndex(1);
+					ImGui::TextWrapped(definition);
+				}
+				ImGui::EndTable();
+			}
+		}
 
 		void DisplayMiscPage(const char* title, const char* tableId, std::initializer_list<uint8_t> opcodes)
 		{

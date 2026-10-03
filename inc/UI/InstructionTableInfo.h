@@ -10,7 +10,7 @@ struct InstructionTableInfo
 	uint8_t lastInstruction{};
 
 
-	InstructionTableInfo(const char* t, const char* id, uint8_t first, uint8_t last) :
+	constexpr InstructionTableInfo(const char* t, const char* id, uint8_t first, uint8_t last) :
 		title{ t }, tableId{ id }, firstInstruction{ first }, lastInstruction{ last }
 	{
 

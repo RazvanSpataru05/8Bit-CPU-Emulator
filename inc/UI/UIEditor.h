@@ -10,6 +10,7 @@
 #include "Core/Keyboard.h"
 
 #include "UI/UICommon.h"
+#include "UI/InstructionTableInfo.h"
 
 #include "Utils/StringUtils.h"
 #include "Utils/Logger.h"

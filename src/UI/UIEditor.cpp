@@ -29,6 +29,16 @@ namespace UIEditor
 		constexpr uint8_t FIRST_STACK_INSTRUCTION = 0x60;
 		constexpr uint8_t LAST_STACK_INSTRUCTION = 0x63;
 
+		constexpr InstructionTableInfo INSTRUCTION_TABLES[] =
+		{
+				{ "Load & Store Instructions Table", "##load_store_table",	FIRST_LOAD_INSTRUCTION,			LAST_LOAD_INSTRUCTION },
+				{ "Arithmetic Instructions Table",   "##arithmetic_table",	FIRST_ARITHMETIC_INSTRUCTION,	LAST_ARITHMETIC_INSTRUCTION },
+				{ "Logical Instructions Table",      "##logical_table",		FIRST_LOGIC_INSTRUCTION,		LAST_LOGIC_INSTRUCTION },
+				{ "Compare Instructions Table",      "##compare_table",		FIRST_COMPARE_INSTRUCTION,		LAST_COMPARE_INSTRUCTION },
+				{ "Jump Instructions Table",         "##jump_table",		FIRST_JUMP_INSTRUCTION,			LAST_JUMP_INSTRUCTION },
+				{ "Stack Instructions Table",        "##stack_table",		FIRST_STACK_INSTRUCTION,		LAST_STACK_INSTRUCTION }
+		};
+
 		const size_t BUFFER_SIZE{ 8192 };
 		const size_t CONSOLE_BUFFER_SIZE{ 256 };
 
@@ -126,7 +136,7 @@ namespace UIEditor
 			{
 				for (size_t index = 0; index < cpu.MEMORY_UNIT_SIZE; ++index)
 				{
-					uint8_t opcode = memoryUnit.Read(static_cast<uint16_t>(index));
+					uint8_t opcode = memoryUnit[index];
 					const InstructionDef instruction = dissasembler.GetInstructionDef(opcode);
 
 					if (index == cpu.GetPC())
@@ -257,17 +267,20 @@ namespace UIEditor
 		}
 		ImGui::End();
 	}
+
 	void DrawSpeedSlider(float& speed)
 	{
 		ImGui::Begin("Speed Slider");
 		ImGui::SliderFloat("Speed (seconds)", &speed, 0.1f, 2.0f);
 		ImGui::End();
 	}
+
 	void DrawHelpMenu()
 	{
 		if (helpMenuVisibility)
 		{
 			ImGui::Begin("Help Menu");
+
 			const std::string pageText = std::format("Page {}/8", static_cast<uint8_t>(currentHelperPage));
 
 			const float windowWidth = ImGui::GetWindowSize().x;
@@ -304,72 +317,20 @@ namespace UIEditor
 			{
 			case PageType::GLOSSARY_PAGE:
 			{
-				const char* title = "Glossary";
-				float titleWidth = ImGui::CalcTextSize(title).x;
-				ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
-				ImGui::SetCursorPosY(windowWidth * 0.05f);
-				ImGui::Text(title);
-				ImGui::Spacing();
-				ImGui::Separator();
-				ImGui::Spacing();
-
-				if (ImGui::BeginTable("glossary_table", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg))
-				{
-					ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed, 120.0f);
-					ImGui::TableSetupColumn("Definition", ImGuiTableColumnFlags_WidthStretch);
-					ImGui::TableHeadersRow();
-
-					static const std::pair<const char*, const char*> glossary[] =
-					{
-						{"PC", "Program Counter"},
-						{"IR", "Instruction Register"},
-						{"SP", "Stack Pointer"},
-						{"A", "Accumulator Register"},
-						{"B", ""},
-						{"C", "Counter Register"},
-						{"D", ""}
-					};
-
-					for (const auto& [mnemonic, definition] : glossary)
-					{
-						ImGui::TableNextRow();
-						ImGui::TableSetColumnIndex(0);
-						ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), mnemonic);
-						ImGui::TableSetColumnIndex(1);
-						ImGui::TextWrapped(definition);
-					}
-					ImGui::EndTable();
-				}
+				Utils::UI::DisplayGlossaryPage();
 				break;
 			}
 			case PageType::LOAD_STORE_PAGE:
-			{
-				Utils::UI::DisplayTable({ "Load & Store Instructions Table", "load_store_table", FIRST_LOAD_INSTRUCTION, LAST_LOAD_INSTRUCTION });
-				break;
-			}
 			case PageType::ARITHMETIC_PAGE:
-			{
-				Utils::UI::DisplayTable({ "Arithmetic Instructions Table", "arithmetic_table", FIRST_ARITHMETIC_INSTRUCTION, LAST_ARITHMETIC_INSTRUCTION });
-				break;
-			}
 			case PageType::LOGICAL_PAGE:
-			{
-				Utils::UI::DisplayTable({ "Logical Instructions Table", "logical_table", FIRST_LOGIC_INSTRUCTION, LAST_LOGIC_INSTRUCTION });
-				break;
-			}
 			case PageType::COMPARE_PAGE:
-			{
-				Utils::UI::DisplayTable({ "Compare Instructions Table", "compare_table", FIRST_COMPARE_INSTRUCTION, LAST_COMPARE_INSTRUCTION });
-				break;
-			}
 			case PageType::JUMP_PAGE:
-			{
-				Utils::UI::DisplayTable({ "Jump Instructions Table", "jump_table", FIRST_JUMP_INSTRUCTION, LAST_JUMP_INSTRUCTION });
-				break;
-			}
 			case PageType::STACK_PAGE:
 			{
-				Utils::UI::DisplayTable({ "Stack Instructions Table", "stack_table", FIRST_STACK_INSTRUCTION, LAST_STACK_INSTRUCTION });
+				Utils::UI::DisplayTable(INSTRUCTION_TABLES[
+					static_cast<uint8_t>(currentHelperPage) -
+					static_cast<uint8_t>(PageType::LOAD_STORE_PAGE)
+				]);
 				break;
 			}
 			case PageType::MISC_PAGE:

@@ -20,6 +20,7 @@ namespace Utils
 		bool ErrorListTab(SelectedTab tab);
 		bool ConsoleListTab(SelectedTab tab);
 
+		void DisplayGlossaryPage();
 		void DisplayMiscPage(const char* title, const char* tableId, std::initializer_list<uint8_t> opcodes);
 		void DisplayTable(const InstructionTableInfo& info);
 	}	
