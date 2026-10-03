@@ -28,5 +28,4 @@ namespace Utils
 	std::string TokenTypeToString(const Token& token);
 
 	const char* FlagToString(bool value);
-	const char* ButtonName(std::string& s, bool flag);
 };  

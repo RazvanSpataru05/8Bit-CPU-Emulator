@@ -69,9 +69,9 @@ namespace UIEditor
 
 		void TextCentered(std::string_view text)
 		{
-			float cellWidth = ImGui::GetColumnWidth();
-			float textWidth = ImGui::CalcTextSize(text.data()).x;
-			float offset = (cellWidth - textWidth) * 0.5f;
+			const float cellWidth = ImGui::GetColumnWidth();
+			const float textWidth = ImGui::CalcTextSize(text.data()).x;
+			const float offset = (cellWidth - textWidth) * 0.5f;
 
 			if (offset > 0.0f)
 			{
@@ -148,8 +148,8 @@ namespace UIEditor
 		void DisplayTable(const char* pageTitle, const char* tableTitle,
 			uint8_t firstInstruction, uint8_t lastInstruction)
 		{
-			float windowWidth = ImGui::GetWindowSize().x;
-			float titleWidth = ImGui::CalcTextSize(pageTitle).x;
+			const float windowWidth = ImGui::GetWindowSize().x;
+			const float titleWidth = ImGui::CalcTextSize(pageTitle).x;
 
 			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
 			ImGui::SetCursorPosY(windowWidth * 0.05f);
@@ -175,8 +175,8 @@ namespace UIEditor
 		void DisplayTable(const char* pageTitle, const char* tableTitle,
 			std::initializer_list<uint8_t> opcodes)
 		{
-			float titleWidth = ImGui::CalcTextSize(pageTitle).x;
-			float windowWidth = ImGui::GetWindowSize().x;
+			const float titleWidth = ImGui::CalcTextSize(pageTitle).x;
+			const float windowWidth = ImGui::GetWindowSize().x;
 
 			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
 			ImGui::SetCursorPosY(windowWidth * 0.05f);
@@ -188,6 +188,7 @@ namespace UIEditor
 			ImGui::Spacing();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
+
 			if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE,
 				ImGuiTableFlags_BordersInnerV |
 				ImGuiTableFlags_RowBg |
@@ -203,25 +204,25 @@ namespace UIEditor
 	void DrawCPUState(const CPU& cpu)
 	{
 		ImGui::Begin("CPU State");
-		ImGui::Text("Program Counter: 0x%04X", cpu.GetPC());
-		ImGui::Text("Stack Pointer: 0x%02X", cpu.GetSP());
-		ImGui::Text("Instruction Register: 0x%02X", cpu.GetIR());
+		ImGui::Text(std::format("Program Counter: {:#06X}", cpu.GetPC()).c_str());
+		ImGui::Text(std::format("Stack Pointer: {:#06X}", cpu.GetSP()).c_str());
+		ImGui::Text(std::format("Program Counter: {:#04X}", cpu.GetIR()).c_str());
 		ImGui::Separator();
 
 		ImGui::Text("\nRegistry");
-		ImGui::Text("A: %d", cpu.GetA());
-		ImGui::Text("B: %d", cpu.GetB());
-		ImGui::Text("C: %d", cpu.GetC());
-		ImGui::Text("D: %d", cpu.GetD());
+		ImGui::Text(std::format("A: {}", cpu.GetA()).c_str());
+		ImGui::Text(std::format("B: {}", cpu.GetB()).c_str());
+		ImGui::Text(std::format("C: {}", cpu.GetC()).c_str());
+		ImGui::Text(std::format("D: {}", cpu.GetD()).c_str());
 		ImGui::Separator();
 
 		ImGui::Text("\nFlags");
-		ImGui::Text("Interrupt Flag: %s", Utils::FlagToString(cpu.GetInterruptController().GetInterruptFlag()));
-		ImGui::Text("Zero Flag: %s", Utils::FlagToString(cpu.GetZeroFlag()));
-		ImGui::Text("Carry Flag: %s", Utils::FlagToString(cpu.GetCarryFlag()));
-		ImGui::Text("Negative Flag: %s", Utils::FlagToString(cpu.GetNegativeFlag()));
-		ImGui::Text("Overflow Flag: %s", Utils::FlagToString(cpu.GetOverflowFlag()));
-		ImGui::Text("Halt Flag: %s", Utils::FlagToString(cpu.GetHaltFlag()));
+		ImGui::Text(std::format("Interrupt Flag: {}", cpu.GetInterruptController().GetInterruptFlag() ? "True" : "False").c_str());
+		ImGui::Text(std::format("Zero Flag: {}", cpu.GetZeroFlag() ? "True" : "False").c_str());
+		ImGui::Text(std::format("Carry Flag: {}", cpu.GetCarryFlag() ? "True" : "False").c_str());
+		ImGui::Text(std::format("Negative Flag: {}", cpu.GetNegativeFlag() ? "True" : "False").c_str());
+		ImGui::Text(std::format("Overflow Flag: {}", cpu.GetOverflowFlag() ? "True" : "False").c_str());
+		ImGui::Text(std::format("Halt Flag: {}", cpu.GetHaltFlag() ? "True" : "False").c_str());
 		ImGui::Separator();
 		ImGui::End();
 	}
@@ -285,25 +286,25 @@ namespace UIEditor
 					{
 					case 1:
 					{
-						ImGui::Text("0x%02x: %s", opcode, instruction.mnemonic.c_str());
+						ImGui::Text(std::format("{:#04x}: {}", opcode, instruction.mnemonic).c_str());
 						break;
 					}
 					case 2:
 					{
-						uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
-						ImGui::Text("0x%02x: %s %d", opcode, instruction.mnemonic.c_str(), secondByte);
+						uint8_t secondByte = memoryUnit[index + 1];
+						ImGui::Text(std::format("{:#04x}: {} {}", opcode, instruction.mnemonic, secondByte).c_str());
 						break;
 					}
 					case 3:
 					{
-						uint8_t secondByte = memoryUnit.Read(static_cast<uint16_t>(index + 1));
-						uint8_t thirdByte = memoryUnit.Read(static_cast<uint16_t>(index + 2));
+						uint8_t secondByte = memoryUnit[index + 1];
+						uint8_t thirdByte = memoryUnit[index + 2];
 						uint16_t address = (secondByte << 8) | thirdByte;
-						ImGui::Text("0x%02x: %s 0x%04X", opcode, instruction.mnemonic.c_str(), address);
+						ImGui::Text(std::format("{:#04x}: {} {:#06X}", opcode, instruction.mnemonic, address).c_str());
 						break;
 					}
 					default:
-						ImGui::Text("0x%04zx: ???", index);
+						ImGui::Text(std::format("{:#06x}: ???", index).c_str());
 						break;
 					}
 
@@ -323,13 +324,11 @@ namespace UIEditor
 			currentPage = static_cast<uint8_t>(cpu.GetPC() / PAGE_SIZE);
 		}
 
-		const std::string memoryView = "Memory View (Page " + std::to_string(currentPage) + "/" + std::to_string(PAGE_SIZE - 1) + ")";
-		ImGui::Begin(memoryView.c_str());
+		ImGui::Begin(std::format("Memory View (Page {}/{})", currentPage, PAGE_SIZE-1).c_str());
 		if (ImGui::Button("\t\t\tPrev\t\t\t"))
 		{
 			currentPage = currentPage - 1 < 0 ? 255 : currentPage - 1;
 		}
-
 
 		ImGui::SameLine();
 		const std::string spaces = std::string(" ", 79);
@@ -362,7 +361,7 @@ namespace UIEditor
 					ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(255, 0, 0, 255));
 				}
 
-				ImGui::Text("0x%02X", memoryUnit.Read(static_cast<uint16_t>(index)));
+				ImGui::Text("0x%02X", memoryUnit[index]);
 			}
 			ImGui::EndTable();
 		}

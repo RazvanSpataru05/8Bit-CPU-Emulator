@@ -125,12 +125,4 @@ namespace Utils
 	{
 		return value ? "True" : "False";
 	}
-
-	const char* ButtonName(std::string& s, bool flag)
-	{
-		s += "(";
-		s += flag ? "ON" : "OFF";
-		s += ")";
-		return s.c_str();
-	}
 }
