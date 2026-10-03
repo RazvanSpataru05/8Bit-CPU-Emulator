@@ -370,8 +370,6 @@ namespace UIEditor
 	}
 	void DrawMenu(MemoryUnit& memoryUnit, bool& followPC, bool& executeAuto,  CPU& cpu)
 	{
-		const char* executeAutoString = "Auto (" + executeAuto ? "ON)" : "OFF)";
-		const char* followPCString = "Follow PC (" + followPC ? "ON)" : "OFF)";
 
 		ImGui::Begin("Menu");
 		if (ImGui::Button("\t\tNext Step\t\t"))
@@ -388,13 +386,13 @@ namespace UIEditor
 			followPC = true;
 		}
 
-		if (ImGui::Button(executeAutoString))
+		if (ImGui::Button(std::format("Auto ({})", executeAuto ? "ON" : "OFF").c_str()))
 		{
 			executeAuto = !executeAuto;
 		}
 		ImGui::SameLine();
 
-		if (ImGui::Button(followPCString))
+		if (ImGui::Button(std::format("Follow PC ({})", followPC ? "ON" : "OFF").c_str()))
 		{
 			followPC = !followPC;
 		}
@@ -418,12 +416,12 @@ namespace UIEditor
 		if (helpMenuVisibility)
 		{
 			ImGui::Begin("Help Menu");
-			const std::string pageText = "Page " + std::to_string(static_cast<uint8_t>(currentHelperPage)) + "/8";
+			const std::string pageText = std::format("Page {}/8", static_cast<uint8_t>(currentHelperPage));
 
-			float windowWidth = ImGui::GetWindowSize().x;
-			float textWidth = ImGui::CalcTextSize(pageText.c_str()).x;
-			float navButtonWidth = ImGui::CalcTextSize(">").x + ImGui::GetStyle().FramePadding.x * 2;
-			float buttonWidth = ImGui::CalcTextSize("X").x + ImGui::GetStyle().FramePadding.x * 2;
+			const float windowWidth = ImGui::GetWindowSize().x;
+			const float textWidth = ImGui::CalcTextSize(pageText.c_str()).x;
+			const float navButtonWidth = ImGui::CalcTextSize(">").x + ImGui::GetStyle().FramePadding.x * 2;
+			const float buttonWidth = ImGui::CalcTextSize("X").x + ImGui::GetStyle().FramePadding.x * 2;
 
 			float centerX = (windowWidth - textWidth) * 0.5f;
 			ImGui::SetCursorPosX(centerX);

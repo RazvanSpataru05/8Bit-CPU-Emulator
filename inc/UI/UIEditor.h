@@ -18,6 +18,8 @@
 #include "ImGui/imgui.h"
 #include "ImGui/imgui-SFML.h"
 
+#include <format>
+
 class Assembler;
 struct AssemblerError;
 struct AssemblerWarning;
