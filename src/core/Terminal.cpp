@@ -2,7 +2,7 @@
 
 void Terminal::ExecuteCommand(std::string_view line)
 {
-    const std::string command = Utils::RemoveWhiteSpace(Utils::ToLower(line));
+    const std::string command = Utils::String::RemoveWhiteSpace(Utils::String::ToLower(line));
     AddLine({ std::format("> {}", line), LineType::INFO });
 
     if (command == "clear")

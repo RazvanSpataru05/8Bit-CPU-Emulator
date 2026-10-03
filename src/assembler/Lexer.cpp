@@ -57,7 +57,7 @@ void Lexer::PrintTokenizedSourceCode() const noexcept
 {
 	for (const auto& token : m_tokens)
 	{
-		std::cout << "Token Type: " << Utils::TokenTypeToString(token) << std::endl;
+		std::cout << "Token Type: " << Utils::String::TokenTypeToString(token) << std::endl;
 		std::cout << "Token Value: " << token.value << std::endl;
 		std::cout << "Token Line: " << token.line << std::endl;
 		std::cout << "Token Column: " << token.column << std::endl << std::endl;
@@ -158,7 +158,7 @@ void Lexer::CheckMixedCase(const Token& token)
 {
 	if (token.type != TokenType::REGISTER && token.type != TokenType::MNEMONIC) return;
 
-	const std::string upperWord = Utils::ToUpper(token.value);
+	const std::string upperWord = Utils::String::ToUpper(token.value);
 
 	if (token.value == upperWord) return;
 
@@ -180,15 +180,15 @@ void Lexer::AddWarning(std::string_view message, uint32_t column)
 
 Token Lexer::BuildToken(std::string_view word)
 {
-	const std::string upperWord = Utils::ToUpper(word);
+	const std::string upperWord = Utils::String::ToUpper(word);
 	const uint32_t wordColumnStart = static_cast<uint32_t>(m_columnNumber - word.size());
 
 	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber, wordColumnStart };
 	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber, wordColumnStart };
 
-	if (Utils::StartsLikeNumber(word))
+	if (Utils::String::StartsLikeNumber(word))
 	{
-		if (Utils::IsNumber(word))
+		if (Utils::String::IsNumber(word))
 		{
 			return { TokenType::NUMBER, word, m_lineNumber, wordColumnStart };
 		}

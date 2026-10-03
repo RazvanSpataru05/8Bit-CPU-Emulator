@@ -2,13 +2,166 @@
 
 namespace Utils
 {
-	bool ErrorListTab(SelectedTab tab)
+	namespace
 	{
-		return tab == SelectedTab::ERROR_LIST;
+		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
+
+		void SetupInstructionsTableColumn()
+		{
+			ImGui::TableSetupColumn("Mnemonic", ImGuiTableColumnFlags_WidthFixed, 92.0f);
+			ImGui::TableSetupColumn("Opcode", ImGuiTableColumnFlags_WidthFixed, 56.0f);
+			ImGui::TableSetupColumn("Operator Kind", ImGuiTableColumnFlags_WidthFixed, 200.0f);
+			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 36.0f);
+			ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
+
+			ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.18f, 0.28f, 0.45f, 1.0f));
+			ImGui::TableHeadersRow();
+			ImGui::PopStyleColor();
+		}
+
+		void TextCentered(std::string_view text)
+		{
+			const float cellWidth = ImGui::GetColumnWidth();
+			const float textWidth = ImGui::CalcTextSize(text.data()).x;
+			const float offset = (cellWidth - textWidth) * 0.5f;
+
+			if (offset > 0.0f)
+			{
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
+			}
+			ImGui::TextUnformatted(text.data(), text.data() + text.size());
+		}
+
+		void DisplayMnemonic(size_t index)
+		{
+			int column = 0;
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.80f, 1.00f, 1.0f));
+			TextCentered(ISA::Table[index].mnemonic);
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
+			TextCentered(std::format("0x{:02X}", ISA::Table[index].opcode));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.70f, 0.40f, 0.90f, 1.0f));
+			TextCentered(Utils::String::OperatorKindToString(ISA::Table[index].operatorKind));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
+			TextCentered(std::format("{}", ISA::Table[index].size));
+			ImGui::PopStyleColor();
+
+			ImGui::TableSetColumnIndex(column++);
+			ImGui::TextWrapped("%s", ISA::Table[index].description);
+		}
+
+		void DisplayMnemonicList(std::initializer_list<uint8_t> opcodes)
+		{
+			SetupInstructionsTableColumn();
+
+			const size_t tableSize = ISA::GetISATableSize();
+			for (size_t index = 0; index < tableSize; ++index)
+			{
+				for (uint8_t opcode : opcodes)
+				{
+					if (ISA::Table[index].opcode == opcode)
+					{
+						DisplayMnemonic(index);
+					}
+				}
+			}
+		}
+
+		void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstruction)
+		{
+			SetupInstructionsTableColumn();
+
+			const size_t tableSize = ISA::GetISATableSize();
+			for (size_t index = 0; index < tableSize; ++index)
+			{
+				if (ISA::Table[index].opcode >= firstInstruction
+					&& ISA::Table[index].opcode <= lastInstruction)
+				{
+					DisplayMnemonic(index);
+				}
+
+				if (ISA::Table[index].opcode > lastInstruction)
+				{
+					return;
+				}
+			}
+		}
 	}
 
-	bool ConsoleListTab(SelectedTab tab)
+	namespace UI
 	{
-		return tab == SelectedTab::CONSOLE;
+		bool ErrorListTab(SelectedTab tab)
+		{
+			return tab == SelectedTab::ERROR_LIST;
+		}
+
+		bool ConsoleListTab(SelectedTab tab)
+		{
+			return tab == SelectedTab::CONSOLE;
+		}
+
+
+		void DisplayMiscPage(const char* title, const char* tableId, std::initializer_list<uint8_t> opcodes)
+		{
+			const float titleWidth = ImGui::CalcTextSize(title).x;
+			const float windowWidth = ImGui::GetWindowSize().x;
+
+			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
+			ImGui::SetCursorPosY(windowWidth * 0.05f);
+			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), title);
+			ImGui::Spacing();
+			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
+			ImGui::Separator();
+			ImGui::PopStyleColor();
+			ImGui::Spacing();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
+
+			if (ImGui::BeginTable(tableId, HELP_TABLE_COLUMN_SIZE,
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_PadOuterX))
+			{
+				DisplayMnemonicList(opcodes);
+				ImGui::EndTable();
+			}
+			ImGui::PopStyleVar();
+		}
+
+		void DisplayTable(const InstructionTableInfo& info)
+		{
+			const float windowWidth = ImGui::GetWindowSize().x;
+			const float titleWidth = ImGui::CalcTextSize(info.title).x;
+
+			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
+			ImGui::SetCursorPosY(windowWidth * 0.05f);
+			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), info.title);
+			ImGui::Spacing();
+			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
+			ImGui::Separator();
+			ImGui::PopStyleColor();
+			ImGui::Spacing();
+
+			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
+			if (ImGui::BeginTable(info.tableId, HELP_TABLE_COLUMN_SIZE,
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_PadOuterX))
+			{
+				DisplayPageInstructions(info.firstInstruction, info.lastInstruction);
+				ImGui::EndTable();
+			}
+			ImGui::PopStyleVar();
+		}
 	}
 }

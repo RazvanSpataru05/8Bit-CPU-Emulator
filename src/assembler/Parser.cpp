@@ -55,7 +55,7 @@ void Parser::AddLabels()
 			continue;
 		}
 
-		const ISAEntry* entry = ISA::Find(Utils::ToUpper(Peek().value));
+		const ISAEntry* entry = ISA::Find(Utils::String::ToUpper(Peek().value));
 		if (!entry) continue;
 
 		m_currentAddress += entry->size;
@@ -84,7 +84,7 @@ void Parser::ParseTokens()
 		const Token& currentToken = Peek();
 
 		Logger::AddInfoMessage(std::format("Value: {}\n", Peek().value));
-		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::TokenTypeToString(Peek())));
+		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::String::TokenTypeToString(Peek())));
 
 		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -164,14 +164,14 @@ void Parser::PrintLabels() const noexcept
 
 void Parser::HandleMnemonicToken(const Token& token)
 {
-	const ISA::ISAEntry* entry = ISA::Find(Utils::ToUpper(token.value));
+	const ISA::ISAEntry* entry = ISA::Find(Utils::String::ToUpper(token.value));
 	if (!entry) return;
 
 	m_currentStatement.opcode = entry->opcode;
 	m_currentStatement.ISAEntry = entry;
 	m_currentStatement.operatorCount = entry->size - 1;
 
-	if (Utils::ToUpper(token.value) == "HLT")
+	if (Utils::String::ToUpper(token.value) == "HLT")
 	{
 		m_seenHLT = true;
 	}
@@ -205,7 +205,7 @@ void Parser::HandleLabel()
 {
 	if (IsLabelDefinition())
 	{
-		const std::string label = Utils::ToLower(Peek().value);
+		const std::string label = Utils::String::ToLower(Peek().value);
 		if (m_labels.find(label) != m_labels.end())
 		{
 			AddError(std::format("Error at line {}, column {}: '{}' already exists.",
@@ -246,7 +246,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 
 	if (token.type == TokenType::IDENTIFIER)
 	{
-		const std::string label = Utils::ToLower(Peek().value);
+		const std::string label = Utils::String::ToLower(Peek().value);
 		if (!m_labels.contains(label))
 		{
 			AddError(std::format("Error at line {}, {}: undefined label '{}'.",
@@ -274,7 +274,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 	else
 	{
 		AddError(std::format("Error at line {}, column {}: expected 16-bit address or label, found {}.",
-			token.line, token.column, Utils::TokenTypeToString(token)));
+			token.line, token.column, Utils::String::TokenTypeToString(token)));
 		ConsumeLine();
 
 		return {};
@@ -315,7 +315,7 @@ void Parser::ExpectEndOfStatement()
 	{
 
 		AddError(std::format("Error at line {}, column {}: expected newline or end of file at the end of statement. Found {}.",
-			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 
@@ -332,7 +332,7 @@ void Parser::ExpectComma()
 		m_currentStatementHasError = true;
 
 		AddError(std::format("Error at line {}, column {}: expected ',' after first operand of 'MOV', found {}.",
-			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 }
@@ -344,7 +344,7 @@ void Parser::ExpectColon()
 		m_currentStatementHasError = true;
 
 		AddError(std::format("Error at line {}, column {}: expected ':' after label definition, found {}.",
-			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 	}
 }
@@ -387,13 +387,13 @@ ParsedNumber Parser::ConsumeNumber()
 	if (Peek().type != TokenType::NUMBER)
 	{
 		AddError(std::format("Error at line {}, column {}: expected number, found {}.",
-			Peek().line, Peek().column, Utils::TokenTypeToString(Peek())));
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 
 		return { 0u, false };
 	}
 
-	return Utils::ParseNumber(Peek().value);
+	return Utils::String::ParseNumber(Peek().value);
 }
 
 uint8_t Parser::ConsumeSelector()
@@ -402,7 +402,7 @@ uint8_t Parser::ConsumeSelector()
 
 	if (token.type == TokenType::REGISTER)
 	{
-		const std::string upper = Utils::ToUpper(token.value);
+		const std::string upper = Utils::String::ToUpper(token.value);
 		if (!nameToSelector.contains(upper))
 		{
 			m_currentStatementHasError = true;
@@ -439,7 +439,7 @@ uint8_t Parser::ConsumeSelector()
 		m_currentStatementHasError = true;
 
 		AddError(std::format("Error at line {}, column {}: expected register selector or name, found {}.",
-			token.line, token.column, Utils::TokenTypeToString(Peek())));
+			token.line, token.column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 
 		return 0u;

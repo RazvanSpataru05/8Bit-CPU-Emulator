@@ -13,19 +13,21 @@
 
 namespace Utils
 {
-	std::string ToUpper(std::string_view word);
-	std::string ToLower(std::string_view word);
-	std::string RemoveWhiteSpace(std::string_view word);
+	namespace String
+	{
+		std::string ToUpper(std::string_view word);
+		std::string ToLower(std::string_view word);
+		std::string RemoveWhiteSpace(std::string_view word);
 
-	void CheckBase(std::string_view prefix, uint8_t& base);
+		void CheckBase(std::string_view prefix, uint8_t& base);
 
-	bool HasPrefix(std::string_view word);
-	bool StartsLikeNumber(std::string_view word);
-	bool IsNumber(std::string_view word);
-	ParsedNumber ParseNumber(const std::string& word);
+		bool HasPrefix(std::string_view word);
+		bool StartsLikeNumber(std::string_view word);
+		bool IsNumber(std::string_view word);
+		ParsedNumber ParseNumber(const std::string& word);
 
-	std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
-	std::string TokenTypeToString(const Token& token);
+		std::string_view OperatorKindToString(ISA::OperatorKind operatorKind);
+		std::string TokenTypeToString(const Token& token);
+	}
 
-	const char* FlagToString(bool value);
 };  

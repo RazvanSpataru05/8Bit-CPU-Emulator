@@ -5,6 +5,8 @@
 
 namespace Utils
 {
-	bool IsValidDigit(unsigned char c, uint8_t base);
-
+	namespace Character
+	{
+		bool IsValidDigit(unsigned char c, uint8_t base);
+	}
 }

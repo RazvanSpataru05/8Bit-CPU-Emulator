@@ -9,8 +9,6 @@ namespace UIEditor
 		SelectedTab tab{ SelectedTab::ERROR_LIST };
 		PageType currentHelperPage{ PageType::GLOSSARY_PAGE };
 
-		constexpr uint8_t HELP_TABLE_COLUMN_SIZE = 5u;
-
 		constexpr uint16_t PAGE_SIZE = 256u;
 
 		constexpr uint8_t FIRST_LOAD_INSTRUCTION = 0x01;
@@ -52,152 +50,6 @@ namespace UIEditor
 			{
 				currentHelperPage = static_cast<PageType>(static_cast<uint8_t>(currentHelperPage) - 1);
 			}
-		}
-
-		void SetupInstructionsTableColumn()
-		{
-			ImGui::TableSetupColumn("Mnemonic", ImGuiTableColumnFlags_WidthFixed, 92.0f);
-			ImGui::TableSetupColumn("Opcode", ImGuiTableColumnFlags_WidthFixed, 56.0f);
-			ImGui::TableSetupColumn("Operator Kind", ImGuiTableColumnFlags_WidthFixed, 200.0f);
-			ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, 36.0f);
-			ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthStretch);
-
-			ImGui::PushStyleColor(ImGuiCol_TableHeaderBg, ImVec4(0.18f, 0.28f, 0.45f, 1.0f));
-			ImGui::TableHeadersRow();
-			ImGui::PopStyleColor();
-		}
-
-		void TextCentered(std::string_view text)
-		{
-			const float cellWidth = ImGui::GetColumnWidth();
-			const float textWidth = ImGui::CalcTextSize(text.data()).x;
-			const float offset = (cellWidth - textWidth) * 0.5f;
-
-			if (offset > 0.0f)
-			{
-				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + offset);
-			}
-			ImGui::TextUnformatted(text.data(), text.data() + text.size());
-		}
-
-		void DisplayInstruction(size_t index)
-		{
-			int column = 0;
-			ImGui::TableNextRow();
-			ImGui::TableSetColumnIndex(column++);
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.40f, 0.80f, 1.00f, 1.0f));
-			TextCentered(ISA::Table[index].mnemonic);
-			ImGui::PopStyleColor();
-
-			ImGui::TableSetColumnIndex(column++);
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.00f, 0.75f, 0.20f, 1.0f));
-			TextCentered(std::format("0x{:02X}", ISA::Table[index].opcode));
-			ImGui::PopStyleColor();
-
-			ImGui::TableSetColumnIndex(column++);
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.70f, 0.40f, 0.90f, 1.0f));
-			TextCentered(Utils::OperatorKindToString(ISA::Table[index].operatorKind));
-			ImGui::PopStyleColor();
-
-			ImGui::TableSetColumnIndex(column++);
-			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.55f, 0.95f, 0.55f, 1.0f));
-			TextCentered(std::format("{}", ISA::Table[index].size));
-			ImGui::PopStyleColor();
-
-			ImGui::TableSetColumnIndex(column++);
-			ImGui::TextWrapped("%s", ISA::Table[index].description);
-		}
-
-		void DisplayPageInstructions(uint8_t firstInstruction, uint8_t lastInstruction)
-		{
-			SetupInstructionsTableColumn();
-
-			const size_t tableSize = ISA::GetISATableSize();
-			for (size_t index = 0; index < tableSize; ++index)
-			{
-				if (ISA::Table[index].opcode >= firstInstruction
-					&& ISA::Table[index].opcode <= lastInstruction)
-				{
-					DisplayInstruction(index);
-				}
-
-				if (ISA::Table[index].opcode > lastInstruction)
-				{
-					return;
-				}
-			}
-		}
-
-		void DisplayPageInstructions(std::initializer_list<uint8_t> opcodes)
-		{
-			SetupInstructionsTableColumn();
-
-			const size_t tableSize = ISA::GetISATableSize();
-			for (size_t index = 0; index < tableSize; ++index)
-			{
-				for (uint8_t opcode : opcodes)
-				{
-					if (ISA::Table[index].opcode == opcode)
-					{
-						DisplayInstruction(index);
-					}
-				}
-			}
-		}
-
-		void DisplayTable(const char* pageTitle, const char* tableTitle,
-			uint8_t firstInstruction, uint8_t lastInstruction)
-		{
-			const float windowWidth = ImGui::GetWindowSize().x;
-			const float titleWidth = ImGui::CalcTextSize(pageTitle).x;
-
-			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
-			ImGui::SetCursorPosY(windowWidth * 0.05f);
-			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
-			ImGui::Spacing();
-			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
-			ImGui::Separator();
-			ImGui::PopStyleColor();
-			ImGui::Spacing();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
-			if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE,
-				ImGuiTableFlags_BordersInnerV |
-				ImGuiTableFlags_RowBg |
-				ImGuiTableFlags_PadOuterX))
-			{
-				DisplayPageInstructions(firstInstruction, lastInstruction);
-				ImGui::EndTable();
-			}
-			ImGui::PopStyleVar();
-		}
-
-		void DisplayTable(const char* pageTitle, const char* tableTitle,
-			std::initializer_list<uint8_t> opcodes)
-		{
-			const float titleWidth = ImGui::CalcTextSize(pageTitle).x;
-			const float windowWidth = ImGui::GetWindowSize().x;
-
-			ImGui::SetCursorPosX((windowWidth - titleWidth) * 0.5f);
-			ImGui::SetCursorPosY(windowWidth * 0.05f);
-			ImGui::TextColored(ImVec4(0.90f, 0.90f, 0.90f, 1.0f), pageTitle);
-			ImGui::Spacing();
-			ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.55f, 0.85f, 1.0f));
-			ImGui::Separator();
-			ImGui::PopStyleColor();
-			ImGui::Spacing();
-
-			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(8.0f, 5.0f));
-
-			if (ImGui::BeginTable(tableTitle, HELP_TABLE_COLUMN_SIZE,
-				ImGuiTableFlags_BordersInnerV |
-				ImGuiTableFlags_RowBg |
-				ImGuiTableFlags_PadOuterX))
-			{
-				DisplayPageInstructions(opcodes);
-				ImGui::EndTable();
-			}
-			ImGui::PopStyleVar();
 		}
 	}
 
@@ -341,6 +193,7 @@ namespace UIEditor
 
 		const size_t startAddress = static_cast<size_t>(currentPage * PAGE_SIZE);
 		const size_t endAddress = startAddress + PAGE_SIZE;
+
 		if (ImGui::BeginTable("MemoryTable", 16, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg))
 		{
 			for (size_t index = startAddress; index < endAddress; ++index)
@@ -422,7 +275,7 @@ namespace UIEditor
 			const float navButtonWidth = ImGui::CalcTextSize(">").x + ImGui::GetStyle().FramePadding.x * 2;
 			const float buttonWidth = ImGui::CalcTextSize("X").x + ImGui::GetStyle().FramePadding.x * 2;
 
-			float centerX = (windowWidth - textWidth) * 0.5f;
+			const float centerX = (windowWidth - textWidth) * 0.5f;
 			ImGui::SetCursorPosX(centerX);
 			ImGui::Text(pageText.c_str());
 			ImGui::SameLine();
@@ -491,37 +344,37 @@ namespace UIEditor
 			}
 			case PageType::LOAD_STORE_PAGE:
 			{
-				DisplayTable("Load & Store Instructions Table", "load_store_table", FIRST_LOAD_INSTRUCTION, LAST_LOAD_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Load & Store Instructions Table", "load_store_table", FIRST_LOAD_INSTRUCTION, LAST_LOAD_INSTRUCTION });
 				break;
 			}
 			case PageType::ARITHMETIC_PAGE:
 			{
-				DisplayTable("Arithmetic Instructions Table", "arithmetic_table", FIRST_ARITHMETIC_INSTRUCTION, LAST_ARITHMETIC_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Arithmetic Instructions Table", "arithmetic_table", FIRST_ARITHMETIC_INSTRUCTION, LAST_ARITHMETIC_INSTRUCTION });
 				break;
 			}
 			case PageType::LOGICAL_PAGE:
 			{
-				DisplayTable("Logical Instructions Table", "logical_tabe", FIRST_LOGIC_INSTRUCTION, LAST_LOGIC_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Logical Instructions Table", "logical_table", FIRST_LOGIC_INSTRUCTION, LAST_LOGIC_INSTRUCTION });
 				break;
 			}
 			case PageType::COMPARE_PAGE:
 			{
-				DisplayTable("Compare Instructions Table", "compare_table", FIRST_COMPARE_INSTRUCTION, LAST_COMPARE_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Compare Instructions Table", "compare_table", FIRST_COMPARE_INSTRUCTION, LAST_COMPARE_INSTRUCTION });
 				break;
 			}
 			case PageType::JUMP_PAGE:
 			{
-				DisplayTable("Jump Instructions Table", "jump_table", FIRST_JUMP_INSTRUCTION, LAST_JUMP_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Jump Instructions Table", "jump_table", FIRST_JUMP_INSTRUCTION, LAST_JUMP_INSTRUCTION });
 				break;
 			}
 			case PageType::STACK_PAGE:
 			{
-				DisplayTable("Stack Instructions Table", "stack_table", FIRST_STACK_INSTRUCTION, LAST_STACK_INSTRUCTION);
+				Utils::UI::DisplayTable({ "Stack Instructions Table", "stack_table", FIRST_STACK_INSTRUCTION, LAST_STACK_INSTRUCTION });
 				break;
 			}
 			case PageType::MISC_PAGE:
 			{
-				DisplayTable("Misc Instructions Table", "misc_table", { 0x00, 0x70, 0xF8, 0xF3, 0xFF });
+				Utils::UI::DisplayMiscPage("Misc Instructions Table", "misc_table", { 0x00, 0x70, 0xF8, 0xF3, 0xFF });
 				break;
 			}
 			}
@@ -536,7 +389,7 @@ namespace UIEditor
 
 		if (ImGui::BeginTabBar("##bottomPanel"))
 		{
-			const auto errorListTabFlag = Utils::ErrorListTab(tab) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+			const auto errorListTabFlag = Utils::UI::ErrorListTab(tab) ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
 			if (ImGui::BeginTabItem("Error List", nullptr, errorListTabFlag))
 			{
 				if (ImGui::IsItemClicked())
@@ -551,7 +404,7 @@ namespace UIEditor
 				tab = SelectedTab::ERROR_LIST;
 			}
 
-			const auto consoleTabFlag = Utils::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
+			const auto consoleTabFlag = Utils::UI::ConsoleListTab(tab) ? ImGuiTabItemFlags_None : ImGuiTabItemFlags_SetSelected;
 			if (ImGui::BeginTabItem("Console", nullptr, consoleTabFlag))
 			{
 				if (ImGui::IsItemClicked())

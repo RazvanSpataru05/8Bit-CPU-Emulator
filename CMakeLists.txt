@@ -69,6 +69,7 @@ set(HEADERS
 
     inc/UI/UIEditor.h
     inc/UI/UICommon.h
+    inc/UI/InstructionTableInfo.h
     inc/UI/Application.h
 
     inc/Utils/CharacterUtils.h
