@@ -227,7 +227,8 @@ namespace UIEditor
 	}
 
 	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit, const Dissasembler& dissasembler,
-		CPU& cpu, Assembler& assembler, Terminal& terminal, InterruptController& interruptController)
+		CPU& cpu, Assembler& assembler, Terminal& terminal, InterruptController& interruptController,
+		Keyboard& keyboard, bool& executeAuto)
 	{
 		static char editorBuffer[BUFFER_SIZE];
 
@@ -264,7 +265,7 @@ namespace UIEditor
 					tab = SelectedTab::ERROR_LIST;
 				}
 			}
-			DrawOutput(assembler, terminal, interruptController);
+			DrawOutput(assembler, terminal, interruptController, keyboard, executeAuto);
 		}
 		else if (mode == Mode::DISSASEMBLY)
 		{
@@ -305,6 +306,7 @@ namespace UIEditor
 						ImGui::Text("0x%04zx: ???", index);
 						break;
 					}
+
 					index += static_cast<size_t>(instruction.size - 1);
 					ImGui::PopStyleColor();
 					if (opcode == 0xFF) break;
@@ -366,8 +368,7 @@ namespace UIEditor
 		}
 		ImGui::End();
 	}
-	void DrawMenu(MemoryUnit& memoryUnit,
-		bool& executeAuto, bool& followPC, CPU& cpu)
+	void DrawMenu(MemoryUnit& memoryUnit, bool& followPC, bool& executeAuto,  CPU& cpu)
 	{
 		const char* executeAutoString = "Auto (" + executeAuto ? "ON)" : "OFF)";
 		const char* followPCString = "Follow PC (" + followPC ? "ON)" : "OFF)";
@@ -531,7 +532,8 @@ namespace UIEditor
 		}
 	}
 
-	void DrawOutput(const Assembler& assembler, Terminal& terminal, InterruptController& interruptController)
+	void DrawOutput(const Assembler& assembler, Terminal& terminal, InterruptController& interruptController,
+		Keyboard& keyboard, bool& executeAuto)
 	{
 		ImGui::Separator();
 
@@ -570,7 +572,7 @@ namespace UIEditor
 			switch (tab)
 			{
 			case SelectedTab::ERROR_LIST: { DrawErrorList(assembler.GetErrors(), assembler.GetWarnings()); break; }
-			case SelectedTab::CONSOLE: { DrawConsole(terminal, interruptController); break; }
+			case SelectedTab::CONSOLE: { DrawConsole(terminal, interruptController, keyboard, executeAuto); break; }
 			}
 		}
 	}
@@ -597,7 +599,8 @@ namespace UIEditor
 		ImGui::EndChild();
 	}
 
-	void DrawConsole(Terminal& terminal, InterruptController& interruptController)
+	void DrawConsole(Terminal& terminal, InterruptController& interruptController, Keyboard& keyboard,
+					bool& executeAuto)
 	{
 		static char consoleBuffer[CONSOLE_BUFFER_SIZE];
 		static bool scrollToBottom = true;
@@ -656,9 +659,14 @@ namespace UIEditor
 			const std::string line{ consoleBuffer };
 			if (interruptController.GetInterruptFlag())
 			{
+				executeAuto = false;
 				interruptController.EnableInterrupts(false);
 				interruptController.SetKeyboardData(line[line.size() - 1]);
-				std::cout << interruptController.ReadKeyboardData();
+				
+				for (uint8_t key : line)
+				{
+					keyboard.AddKey(key);
+				}
 			}
 			else
 			{

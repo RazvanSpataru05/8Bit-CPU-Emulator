@@ -7,6 +7,7 @@
 #include "Core/CPU.h"
 #include "Core/InterruptController.h"
 #include "Core/Terminal.h"
+#include "Core/Keyboard.h"
 
 #include "UI/UICommon.h"
 
@@ -29,15 +30,18 @@ namespace UIEditor
 	void DrawCPUState(const CPU& cpu);
 	void DrawAssemblyPanel(Mode& mode, MemoryUnit& memoryUnit,
 							const Dissasembler& dissasembler, CPU& cpu, Assembler& assembler,
-							Terminal& terminal, InterruptController& interruptController);
+							Terminal& terminal, InterruptController& interruptController,
+							Keyboard& keyboard, bool& executeAuto);
 
 	void DrawMemoryView(const MemoryUnit& memoryUnit, CPU& cpu, bool& followPC);
 	void DrawMenu(MemoryUnit& memoryUnit, 
 				  bool& executeAuto, bool& followPC, CPU& cpu);
 	void DrawSpeedSlider(float& speed);
 	void DrawHelpMenu();
-	void DrawOutput(const Assembler& assembler, Terminal& terminal, InterruptController& interruptController);
+	void DrawOutput(const Assembler& assembler, Terminal& terminal, 
+		InterruptController& interruptController, Keyboard& keyboard, bool& executeAuto);
 
 	void DrawErrorList(std::span<const AssemblerError> errors, std::span<const AssemblerWarning> warnings);
-	void DrawConsole(Terminal& terminal, InterruptController& interruptController);
+	void DrawConsole(Terminal& terminal, InterruptController& interruptController, Keyboard& keyboard,
+					bool& executeAuto);
 }
