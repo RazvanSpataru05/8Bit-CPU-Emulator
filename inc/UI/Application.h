@@ -5,6 +5,7 @@
 #include "Core/Emulator.h"
 
 #include "UI/UIEditor.h"
+#include "UI/AppConfig.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -32,16 +33,16 @@ private:
 	Application& operator=(Application&&) = delete;
 
 private:
+	void Reset();
+
+private:
 	std::unique_ptr<Emulator> m_emulator;
 	std::unique_ptr<Dissasembler> m_dissasembler;
 	std::unique_ptr<Assembler> m_assembler;
 
 	UIEditor::Mode m_editorMode;
 
-	bool m_executeAuto;
-	bool m_followPC;
-	bool m_showISA;
-	float m_autoSpeed;
+	AppConfig m_appConfig;
 
 	sf::RenderWindow m_window;
 	sf::Clock m_deltaClock;

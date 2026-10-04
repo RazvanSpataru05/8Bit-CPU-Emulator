@@ -4,11 +4,7 @@ Application::Application() :
 	m_emulator{ std::make_unique<Emulator>()},
 	m_dissasembler{ std::make_unique<Dissasembler>() },
 	m_assembler{std::make_unique<Assembler>()},
-	m_editorMode{ UIEditor::Mode::EDIT },
-	m_executeAuto{ false },
-	m_followPC{ true },
-	m_showISA{ false },
-	m_autoSpeed{ 1.0f }
+	m_editorMode{ UIEditor::Mode::EDIT }
 {
 
 }
@@ -46,7 +42,7 @@ void Application::ProcessEvents()
 
 void Application::Update()
 {
-	if (m_executeAuto && m_instructionCycle.getElapsedTime().asSeconds() >= m_autoSpeed)
+	if (m_appConfig.executeAuto && m_instructionCycle.getElapsedTime().asSeconds() >= m_appConfig.autoSpeed)
 	{
 		m_emulator->GetCPU().Step();
 		m_instructionCycle.restart();
@@ -61,15 +57,15 @@ void Application::RenderUI()
 	UIEditor::DrawCPUState(m_emulator->GetCPU());
 	UIEditor::DrawAssemblyPanel(m_editorMode, m_emulator->GetCPU().GetMemoryUnit(),
 		*m_dissasembler, m_emulator->GetCPU(), *m_assembler, m_emulator->GetTerminal(), m_emulator->GetInterruptController(),
-		m_emulator->GetKeyboard(), m_executeAuto);
+		m_emulator->GetKeyboard(), m_appConfig.executeAuto);
 
 	UIEditor::DrawMemoryView(m_emulator->GetCPU().GetMemoryUnit(),
-		m_emulator->GetCPU(), m_followPC);
+		m_emulator->GetCPU(), m_appConfig.followPC);
 
 	UIEditor::DrawMenu(m_emulator->GetCPU().GetMemoryUnit(),
-		m_followPC, m_executeAuto, m_emulator->GetCPU());
+		m_appConfig.followPC, m_appConfig.executeAuto, m_emulator->GetCPU());
 
-	UIEditor::DrawSpeedSlider(m_autoSpeed);
+	UIEditor::DrawSpeedSlider(m_appConfig.autoSpeed);
 	UIEditor::DrawHelpMenu();
 
 	ImGui::SFML::Render(m_window);
@@ -94,6 +90,7 @@ void Application::ManageKeyStrokes(const std::optional<sf::Event>& event)
 	{
 		return;
 	}
+
 	const auto keyCode = event->getIf<sf::Event::KeyPressed>();
 
 	switch (keyCode->code)
@@ -107,26 +104,29 @@ void Application::ManageKeyStrokes(const std::optional<sf::Event>& event)
 		break;
 
 	case sf::Keyboard::Key::R:
-		m_emulator->GetCPU().GetMemoryUnit().RestoreSnapshot();
-		m_emulator->GetCPU().Reset();
-		m_followPC = true;
-		m_executeAuto = false;
-		m_autoSpeed = 1.0f;
+		Reset();
 		break;
 
 	// Speed Slider Controls
 	case sf::Keyboard::Key::D:
 	{
-		m_autoSpeed = std::min(2.00f, m_autoSpeed + 0.10f);
+		m_appConfig.autoSpeed = std::min(2.00f, m_appConfig.autoSpeed + 0.10f);
 		break;
 	}
 	case sf::Keyboard::Key::A:
 	{
-		m_autoSpeed = std::max(0.10f, m_autoSpeed - 0.10f);
+		m_appConfig.autoSpeed = std::max(0.10f, m_appConfig.autoSpeed - 0.10f);
 		break;
 	}
 
 	default:
 		break;
 	}
+}
+
+void Application::Reset()
+{
+	m_emulator->GetCPU().GetMemoryUnit().RestoreSnapshot();
+	m_emulator->GetCPU().Reset();
+	m_appConfig.Reset();
 }
