@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UI/AppDefaults.h"
+
 struct AppConfig
 {
 	bool executeAuto{ false };
@@ -9,9 +11,9 @@ struct AppConfig
 
 	void Reset()
 	{
-		executeAuto = false;
-		followPC = true;
-		showISA = false;
-		autoSpeed = 1.0f;
+		executeAuto = AppDefaults::EXECUTE_AUTO;
+		followPC = AppDefaults::FOLLOW_PC;
+		showISA = AppDefaults::SHOW_ISA;
+		autoSpeed = AppDefaults::AUTO_SPEED;
 	}
 };

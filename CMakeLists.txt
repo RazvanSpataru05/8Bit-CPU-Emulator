@@ -72,6 +72,7 @@ set(HEADERS
     inc/UI/InstructionTableInfo.h
     inc/UI/Application.h
     inc/UI/AppConfig.h
+    inc/UI/AppDefaults.h
 
     inc/Utils/CharacterUtils.h
     inc/Utils/StringUtils.h
