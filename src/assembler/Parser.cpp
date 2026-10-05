@@ -49,6 +49,8 @@ void Parser::AddLabels()
 
 		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
 
+		if (Peek().type == TokenType::DOT) { HandleDotToken(); }
+
 		if (Peek().type == TokenType::IDENTIFIER)
 		{
 			HandleLabel();
@@ -198,6 +200,26 @@ void Parser::HandleIdentifierToken()
 void Parser::HandleNewLineToken()
 {
 	ResetCurrentStatement();
+	Next();
+}
+
+void Parser::HandleDotToken()
+{
+	Next();
+	if (Peek().type != TokenType::IDENTIFIER || Utils::String::ToLower(Peek().value) != "org")
+	{
+		AddError(std::format("Parser Error at line {}, column {}: Unknown directive .{}.",
+			Peek().line, Peek().column, Peek().value));
+		ConsumeLine();
+	}
+
+	Next();
+	
+	ParsedNumber parsedNumber = ConsumeNumber();
+	if (CheckNumericLimit<uint16_t>(parsedNumber))
+	{
+		m_currentAddress = parsedNumber.value;
+	}
 	Next();
 }
 

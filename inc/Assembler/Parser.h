@@ -42,6 +42,7 @@ private:
 	void HandleMnemonicToken();
 	void HandleIdentifierToken();
 	void HandleNewLineToken();
+	void HandleDotToken();
 
 	void HandleLabel();
 
@@ -97,6 +98,9 @@ private:
 
 		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},
 			[this]() {HandleNewLineToken();}},
+
+		{[](const Token& token) {return token.type == TokenType::DOT;},
+			[this]() {HandleDotToken();}}
 	};
 };
 
