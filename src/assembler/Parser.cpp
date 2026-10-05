@@ -51,6 +51,8 @@ void Parser::AddLabels()
 
 		if (Peek().type == TokenType::DOT) { HandleDotToken(); }
 
+		if (Peek().type == TokenType::DW) { HandleDWToken(); }
+
 		if (Peek().type == TokenType::IDENTIFIER)
 		{
 			HandleLabel();
@@ -220,6 +222,21 @@ void Parser::HandleDotToken()
 	{
 		m_currentAddress = parsedNumber.value;
 	}
+	Next();
+}
+
+void Parser::HandleDWToken()
+{
+	Next();
+	if (Peek().type != TokenType::IDENTIFIER)
+	{
+		AddError(std::format("Parser Error at line {}, column {}: expected identifier, found {}.",
+			Peek().line, Peek().column, Peek().value));
+		ConsumeLine();
+	}
+	m_labels.insert({ Peek().value, {m_currentAddress, Peek().line} });
+
+	m_currentAddress += 2;
 	Next();
 }
 

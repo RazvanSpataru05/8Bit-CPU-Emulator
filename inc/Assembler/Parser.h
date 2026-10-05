@@ -43,6 +43,7 @@ private:
 	void HandleIdentifierToken();
 	void HandleNewLineToken();
 	void HandleDotToken();
+	void HandleDWToken();
 
 	void HandleLabel();
 
@@ -100,7 +101,10 @@ private:
 			[this]() {HandleNewLineToken();}},
 
 		{[](const Token& token) {return token.type == TokenType::DOT;},
-			[this]() {HandleDotToken();}}
+			[this]() {HandleDotToken();}},
+
+		{[](const Token& token) {return token.type == TokenType::DW;},
+			[this]() {HandleDWToken();}}
 	};
 };
 

@@ -118,6 +118,8 @@ namespace Utils
 			case TokenType::COMMA:			return "comma";
 			case TokenType::DOT:			return "dot";
 
+			case TokenType::DW:				return "DW";
+
 			case TokenType::END_OF_FILE:	return "end of file";
 
 			default:						return "error";

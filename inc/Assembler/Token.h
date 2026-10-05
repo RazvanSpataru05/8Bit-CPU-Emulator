@@ -19,6 +19,8 @@ enum class TokenType : uint8_t
 	COMMA,
 	DOT,
 
+	DW, // define word
+
 	END_OF_FILE
 };
 

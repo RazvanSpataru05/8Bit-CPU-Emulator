@@ -190,6 +190,7 @@ Token Lexer::BuildToken(std::string_view word)
 
 	if (nameToSelector.contains(upperWord)) return { TokenType::REGISTER, word, m_lineNumber, wordColumnStart };
 	if (ISA::IsMnemonic(upperWord)) return { TokenType::MNEMONIC, word, m_lineNumber, wordColumnStart };
+	if (upperWord == "DW") return { TokenType::DW, word, m_lineNumber, wordColumnStart };
 
 	if (Utils::String::StartsLikeNumber(word))
 	{
