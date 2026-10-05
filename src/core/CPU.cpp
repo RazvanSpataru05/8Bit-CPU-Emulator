@@ -592,6 +592,23 @@ void CPU::Reset()
 	m_interruptController.EnableInterrupts(false);
 }
 
+void CPU::HandleInterrupt()
+{
+	if (auto result = m_interruptController.PollPendingInterrupt(); result.has_value())
+	{
+		const uint8_t line = result.value();
+
+		const uint8_t hiPC = (m_PC >> 8) & 0xFF;
+		const uint8_t loPC = m_PC & 0xFF;
+
+		m_memoryUnit[m_SP--] = hiPC;
+		m_memoryUnit[m_SP--] = loPC;
+
+		const uint16_t vectorAddress = line * 2;
+		m_PC = ComputeAddress(vectorAddress);
+	}
+}
+
 uint8_t CPU::ReadRegister(uint8_t selector) const noexcept
 {
 	switch (selector)
@@ -727,9 +744,9 @@ InterruptController& CPU::GetInterruptController() noexcept
 	return m_interruptController;
 }
 
-uint16_t CPU::ComputeAddress(uint16_t programCounter)
+uint16_t CPU::ComputeAddress(uint16_t address)
 {
-	uint8_t high = m_memoryUnit[programCounter++];
-	uint8_t low = m_memoryUnit[programCounter++];
+	uint8_t high = m_memoryUnit[address++];
+	uint8_t low = m_memoryUnit[address++];
 	return (high << 8) | low;
 }

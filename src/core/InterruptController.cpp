@@ -18,16 +18,6 @@ std::optional<uint8_t> InterruptController::PollPendingInterrupt()
 	return std::nullopt;
 }
 
-void InterruptController::SetKeyboardData(uint8_t key)
-{
-	m_keyboardData = key;
-}
-
-uint8_t InterruptController::ReadKeyboardData() const noexcept
-{
-	return m_keyboardData;
-}
-
 bool InterruptController::GetInterruptFlag() const noexcept
 {
 	return m_interruptFlag;

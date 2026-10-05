@@ -20,7 +20,9 @@ public:
 	void Step();
 	void Reset();
 
-	uint16_t ComputeAddress(uint16_t programCounter);
+	void HandleInterrupt();
+
+	uint16_t ComputeAddress(uint16_t address);
 
 	//Registry getters
 	[[nodiscard]] uint8_t		GetA()		const noexcept;

@@ -8,6 +8,8 @@
 #include <fstream>
 #include <span>
 
+const size_t MEMORY_SIZE{ 65536 };
+
 class MemoryUnit
 {
 public:
@@ -40,7 +42,7 @@ private:
 	MemoryUnit& operator=(const MemoryUnit&) = delete;
 
 private:
-	std::array<uint8_t, 65536> m_memory{};
+	std::array<uint8_t, MEMORY_SIZE> m_memory{};
 
 	bool m_hasData;
 	std::vector<uint8_t> m_snapshotData;

@@ -454,7 +454,7 @@ namespace UIEditor
 			{
 				executeAuto = false;
 				interruptController.EnableInterrupts(false);
-				interruptController.SetKeyboardData(line[line.size() - 1]);
+				interruptController.RaiseInterrupt(KEYBOARD_INTERRUPT_LINE);
 				
 				for (uint8_t key : line)
 				{
