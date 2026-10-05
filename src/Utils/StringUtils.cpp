@@ -116,6 +116,7 @@ namespace Utils
 
 			case TokenType::COLON:			return "colon";
 			case TokenType::COMMA:			return "comma";
+			case TokenType::DOT:			return "dot";
 
 			case TokenType::END_OF_FILE:	return "end of file";
 

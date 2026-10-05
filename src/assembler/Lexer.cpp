@@ -127,6 +127,11 @@ void Lexer::ConsumeComma()
 	ConsumeSymbol(TokenType::COMMA, ",");
 }
 
+void Lexer::ConsumeDot()
+{
+	ConsumeSymbol(TokenType::DOT, ".");
+}
+
 void Lexer::ConsumeLeftParanthesis()
 {
 	ConsumeSymbol(TokenType::LEFT_PARAN, "(");

@@ -91,7 +91,7 @@ void Parser::ParseTokens()
 			});
 		if (it != m_handlers.end())
 		{
-			it->second(currentToken);
+			it->second();
 		}
 		else
 		{	
@@ -162,16 +162,16 @@ void Parser::PrintLabels() const noexcept
 	}
 }
 
-void Parser::HandleMnemonicToken(const Token& token)
+void Parser::HandleMnemonicToken()
 {
-	const ISA::ISAEntry* entry = ISA::Find(Utils::String::ToUpper(token.value));
+	const ISA::ISAEntry* entry = ISA::Find(Utils::String::ToUpper(Peek().value));
 	if (!entry) return;
 
 	m_currentStatement.opcode = entry->opcode;
 	m_currentStatement.ISAEntry = entry;
 	m_currentStatement.operatorCount = entry->size - 1;
 
-	if (Utils::String::ToUpper(token.value) == "HLT")
+	if (Utils::String::ToUpper(Peek().value) == "HLT")
 	{
 		m_seenHLT = true;
 	}
@@ -190,12 +190,12 @@ void Parser::HandleMnemonicToken(const Token& token)
 	AddStatement();
 }
 
-void Parser::HandleIdentifierToken(const Token& token)
+void Parser::HandleIdentifierToken()
 {
 	ConsumeLabel();
 }
 
-void Parser::HandleNewLineToken(const Token& token)
+void Parser::HandleNewLineToken()
 {
 	ResetCurrentStatement();
 	Next();

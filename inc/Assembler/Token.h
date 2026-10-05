@@ -17,6 +17,7 @@ enum class TokenType : uint8_t
 
 	COLON,
 	COMMA,
+	DOT,
 
 	END_OF_FILE
 };

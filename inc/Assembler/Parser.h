@@ -8,7 +8,7 @@
 
 using namespace ISA;
 
-using StatementHandler = std::function<void(const Token&)>;
+using StatementHandler = std::function<void()>;
 
 class Parser
 {
@@ -39,9 +39,9 @@ private:
 	Parser& operator=(const Parser&) = delete;
 
 private:
-	void HandleMnemonicToken(const Token& token);
-	void HandleIdentifierToken(const Token& token);
-	void HandleNewLineToken(const Token& token);
+	void HandleMnemonicToken();
+	void HandleIdentifierToken();
+	void HandleNewLineToken();
 
 	void HandleLabel();
 
@@ -90,13 +90,13 @@ private:
 	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
 	{
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
-			[this](const Token& token) {HandleMnemonicToken(token);}},
+			[this]() {HandleMnemonicToken();}},
 
 		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER && IsLabelDefinition();},
-			[this](const Token& token) {HandleIdentifierToken(token);}},
+			[this]() {HandleIdentifierToken();}},
 
 		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},
-			[this](const Token& token) {HandleNewLineToken(token);}},
+			[this]() {HandleNewLineToken();}},
 	};
 };
 

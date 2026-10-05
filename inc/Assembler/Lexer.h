@@ -43,6 +43,7 @@ private:
 	void ConsumeNewLine();
 	void ConsumeColon();
 	void ConsumeComma();
+	void ConsumeDot();
 	void ConsumeLeftParanthesis();
 	void ConsumeRightParanthesis();
 	void ConsumeLeftBracket();
@@ -85,6 +86,8 @@ private:
 		{[](unsigned char c) {return c == ':';}, [this] {ConsumeColon();}},
 
 		{[](unsigned char c) {return c == ',';}, [this] {ConsumeComma();}},
+
+		{[](unsigned char c) {return c == '.';}, [this] {ConsumeDot();}},
 
 		{[](unsigned char c) {return c == '(';}, [this] {ConsumeLeftParanthesis();} },
 
