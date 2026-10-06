@@ -27,6 +27,7 @@ std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> stat
 	std::vector<uint8_t> values;
 	for (const auto& statement : statements)
 	{
+		Logger::AddInfoMessage("Parsing Statement\n");
 		if (statement.opcode.has_value())
 		{
 			values.emplace_back(statement.opcode.value());

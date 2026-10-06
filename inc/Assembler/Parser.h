@@ -117,7 +117,7 @@ private:
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
 			[this]() {HandleMnemonicToken_Emit();}},
 
-		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER && IsLabelDefinition();},
+		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER;},
 			[this]() {HandleIdentifierToken_Emit();}},
 
 		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},

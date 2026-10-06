@@ -97,7 +97,7 @@ void Parser::ParseTokens()
 			it->second();
 		}
 		else
-		{	
+		{
 			AddError(std::format("Error at line {}, column {}: '{}' is not a recognized instruction.",
 				Peek().line, Peek().column, Peek().value));
 			ConsumeLine();
@@ -144,7 +144,10 @@ void Parser::PrintStatements() const noexcept
 			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", statement.ISAEntry->mnemonic));
 		}
 
-		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode.value())));
+		if (statement.opcode.has_value())
+		{
+			Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode.value())));
+		}
 		Logger::AddInfoMessage("VALUE(S): ");
 
 		for (size_t index = 0; index < statement.operatorCount; ++index)
@@ -200,7 +203,7 @@ void Parser::HandleDWToken_Emit()
 	Next();
 	if (Peek().type == TokenType::IDENTIFIER)
 	{
-		const std::string& label = Utils::String::ToLower(Peek().value);
+		const std::string label = Utils::String::ToLower(Peek().value);
 		if (m_labels.find(label) == m_labels.end())
 		{
 			AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
@@ -209,6 +212,7 @@ void Parser::HandleDWToken_Emit()
 			return;
 		}
 
+		Logger::AddInfoMessage("Define Word Emit (DWE)\n");
 		const uint16_t address = m_labels.at(label).address;
 		m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi
 		m_currentStatement.operands[1] = address & 0xFF; // lo
@@ -230,6 +234,7 @@ void Parser::HandleDWToken_Emit()
 		AddError(std::format("Error at line {}, column {}: Expected identifier or 16-bit address, found {}.",
 			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
+		return;
 	}
 }
 
@@ -243,11 +248,12 @@ void Parser::HandleMnemonicToken_Scan()
 	}
 
 	m_currentAddress += entry->size;
-
+	Next();
 }
 
 void Parser::HandleIdentifierToken_Emit()
 {
+	Logger::AddInfoMessage("Identifier Token Emit (ITE)\n");
 	ConsumeLabel();
 }
 
@@ -289,24 +295,17 @@ void Parser::HandleDotToken()
 void Parser::HandleDWToken_Scan()
 {
 	Next();
-	if (Peek().type != TokenType::IDENTIFIER)
+	if (Peek().type == TokenType::IDENTIFIER || Peek().type == TokenType::NUMBER)
 	{
-		AddError(std::format("Error at line {}, column {}: expected identifier, found {}.",
+		m_currentAddress += 2;
+		Next();
+	}
+	else
+	{
+		AddError(std::format("Error at line {}, column {}: Expected identifier or number, found {}.",
 			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
-		return;
 	}
-
-	if (m_labels.find(Utils::String::ToLower(Peek().value)) == m_labels.end())
-	{
-		AddError(std::format("Error at line {}, column {}: Undefined label '{}',",
-			Peek().line, Peek().column, Peek().value));
-		ConsumeLine();
-		return;
-	}
-
-	m_currentAddress += 2;
-	Next();
 }
 
 void Parser::HandleIdentifierToken_Scan()
@@ -316,12 +315,13 @@ void Parser::HandleIdentifierToken_Scan()
 		const std::string label = Utils::String::ToLower(Peek().value);
 		if (m_labels.find(label) != m_labels.end())
 		{
-			AddError(std::format("Error at line {}, column {}: '{}' already exists.",
+			AddError(std::format("Error at line {}, column {}: Label '{}' already exists.",
 				Peek().line, Peek().column, Peek().value));
 			ConsumeLine();
 		}
 		else
 		{
+			Logger::AddInfoMessage(std::format("Label added: {}\n", label));
 			m_labels.insert({ label, LabelInfo(m_currentAddress, Peek().line) });
 		}
 		ConsumeLabel();
@@ -330,7 +330,7 @@ void Parser::HandleIdentifierToken_Scan()
 	{
 		ConsumeLine();
 	}
-} 
+}
 
 std::array<uint8_t, 2> Parser::ConsumeImm8()
 {
@@ -369,7 +369,7 @@ std::array<uint8_t, 2> Parser::ConsumeAddr16()
 			m_labels.at(label).used = true;
 			Next(); // go to newline or end of file
 		}
-		
+
 	}
 	else if (token.type == TokenType::NUMBER)
 	{
@@ -410,7 +410,7 @@ std::array<uint8_t, 2> Parser::ConsumeRegReg()
 	if (m_currentStatementHasError) return operands;
 
 	ExpectComma();
-	if (m_currentStatementHasError) return operands; 
+	if (m_currentStatementHasError) return operands;
 
 	operands[1] = ConsumeSelector();
 
@@ -559,7 +559,7 @@ void Parser::ConsumeLine()
 	Logger::AddInfoMessage("CONSUME LINE called\n\n");
 	while (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
-		std::cout << m_pos << " ";
+		std::cout << "Position: " << m_pos << std::endl;
 		Next();
 	}
 	Logger::AddInfoMessage("CONSUME LINE finished\n");

@@ -549,15 +549,21 @@ void CPU::Step()
 		break;
 	}
 
-	case 0xF8: // EI 1by
+	case 0xF3: // EI 1by
 	{
 		m_interruptController.EnableInterrupts(true);
 		break;
 	}
 
-	case 0xF3: // DI 1by
+	case 0xF8: // DI 1by
 	{
 		m_interruptController.EnableInterrupts(false);
+		break;
+	}
+
+	case 0xF9: // RETI 1by
+	{
+		m_PC = m_memoryUnit[m_SP++];
 		break;
 	}
 

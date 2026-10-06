@@ -100,8 +100,9 @@ namespace ISA
             /* Misc (5 total) */
             {"NOP",     0x00,   OperatorKind::NONE,     1, "No operation"},
             {"MOV",     0x70,   OperatorKind::REG_REG,  3, "Copies the value of a register to another register"},
-            {"EI",      0xF8,   OperatorKind::NONE,     1, "Enables interrupt service routines"},
-            {"DI",      0xF3,   OperatorKind::NONE,     1, "Disables interrupt service routines"},
+            {"EI",      0xF3,   OperatorKind::NONE,     1, "Enables interrupt service routines"},
+            {"DI",      0xF8,   OperatorKind::NONE,     1, "Disables interrupt service routines"},
+            {"RETI",    0xF9,   OperatorKind::NONE,     1, "Assigns to PC the address it had before the interrupt service routine"},
             {"HLT",     0xFF,   OperatorKind::NONE,     1, "Stops the Program Counter from reading further"}
 
             /* ISA Table size : 61 total */

@@ -78,8 +78,9 @@ Dissasembler::Dissasembler()
 
 	// Misc
 	m_instructions[0x70] = { "MOV",     3u };
-	m_instructions[0xF8] = { "EI",		1u };
-	m_instructions[0xF3] = { "DI",		1u };
+	m_instructions[0xF3] = { "EI",		1u };
+	m_instructions[0xF8] = { "DI",		1u };
+	m_instructions[0xF9] = { "RETI",	1u };
 	m_instructions[0xFF] = { "HLT",     1u };
 }
 

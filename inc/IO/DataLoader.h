@@ -2,6 +2,8 @@
 
 #include "Assembler/Statement.h"
 
+#include "Utils/Logger.h"
+
 #include <filesystem>
 #include <vector>
 #include <fstream>
