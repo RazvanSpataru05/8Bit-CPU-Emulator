@@ -30,7 +30,6 @@ bool Assembler::Assemble(std::string_view sourceCode)
 		m_errors.insert(m_errors.end(), parserErrors.begin(), parserErrors.end());
 		return false;
 	}
-	Logger::AddInfoMessage("------ PARSER HAS BEEN RUN -----\n\n\n");
 
 	const auto& parserWarnings = m_parser.GetWarnings();
 	m_warnings.insert(m_warnings.end(), parserWarnings.begin(), parserWarnings.end());

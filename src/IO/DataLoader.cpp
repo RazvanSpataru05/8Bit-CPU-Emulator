@@ -27,10 +27,18 @@ std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> stat
 	std::vector<uint8_t> values;
 	for (const auto& statement : statements)
 	{
-		Logger::AddInfoMessage("Parsing Statement\n");
 		if (statement.opcode.has_value())
 		{
 			values.emplace_back(statement.opcode.value());
+		}
+
+		if (statement.opcode.has_value())
+		{
+			Logger::AddInfoMessage("This is a regular instruction\n");
+		}
+		else
+		{
+			Logger::AddInfoMessage("This is a DW statement\n");
 		}
 
 		for (size_t index = 0; index < statement.operatorCount; ++index)

@@ -4,7 +4,7 @@ using namespace ISA;
 
 Parser::Parser(std::span<const Token> tokens) :
 	m_pos{ 0 },
-	m_currentAddress{ false }
+	m_currentAddress{ 0x0000 }
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
 	ResetStatement();
@@ -45,7 +45,6 @@ void Parser::AddLabels()
 	Logger::AddInfoMessage("In First Pass\n");
 	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
 	{
-		Logger::AddInfoMessage(std::format("Position: {}, {}\n", m_pos, m_tokens[m_pos].value));
 
 		const Token& currentToken = Peek();
 		auto it = std::find_if(m_scanHandlers.begin(), m_scanHandlers.end(), [currentToken](const auto& handler) {
@@ -85,9 +84,6 @@ void Parser::ParseTokens()
 	while (Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
-
-		Logger::AddInfoMessage(std::format("Value: {}\n", Peek().value));
-		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::String::TokenTypeToString(Peek())));
 
 		auto it = std::find_if(m_emitHandlers.begin(), m_emitHandlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
@@ -130,6 +126,7 @@ void Parser::AddWarning(std::string_view message)
 void Parser::ResetStatement()
 {
 	m_currentStatement.opcode = std::nullopt;
+	m_currentStatement.address = 0x0000;
 	m_currentStatement.operatorCount = 0u;
 	m_currentStatement.operands.fill(0x00);
 	m_currentStatement.ISAEntry = nullptr;
@@ -168,6 +165,7 @@ void Parser::PrintLabels() const noexcept
 		Logger::AddInfoMessage(std::format("Address: {}\n", static_cast<int>(it->second.address)));
 		Logger::AddInfoMessage(std::format("Line declaration: {}\n", static_cast<int>(it->second.lineDeclaration)));
 	}
+	Logger::AddInfoMessage("\n\n\n");
 }
 
 void Parser::HandleMnemonicToken_Emit()
@@ -178,6 +176,9 @@ void Parser::HandleMnemonicToken_Emit()
 	m_currentStatement.opcode = entry->opcode;
 	m_currentStatement.ISAEntry = entry;
 	m_currentStatement.operatorCount = entry->size - 1;
+	m_currentStatement.address = m_currentAddress;
+
+	m_currentAddress += entry->size;
 
 	if (Utils::String::ToUpper(Peek().value) == "HLT")
 	{
@@ -214,6 +215,8 @@ void Parser::HandleDWToken_Emit()
 
 		Logger::AddInfoMessage("Define Word Emit (DWE)\n");
 		const uint16_t address = m_labels.at(label).address;
+
+		m_currentStatement.address = address;
 		m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi
 		m_currentStatement.operands[1] = address & 0xFF; // lo
 		AddStatement();
@@ -224,6 +227,8 @@ void Parser::HandleDWToken_Emit()
 		if (CheckNumericLimit<uint16_t>(parsedNumber))
 		{
 			const uint16_t address = static_cast<uint16_t>(parsedNumber.value);
+
+			m_currentStatement.address = address;
 			m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi byte
 			m_currentStatement.operands[1] = address & 0xFF; // lo byte
 			AddStatement();
@@ -253,7 +258,19 @@ void Parser::HandleMnemonicToken_Scan()
 
 void Parser::HandleIdentifierToken_Emit()
 {
-	Logger::AddInfoMessage("Identifier Token Emit (ITE)\n");
+	Logger::AddInfoMessage("Found Identifier Token (Label) on Second Pass\n");
+	const std::string label = Utils::String::ToLower(Peek().value);
+
+	if (m_labels.find(label) == m_labels.end())
+	{
+		AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
+			Peek().line, Peek().column, Peek().value));
+		ConsumeLine();
+		return;
+	}
+	m_currentAddress = m_labels.at(label).address;
+	m_currentStatement.address = m_currentAddress;
+
 	ConsumeLabel();
 }
 
@@ -559,7 +576,6 @@ void Parser::ConsumeLine()
 	Logger::AddInfoMessage("CONSUME LINE called\n\n");
 	while (Peek().type != TokenType::NEW_LINE && Peek().type != TokenType::END_OF_FILE)
 	{
-		std::cout << "Position: " << m_pos << std::endl;
 		Next();
 	}
 	Logger::AddInfoMessage("CONSUME LINE finished\n");
