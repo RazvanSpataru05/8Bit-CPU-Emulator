@@ -161,8 +161,8 @@ void Parser::PrintLabels() const noexcept
 	for (auto it = m_labels.begin(); it != m_labels.end(); it++)
 	{
 		Logger::AddInfoMessage(std::format("Label: {}\n", it->first));
-		Logger::AddInfoMessage(std::format("Address: {}\n", static_cast<int>(it->second.address))); 
-		Logger::AddInfoMessage(std::format("Line declaration: {}\n", static_cast<int>(it->second.lineDeclaration))); 
+		Logger::AddInfoMessage(std::format("Address: {}\n", static_cast<int>(it->second.address)));
+		Logger::AddInfoMessage(std::format("Line declaration: {}\n", static_cast<int>(it->second.lineDeclaration)));
 	}
 }
 
@@ -208,21 +208,30 @@ void Parser::HandleNewLineToken()
 void Parser::HandleDotToken()
 {
 	Next();
-	if (Peek().type != TokenType::IDENTIFIER || Utils::String::ToLower(Peek().value) != "org")
+	if (Peek().type != TokenType::IDENTIFIER)
 	{
-		AddError(std::format("Parser Error at line {}, column {}: Unknown directive .{}.",
+		AddError(std::format("Error at line {}, column {}: Expected identifier, found {}.",
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
+		ConsumeLine();
+		return;
+	}
+
+	if (Utils::String::ToLower(Peek().value) != "org")
+	{
+		AddError(std::format("Error at line {}, column {}: Unknown directive '{}'.",
 			Peek().line, Peek().column, Peek().value));
 		ConsumeLine();
+		return;
 	}
 
 	Next();
-	
+
 	ParsedNumber parsedNumber = ConsumeNumber();
 	if (CheckNumericLimit<uint16_t>(parsedNumber))
 	{
 		m_currentAddress = parsedNumber.value;
+		Next();
 	}
-	Next();
 }
 
 void Parser::HandleDWToken()
@@ -230,11 +239,19 @@ void Parser::HandleDWToken()
 	Next();
 	if (Peek().type != TokenType::IDENTIFIER)
 	{
-		AddError(std::format("Parser Error at line {}, column {}: expected identifier, found {}.",
+		AddError(std::format("Error at line {}, column {}: expected identifier, found {}.",
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
+		ConsumeLine();
+		return;
+	}
+
+	if (m_labels.find(Utils::String::ToLower(Peek().value)) == m_labels.end())
+	{
+		AddError(std::format("Error at line {}, column {}: Undefined label '{}',",
 			Peek().line, Peek().column, Peek().value));
 		ConsumeLine();
+		return;
 	}
-	m_labels.insert({ Peek().value, {m_currentAddress, Peek().line} });
 
 	m_currentAddress += 2;
 	Next();
