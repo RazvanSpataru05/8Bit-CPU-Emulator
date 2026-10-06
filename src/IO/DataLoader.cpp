@@ -27,7 +27,11 @@ std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> stat
 	std::vector<uint8_t> values;
 	for (const auto& statement : statements)
 	{
-		values.emplace_back(statement.opcode);
+		if (statement.opcode.has_value())
+		{
+			values.emplace_back(statement.opcode.value());
+		}
+
 		for (size_t index = 0; index < statement.operatorCount; ++index)
 		{
 			values.emplace_back(statement.operands[index]);

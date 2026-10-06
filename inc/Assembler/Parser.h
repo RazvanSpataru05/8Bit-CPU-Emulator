@@ -30,7 +30,7 @@ public:
 
 	void SetTokens(std::span<const Token> tokens);
 
-	void ResetCurrentStatement();
+	void ResetStatement();
 	void PrintStatements() const noexcept;
 	void PrintLabels() const noexcept;
 
@@ -39,13 +39,18 @@ private:
 	Parser& operator=(const Parser&) = delete;
 
 private:
-	void HandleMnemonicToken();
-	void HandleIdentifierToken();
+
+	// first pass handlers
+	void HandleMnemonicToken_Scan();
+	void HandleIdentifierToken_Scan();
 	void HandleNewLineToken();
 	void HandleDotToken();
-	void HandleDWToken();
+	void HandleDWToken_Scan();
 
-	void HandleLabel();
+	// second pass handlers
+	void HandleMnemonicToken_Emit();
+	void HandleDWToken_Emit();
+	void HandleIdentifierToken_Emit();
 
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
@@ -89,13 +94,13 @@ private:
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;
 
-	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_handlers =
+	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_scanHandlers =
 	{
 		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
-			[this]() {HandleMnemonicToken();}},
+			[this]() {HandleMnemonicToken_Scan();}},
 
-		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER && IsLabelDefinition();},
-			[this]() {HandleIdentifierToken();}},
+		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER;},
+			[this]() {HandleIdentifierToken_Scan();}},
 
 		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},
 			[this]() {HandleNewLineToken();}},
@@ -104,8 +109,28 @@ private:
 			[this]() {HandleDotToken();}},
 
 		{[](const Token& token) {return token.type == TokenType::DW;},
-			[this]() {HandleDWToken();}}
+			[this]() {HandleDWToken_Scan();}}
 	};
+
+	const std::vector<std::pair<std::function<bool(const Token&)>, StatementHandler>> m_emitHandlers =
+	{
+		{[](const Token& token) {return token.type == TokenType::MNEMONIC;},
+			[this]() {HandleMnemonicToken_Emit();}},
+
+		{[this](const Token& token) {return token.type == TokenType::IDENTIFIER && IsLabelDefinition();},
+			[this]() {HandleIdentifierToken_Emit();}},
+
+		{[](const Token& token) {return token.type == TokenType::NEW_LINE;},
+			[this]() {HandleNewLineToken();}},
+
+		{[](const Token& token) {return token.type == TokenType::DOT;},
+			[this]() {HandleDotToken();}},
+
+		{[](const Token& token) {return token.type == TokenType::DW;},
+			[this]() {HandleDWToken_Emit();}}
+	};
+
+
 };
 
 template<typename T>

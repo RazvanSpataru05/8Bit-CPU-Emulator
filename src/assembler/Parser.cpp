@@ -7,7 +7,7 @@ Parser::Parser(std::span<const Token> tokens) :
 	m_currentAddress{ false }
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
-	ResetCurrentStatement();
+	ResetStatement();
 }
 
 bool Parser::ParserErrors() const noexcept
@@ -47,23 +47,21 @@ void Parser::AddLabels()
 	{
 		Logger::AddInfoMessage(std::format("Position: {}, {}\n", m_pos, m_tokens[m_pos].value));
 
-		if (Peek().type == TokenType::NEW_LINE) { Next(); continue; }
+		const Token& currentToken = Peek();
+		auto it = std::find_if(m_scanHandlers.begin(), m_scanHandlers.end(), [currentToken](const auto& handler) {
+			return handler.first(currentToken);
+			});
 
-		if (Peek().type == TokenType::DOT) { HandleDotToken(); }
-
-		if (Peek().type == TokenType::DW) { HandleDWToken(); }
-
-		if (Peek().type == TokenType::IDENTIFIER)
+		if (it != m_scanHandlers.end())
 		{
-			HandleLabel();
-			continue;
+			it->second();
 		}
-
-		const ISAEntry* entry = ISA::Find(Utils::String::ToUpper(Peek().value));
-		if (!entry) continue;
-
-		m_currentAddress += entry->size;
-		ConsumeLine();
+		else
+		{
+			AddError(std::format("Error at line {}, column {}: Undefined symbol '{}'.",
+				Peek().line, Peek().column, Peek().value));
+			ConsumeLine();
+		}
 	}
 	Logger::AddInfoMessage("Out First Pass\n");
 }
@@ -81,29 +79,32 @@ void Parser::ParseTokens()
 	m_currentAddress = 0x0000;
 	m_currentStatementHasError = false;
 	m_seenHLT = false;
-	ResetCurrentStatement();
+	ResetStatement();
 
-	while (m_pos < m_tokens.size() && Peek().type != TokenType::END_OF_FILE)
+	Logger::AddInfoMessage("In Second Pass\n");
+	while (Peek().type != TokenType::END_OF_FILE)
 	{
 		const Token& currentToken = Peek();
 
 		Logger::AddInfoMessage(std::format("Value: {}\n", Peek().value));
 		Logger::AddInfoMessage(std::format("Token type: {}\n", Utils::String::TokenTypeToString(Peek())));
 
-		auto it = std::find_if(m_handlers.begin(), m_handlers.end(), [currentToken](const auto& handler) {
+		auto it = std::find_if(m_emitHandlers.begin(), m_emitHandlers.end(), [currentToken](const auto& handler) {
 			return handler.first(currentToken);
 			});
-		if (it != m_handlers.end())
+		if (it != m_emitHandlers.end())
 		{
 			it->second();
 		}
 		else
 		{	
-			AddError(std::format("Error at line {}, column {}: '{}' is not a recognized instruction",
-				currentToken.line, currentToken.column, currentToken.value));
+			AddError(std::format("Error at line {}, column {}: '{}' is not a recognized instruction.",
+				Peek().line, Peek().column, Peek().value));
 			ConsumeLine();
 		}
 	}
+	Logger::AddInfoMessage("Out Second Pass\n");
+
 	CheckUnusedLabels();
 	if (!m_seenHLT)
 	{
@@ -126,9 +127,9 @@ void Parser::AddWarning(std::string_view message)
 	m_warnings.emplace_back(AssemblerStage::PARSER, Peek().line, Peek().column, message);
 }
 
-void Parser::ResetCurrentStatement()
+void Parser::ResetStatement()
 {
-	m_currentStatement.opcode = 0x00;
+	m_currentStatement.opcode = std::nullopt;
 	m_currentStatement.operatorCount = 0u;
 	m_currentStatement.operands.fill(0x00);
 	m_currentStatement.ISAEntry = nullptr;
@@ -143,7 +144,7 @@ void Parser::PrintStatements() const noexcept
 			Logger::AddInfoMessage(std::format("MNEMONIC: {}\n", statement.ISAEntry->mnemonic));
 		}
 
-		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode)));
+		Logger::AddInfoMessage(std::format("OPCODE: 0x{}\n", static_cast<int>(statement.opcode.value())));
 		Logger::AddInfoMessage("VALUE(S): ");
 
 		for (size_t index = 0; index < statement.operatorCount; ++index)
@@ -166,7 +167,7 @@ void Parser::PrintLabels() const noexcept
 	}
 }
 
-void Parser::HandleMnemonicToken()
+void Parser::HandleMnemonicToken_Emit()
 {
 	const ISA::ISAEntry* entry = ISA::Find(Utils::String::ToUpper(Peek().value));
 	if (!entry) return;
@@ -194,14 +195,65 @@ void Parser::HandleMnemonicToken()
 	AddStatement();
 }
 
-void Parser::HandleIdentifierToken()
+void Parser::HandleDWToken_Emit()
+{
+	Next();
+	if (Peek().type == TokenType::IDENTIFIER)
+	{
+		const std::string& label = Utils::String::ToLower(Peek().value);
+		if (m_labels.find(label) == m_labels.end())
+		{
+			AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
+				Peek().line, Peek().column, Peek().value));
+			ConsumeLine();
+			return;
+		}
+
+		const uint16_t address = m_labels.at(label).address;
+		m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi
+		m_currentStatement.operands[1] = address & 0xFF; // lo
+		AddStatement();
+	}
+	else if (Peek().type == TokenType::NUMBER)
+	{
+		const ParsedNumber parsedNumber = ConsumeNumber();
+		if (CheckNumericLimit<uint16_t>(parsedNumber))
+		{
+			const uint16_t address = static_cast<uint16_t>(parsedNumber.value);
+			m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi byte
+			m_currentStatement.operands[1] = address & 0xFF; // lo byte
+			AddStatement();
+		}
+	}
+	else
+	{
+		AddError(std::format("Error at line {}, column {}: Expected identifier or 16-bit address, found {}.",
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
+		ConsumeLine();
+	}
+}
+
+void Parser::HandleMnemonicToken_Scan()
+{
+	const ISAEntry* entry = ISA::Find(Utils::String::ToUpper(Peek().value));
+	if (!entry)
+	{
+		ConsumeLine();
+		return;
+	}
+
+	m_currentAddress += entry->size;
+
+}
+
+void Parser::HandleIdentifierToken_Emit()
 {
 	ConsumeLabel();
 }
 
 void Parser::HandleNewLineToken()
 {
-	ResetCurrentStatement();
+	ResetStatement();
 	Next();
 }
 
@@ -234,7 +286,7 @@ void Parser::HandleDotToken()
 	}
 }
 
-void Parser::HandleDWToken()
+void Parser::HandleDWToken_Scan()
 {
 	Next();
 	if (Peek().type != TokenType::IDENTIFIER)
@@ -257,7 +309,7 @@ void Parser::HandleDWToken()
 	Next();
 }
 
-void Parser::HandleLabel()
+void Parser::HandleIdentifierToken_Scan()
 {
 	if (IsLabelDefinition())
 	{
