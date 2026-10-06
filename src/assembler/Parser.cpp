@@ -216,7 +216,8 @@ void Parser::HandleDWToken_Emit()
 		Logger::AddInfoMessage("Define Word Emit (DWE)\n");
 		const uint16_t address = m_labels.at(label).address;
 
-		m_currentStatement.address = address;
+		m_currentStatement.address = m_currentAddress;
+		m_currentStatement.operatorCount = m_currentStatement.operands.size(); // the address of the word
 		m_currentStatement.operands[0] = (address >> 8) & 0xFF; // hi
 		m_currentStatement.operands[1] = address & 0xFF; // lo
 		AddStatement();

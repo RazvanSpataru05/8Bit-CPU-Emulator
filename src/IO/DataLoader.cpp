@@ -22,15 +22,26 @@ std::vector<uint8_t> DataLoader::ParseHexValues(const std::filesystem::path& pat
 	return values;
 }
 
-std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> statements)
-{         
-	std::vector<uint8_t> values;
+std::vector<AddressValue> DataLoader::ParseStatements(std::span<const Statement> statements)
+{
+	std::vector<AddressValue> values;
+
 	for (const auto& statement : statements)
 	{
-		if (statement.opcode.has_value())
+		uint16_t address = statement.address;
+		Logger::AddInfoMessage(std::format("Address: {}", address));
+
+		// this is an instruction
+		if (statement.opcode.has_value()) 
 		{
-			values.emplace_back(statement.opcode.value());
+			values.push_back({ address++, statement.opcode.value() });	
 		}
+
+		for (size_t index = 0; index < statement.operatorCount; ++index)
+		{
+			values.push_back({ address++, statement.operands[index] });
+		}
+
 
 		if (statement.opcode.has_value())
 		{
@@ -40,11 +51,6 @@ std::vector<uint8_t> DataLoader::ParseStatements(std::span<const Statement> stat
 		{
 			Logger::AddInfoMessage("This is a DW statement\n");
 		}
-
-		for (size_t index = 0; index < statement.operatorCount; ++index)
-		{
-			values.emplace_back(statement.operands[index]);
-		}
 	}
-	return values.size() < std::numeric_limits<uint16_t>::max() ? values : std::vector<uint8_t>();
-}        
+	return values.size() < std::numeric_limits<uint16_t>::max() ? values : std::vector<AddressValue>();
+}

@@ -24,14 +24,14 @@ public:
 	[[nodiscard]] uint16_t GetEndAddress() const noexcept;
 
 	[[nodiscard]] uint8_t Read(uint16_t address) const noexcept;
-	void Write(uint16_t address, uint8_t value) noexcept;
+	void				  Write(uint16_t address, uint8_t value) noexcept;
 
 	void Clear() noexcept;
 	void RestoreSnapshot();
 
 	void PrintMemoryUntit() const;
 
-	void LoadValuesIntoMemory(std::span<const uint8_t> program, uint16_t startAddress = 0x0000);
+	void LoadValuesIntoMemory(std::span<const AddressValue> program, uint16_t startAddress = 0x0000);
 	void LoadProgramFromFIle(const std::filesystem::path& filename);
 
 	const uint8_t& operator[](uint16_t address) const;
@@ -45,7 +45,7 @@ private:
 	std::array<uint8_t, MEMORY_SIZE> m_memory{};
 
 	bool m_hasData;
-	std::vector<uint8_t> m_snapshotData;
+	std::vector<AddressValue> m_snapshotData;
 	uint16_t m_startAddress{};
 	uint16_t m_endAddress{};
 };

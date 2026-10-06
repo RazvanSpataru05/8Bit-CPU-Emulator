@@ -45,10 +45,10 @@ void MemoryUnit::Clear() noexcept
 void MemoryUnit::RestoreSnapshot()
 {
 	Clear();
-	for (size_t index = 0; index < m_snapshotData.size(); ++index)
+	for (const auto& addrVal : m_snapshotData)
 	{
-		m_memory[m_startAddress + index] = m_snapshotData[index];
-		if (m_snapshotData[index] != 0x00)
+		m_memory[addrVal.address] = addrVal.value;
+		if (addrVal.value != 0x00)
 		{
 			m_hasData = true;
 		}
@@ -64,21 +64,31 @@ void MemoryUnit::PrintMemoryUntit() const
 	}
 }
 
-void MemoryUnit::LoadValuesIntoMemory(std::span<const uint8_t> values, uint16_t startAddress)
+void MemoryUnit::LoadValuesIntoMemory(std::span<const AddressValue> values, uint16_t startAddress)
 {
 	if (startAddress + values.size() > m_memory.size() || values.empty()) return;
 
-	std::copy(values.begin(), values.end(), m_memory.begin() + startAddress);
 	m_snapshotData.assign(values.begin(), values.end());
+
+	for (const auto& addrVal : values)
+	{
+		m_memory[addrVal.address] = addrVal.value;
+		if (addrVal.value != 0x00)
+		{
+			m_hasData = true;
+		}
+	}
+
 	m_startAddress = startAddress;
-	m_endAddress = startAddress + values.size();
+	//m_endAddress = startAddress + values.size();
+
 	m_hasData = true;
 }
 
 void MemoryUnit::LoadProgramFromFIle(const std::filesystem::path& filename)
 {
 	const std::filesystem::path fullPath = std::filesystem::path("resources") / filename;
-	LoadValuesIntoMemory(DataLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
+	//LoadValuesIntoMemory(DataLoader::ParseHexValues(fullPath, m_hasData), 0x0000);
 }
 
 const uint8_t& MemoryUnit::operator[](uint16_t address) const
