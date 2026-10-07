@@ -67,6 +67,7 @@ set(HEADERS
 
     inc/IO/DataLoader.h
     inc/IO/AddressValue.h
+    inc/IO/Program.h
 
     inc/UI/UIEditor.h
     inc/UI/UICommon.h
