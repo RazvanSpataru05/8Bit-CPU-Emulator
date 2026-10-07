@@ -4,21 +4,12 @@
 
 #include "Utils/Logger.h"
 
+#include "IO/AddressValue.h"
+
 #include <filesystem>
 #include <vector>
 #include <fstream>
 #include <span>
-
-struct AddressValue
-{
-	uint16_t address{};
-	uint8_t value{};
-
-	AddressValue(uint16_t a, uint8_t v) :
-		address{ a }, value{ v }
-	{
-	}
-};
 
 namespace DataLoader
 {
