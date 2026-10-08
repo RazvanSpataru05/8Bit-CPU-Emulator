@@ -4,7 +4,8 @@ using namespace ISA;
 
 Parser::Parser(std::span<const Token> tokens) :
 	m_pos{ 0 },
-	m_currentAddress{ 0x0000 }
+	m_currentAddress{ 0x0000 },
+	m_startAddress{ 0x0000 }
 {
 	m_tokens.assign(tokens.begin(), tokens.end());
 	ResetStatement();
@@ -76,6 +77,7 @@ void Parser::ParseTokens()
 
 	m_pos = 0;
 	m_currentAddress = 0x0000;
+	m_startAddress = 0x0000;
 	m_currentStatementHasError = false;
 	m_seenHLT = false;
 	ResetStatement();
@@ -275,6 +277,43 @@ void Parser::HandleIdentifierToken_Emit()
 	ConsumeLabel();
 }
 
+void Parser::HandleOrgDirective()
+{
+	Next();
+	ParsedNumber parsedNumber = ConsumeNumber();
+
+	if (!CheckNumericLimit<uint16_t>(parsedNumber))
+	{
+		ConsumeLine();
+		return;
+	}
+
+	m_currentAddress = parsedNumber.value;
+}
+
+void Parser::HandleStartDirective()
+{
+	Next();
+	if (Peek().type != TokenType::IDENTIFIER)
+	{
+		AddError(std::format("Error at line {}, column {}: Expected identifier, found {}.",
+			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
+		ConsumeLine();
+		return;
+	}
+
+	const std::string label = Utils::String::ToLower(Peek().value);
+	if (m_labels.find(label) == m_labels.end())
+	{
+		AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
+			Peek().line, Peek().column, Peek().value));
+		ConsumeLine();
+		return;
+	}
+
+	m_startAddress = m_labels.at(label).address;
+}
+
 void Parser::HandleNewLineToken()
 {
 	ResetStatement();
@@ -292,7 +331,12 @@ void Parser::HandleDotToken()
 		return;
 	}
 
-	if (Utils::String::ToLower(Peek().value) != "org")
+	auto it = m_directiveHandlers.find(Utils::String::ToLower(Peek().value));
+	if (it != m_directiveHandlers.end())
+	{
+		it->second();
+	}
+	else
 	{
 		AddError(std::format("Error at line {}, column {}: Unknown directive '{}'.",
 			Peek().line, Peek().column, Peek().value));
@@ -301,13 +345,6 @@ void Parser::HandleDotToken()
 	}
 
 	Next();
-
-	ParsedNumber parsedNumber = ConsumeNumber();
-	if (CheckNumericLimit<uint16_t>(parsedNumber))
-	{
-		m_currentAddress = parsedNumber.value;
-		Next();
-	}
 }
 
 void Parser::HandleDWToken_Scan()

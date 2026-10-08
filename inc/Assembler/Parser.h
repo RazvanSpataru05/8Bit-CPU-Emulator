@@ -52,6 +52,10 @@ private:
 	void HandleDWToken_Emit();
 	void HandleIdentifierToken_Emit();
 
+	// directive handlers
+	void HandleOrgDirective();
+	void HandleStartDirective();
+
 	std::array<uint8_t, 2> ConsumeImm8();
 	std::array<uint8_t, 2> ConsumeAddr16();
 	std::array<uint8_t, 2> ConsumeReg();
@@ -85,6 +89,7 @@ private:
 	std::vector<AssemblerWarning> m_warnings;
 	std::unordered_map<std::string, LabelInfo> m_labels;
 
+	uint16_t m_startAddress{ 0x0000 };
 	uint16_t m_currentAddress{ 0x0000 };
 	size_t m_pos{};
 
@@ -130,7 +135,10 @@ private:
 			[this]() {HandleDWToken_Emit();}}
 	};
 
-
+	const std::unordered_map<std::string_view, std::function<void()>> m_directiveHandlers = {
+		{"org", [this]() {HandleOrgDirective();}},
+		{"start", [this]() {HandleStartDirective();}}
+	};
 };
 
 template<typename T>
@@ -140,7 +148,6 @@ inline bool Parser::CheckNumericLimit(const ParsedNumber& parsedNumber)
 	{
 		AddError(std::format("Error at line {}, {}: '{}' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).",
 			Peek().line, Peek().column, Peek().value));
-		ConsumeLine();
 		return false;
 	}
 
