@@ -118,9 +118,9 @@ namespace UIEditor
 				if (assembler.Assemble(editorBuffer))
 				{
 					const auto& statements = assembler.GetStatements();
-					const std::vector<AddressValue> values = DataLoader::ParseStatements(statements);
+					const Program program = DataLoader::ParseStatements(statements);
 
-					memoryUnit.LoadValuesIntoMemory(values);
+					memoryUnit.LoadValuesIntoMemory(program);
 					tab = SelectedTab::CONSOLE;
 					mode = Mode::DISSASEMBLY;
 				}

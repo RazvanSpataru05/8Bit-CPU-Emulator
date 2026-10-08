@@ -22,7 +22,7 @@ std::vector<uint8_t> DataLoader::ParseHexValues(const std::filesystem::path& pat
 	return values;
 }
 
-std::vector<AddressValue> DataLoader::ParseStatements(std::span<const Statement> statements)
+Program DataLoader::ParseStatements(std::span<const Statement> statements)
 {
 	std::vector<AddressValue> values;
 
@@ -52,5 +52,9 @@ std::vector<AddressValue> DataLoader::ParseStatements(std::span<const Statement>
 			Logger::AddInfoMessage("This is a DW statement\n");
 		}
 	}
-	return values.size() < std::numeric_limits<uint16_t>::max() ? values : std::vector<AddressValue>();
+	if (values.size() < std::numeric_limits<uint16_t>::max())
+	{
+		return Program(0x0000, values);
+	}
+	return Program();
 }

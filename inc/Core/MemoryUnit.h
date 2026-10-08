@@ -31,7 +31,7 @@ public:
 
 	void PrintMemoryUntit() const;
 
-	void LoadValuesIntoMemory(std::span<const AddressValue> program, uint16_t startAddress = 0x0000);
+	void LoadValuesIntoMemory(const Program& program);
 	void LoadProgramFromFIle(const std::filesystem::path& filename);
 
 	const uint8_t& operator[](uint16_t address) const;

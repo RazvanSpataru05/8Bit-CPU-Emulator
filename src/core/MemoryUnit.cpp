@@ -64,13 +64,13 @@ void MemoryUnit::PrintMemoryUntit() const
 	}
 }
 
-void MemoryUnit::LoadValuesIntoMemory(std::span<const AddressValue> values, uint16_t startAddress)
+void MemoryUnit::LoadValuesIntoMemory(const Program& program)
 {
-	if (startAddress + values.size() > m_memory.size() || values.empty()) return;
+	if (program.startAddress + program.addrValues.size() > m_memory.size() || program.addrValues.empty()) return;
 
-	m_snapshotData.assign(values.begin(), values.end());
+	m_snapshotData.assign(program.addrValues.begin(), program.addrValues.end());
 
-	for (const auto& addrVal : values)
+	for (const auto& addrVal : program.addrValues)
 	{
 		m_memory[addrVal.address] = addrVal.value;
 		if (addrVal.value != 0x00)
@@ -79,7 +79,7 @@ void MemoryUnit::LoadValuesIntoMemory(std::span<const AddressValue> values, uint
 		}
 	}
 
-	m_startAddress = startAddress;
+	m_startAddress = program.startAddress;
 	//m_endAddress = startAddress + values.size();
 
 	m_hasData = true;

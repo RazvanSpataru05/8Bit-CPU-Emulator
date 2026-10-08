@@ -10,6 +10,7 @@ struct Program
 	uint16_t startAddress{};
 	std::vector<AddressValue> addrValues;
 
+	Program() {};
 	Program(uint16_t startAddr, std::span<const AddressValue> addrVal) :
 		startAddress{ startAddr }
 	{
