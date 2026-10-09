@@ -97,6 +97,7 @@ private:
 
 	bool m_currentStatementHasError{ false };
 	bool m_seenHLT{ false };
+	bool m_seenStartDirective{ false };
 
 	Statement m_currentStatement;
 	std::vector<Statement> m_statements;

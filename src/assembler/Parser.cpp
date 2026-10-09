@@ -85,6 +85,7 @@ void Parser::ParseTokens()
 	m_startAddress = 0x0000;
 	m_currentStatementHasError = false;
 	m_seenHLT = false;
+	m_seenStartDirective = false;
 	ResetStatement();
 
 	Logger::AddInfoMessage("In Second Pass\n");
@@ -112,6 +113,10 @@ void Parser::ParseTokens()
 	if (!m_seenHLT)
 	{
 		AddWarning(std::format("Warning: no 'HLT' instruction found anywhere in the program."));
+	}
+	if (!m_seenStartDirective)
+	{
+		AddWarning(std::format("Warning: no '.start' directive found anywhere in the program. PC value will have default value 0x0000."));
 	}
 }
 
@@ -316,6 +321,7 @@ void Parser::HandleStartDirective()
 		return;
 	}
 
+	m_seenStartDirective = true;
 	m_startAddress = m_labels.at(label).address;
 }
 
