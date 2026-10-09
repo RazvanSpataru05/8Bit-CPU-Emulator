@@ -12,6 +12,8 @@ public:
 
 	bool HasErrors() const noexcept;
 
+	uint16_t GetStartAddress() const noexcept;
+
 	[[nodiscard]] std::span<const Statement>		GetStatements()			const noexcept;
 	[[nodiscard]] std::span<const AssemblerError>	GetErrors()				const noexcept;
 	[[nodiscard]] std::span<const AssemblerWarning> GetWarnings()			const noexcept;

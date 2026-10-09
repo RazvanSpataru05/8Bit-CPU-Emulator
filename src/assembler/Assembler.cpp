@@ -44,6 +44,11 @@ bool Assembler::HasErrors() const noexcept
 	return !m_errors.empty();
 }
 
+uint16_t Assembler::GetStartAddress() const noexcept
+{
+	return m_parser.GetStartAddress();
+}
+
 std::span<const Statement> Assembler::GetStatements() const noexcept
 {
 	return m_parser.GetStatements();

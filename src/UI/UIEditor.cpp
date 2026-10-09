@@ -118,7 +118,7 @@ namespace UIEditor
 				if (assembler.Assemble(editorBuffer))
 				{
 					const auto& statements = assembler.GetStatements();
-					const Program program = DataLoader::ParseStatements(statements);
+					const Program program = DataLoader::ParseStatements(statements, assembler.GetStartAddress());
 
 					memoryUnit.LoadValuesIntoMemory(program);
 					tab = SelectedTab::CONSOLE;

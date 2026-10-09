@@ -24,6 +24,8 @@ public:
 
 	bool ParserErrors() const noexcept;
 
+	uint16_t GetStartAddress()									const noexcept;
+
 	std::span<const Statement>			GetStatements()			const noexcept;
 	std::span<const AssemblerError>		GetErrors()				const noexcept;
 	std::span<const AssemblerWarning>	GetWarnings()			const noexcept;

@@ -16,6 +16,11 @@ bool Parser::ParserErrors() const noexcept
 	return !m_errors.empty();
 }
 
+uint16_t Parser::GetStartAddress() const noexcept
+{
+	return m_startAddress;
+}
+
 std::span<const Statement> Parser::GetStatements() const noexcept
 {
 	return m_statements;

@@ -22,14 +22,13 @@ std::vector<uint8_t> DataLoader::ParseHexValues(const std::filesystem::path& pat
 	return values;
 }
 
-Program DataLoader::ParseStatements(std::span<const Statement> statements)
+Program DataLoader::ParseStatements(std::span<const Statement> statements, uint16_t startAddress)
 {
 	std::vector<AddressValue> values;
 
 	for (const auto& statement : statements)
 	{
 		uint16_t address = statement.address;
-		Logger::AddInfoMessage(std::format("Address: {}", address));
 
 		// this is an instruction
 		if (statement.opcode.has_value()) 
@@ -42,19 +41,10 @@ Program DataLoader::ParseStatements(std::span<const Statement> statements)
 			values.push_back({ address++, statement.operands[index] });
 		}
 
-
-		if (statement.opcode.has_value())
-		{
-			Logger::AddInfoMessage("This is a regular instruction\n");
-		}
-		else
-		{
-			Logger::AddInfoMessage("This is a DW statement\n");
-		}
 	}
 	if (values.size() < std::numeric_limits<uint16_t>::max())
 	{
-		return Program(0x0000, values);
+		return Program(startAddress, values);
 	}
 	return Program();
 }
