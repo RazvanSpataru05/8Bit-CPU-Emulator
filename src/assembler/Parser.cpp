@@ -304,25 +304,45 @@ void Parser::HandleOrgDirective()
 void Parser::HandleStartDirective()
 {
 	Next();
-	if (Peek().type != TokenType::IDENTIFIER)
+	
+	if (m_seenStartDirective)
 	{
-		AddError(std::format("Error at line {}, column {}: Expected identifier, found {}.",
+		AddError(std::format("Error at line {}, column {}: '.start' directive already defined.",
+			Peek().line, Peek().column));
+		ConsumeLine();
+		return;
+	}
+
+	if (Peek().type == TokenType::IDENTIFIER)
+	{
+		const std::string label = Utils::String::ToLower(Peek().value);
+		if (m_labels.find(label) == m_labels.end())
+		{
+			AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
+				Peek().line, Peek().column, Peek().value));
+			ConsumeLine();
+			return;
+		}
+		m_startAddress = m_labels.at(label).address;
+	}
+	else if (Peek().type == TokenType::NUMBER)
+	{
+		ParsedNumber parsedNumber = ConsumeNumber();
+		if (!CheckNumericLimit<uint16_t>(parsedNumber))
+		{
+			ConsumeLine();
+			return;
+		}
+		m_startAddress = parsedNumber.value;
+	}
+	else
+	{
+		AddError(std::format("Error at line {}, column {}: expected identifier or 16-bit address. Found {}.",
 			Peek().line, Peek().column, Utils::String::TokenTypeToString(Peek())));
 		ConsumeLine();
 		return;
 	}
-
-	const std::string label = Utils::String::ToLower(Peek().value);
-	if (m_labels.find(label) == m_labels.end())
-	{
-		AddError(std::format("Error at line {}, column {}: Undefined label '{}'.",
-			Peek().line, Peek().column, Peek().value));
-		ConsumeLine();
-		return;
-	}
-
 	m_seenStartDirective = true;
-	m_startAddress = m_labels.at(label).address;
 }
 
 void Parser::HandleNewLineToken()
