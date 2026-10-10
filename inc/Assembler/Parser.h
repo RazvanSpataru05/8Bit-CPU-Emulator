@@ -149,7 +149,7 @@ inline bool Parser::CheckNumericLimit(const ParsedNumber& parsedNumber)
 {
 	if (parsedNumber.outOfRange)
 	{
-		AddError(std::format("Error at line {}, {}: '{}' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).",
+		AddError(std::format("Error at line {}, column {}: '{}' is out of range for a numeric literal (maximum representable value is 0xFFFFFFFF).",
 			Peek().line, Peek().column, Peek().value));
 		return false;
 	}

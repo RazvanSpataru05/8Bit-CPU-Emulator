@@ -298,6 +298,12 @@ void Parser::HandleOrgDirective()
 		return;
 	}
 
+	if (parsedNumber.value < m_currentAddress)
+	{
+		AddWarning(std::format("Warning at line {}, column {}: '.org' address is lower than current one. Previous values could be overwritten.",
+			Peek().line, Peek().column));
+	}
+
 	m_currentAddress = parsedNumber.value;
 }
 
